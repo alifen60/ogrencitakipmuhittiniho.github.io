@@ -32,14 +32,20 @@
         .tab-pane.active { display: block; }
 
         .section-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .subject-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
+        .subject-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
         .subject-header h3 { color: var(--primary); font-size: 0.95rem; margin: 0; }
         .subject-progress { font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 12px; }
         
+        .topic-row { display: flex; align-items: center; justify-content: space-between; background: white; padding: 6px 10px; border-radius: 8px; border: 1px solid #f1f5f9; gap: 8px; margin-bottom: 6px; }
+        .topic-row-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .topic-actions { display: flex; gap: 4px; align-items: center; }
+        .icon-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; opacity: 0.7; transition: opacity 0.2s; }
+        .icon-btn:hover { opacity: 1; background: #f1f5f9; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 8px; }
         @media(min-width: 600px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 
-        label.checkbox-label { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #f1f5f9; cursor: pointer; font-size: 0.85rem; }
+        label.checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; width: 100%; }
         input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
 
         .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
@@ -71,6 +77,9 @@
         .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 4px; margin-top: 4px; }
         .tag-error { background: #ffe4e6; color: #be123c; }
 
+        .editable-header { cursor: pointer; transition: background 0.2s; }
+        .editable-header:hover { background: #e2e8f0; }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; color: black; }
@@ -78,9 +87,21 @@
             .tabs { display: none !important; }
             .tab-pane { display: none !important; }
             .tab-pane.active { display: block !important; }
-            .section-box { border: 1px solid #ccc; page-break-inside: avoid; background: white !important; }
+            .section-box { border: 1px solid #ccc; page-break-inside: avoid; background: white !important; margin-bottom: 10px; }
             select { border: 1px solid #cbd5e1; appearance: none; -webkit-appearance: none; }
-            img { max-height: 500px !important; page-break-inside: avoid; }
+            
+            .question-card {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 15px;
+                border: 1px solid #ddd !important;
+            }
+            .question-img {
+                max-height: 280px !important;
+                width: auto !important;
+                max-width: 100% !important;
+                object-fit: contain !important;
+            }
         }
     </style>
 </head>
@@ -116,7 +137,7 @@
             <div class="flex-between">
                 <div>
                     <h2>Deneme Hata Analizi</h2>
-                    <p style="font-size: 0.75rem; color: #64748b;" class="no-print">Hücrelere tıklayarak durum seçin.</p>
+                    <p style="font-size: 0.75rem; color: #64748b;" class="no-print">Deneme isimlerini değiştirmek için başlıkların üzerine tıklayabilirsiniz.</p>
                 </div>
                 <div class="no-print" style="display: flex; gap: 5px;">
                     <button class="btn btn-primary" onclick="addExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➕ Deneme Ekle</button>
@@ -167,8 +188,8 @@
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Saat)</label>
-                        <input type="number" id="log-hours" step="0.25" min="0" placeholder="Örn: 1.5" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Dakika)</label>
+                        <input type="number" id="log-minutes" min="0" placeholder="Örn: 45" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
@@ -286,7 +307,7 @@
 </div>
 
 <script>
-    const lgsData = {
+    const defaultLgsData = {
         "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri ve Söz Sanatları", "Anlatım Bozuklukları"],
         "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
         "Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"],
@@ -295,12 +316,31 @@
         "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"]
     };
 
+    // Din Kültürü ve İngilizce'yi zorla ekleyen, eksik anahtarları tamamlayan kesinleştirilmiş yükleme mantığı
+    let lgsData = JSON.parse(localStorage.getItem('lgs_custom_topics')) || {};
+    
+    // Eğer hafızadaki veri eksik veya bozuksa, tüm standart dersleri tam olarak eşitle
+    for (const [subject, topics] of Object.entries(defaultLgsData)) {
+        if (!lgsData[subject]) {
+            lgsData[subject] = topics;
+        }
+    }
+    
+    // Güvenlik önlemi: Din Kültürü veya İngilizce anahtarı herhangi bir sebepten yoksa direkt enjekte et
+    if(!lgsData["Din Kültürü"]) lgsData["Din Kültürü"] = defaultLgsData["Din Kültürü"];
+    if(!lgsData["İngilizce"]) lgsData["İngilizce"] = defaultLgsData["İngilizce"];
+
+    localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+
+    let examNames = JSON.parse(localStorage.getItem('lgs_exam_names')) || {};
     const examOptions = ["-", "Konu Eksik", "Süre Yetmedi", "Boş Bırakıldı", "Dikkat Hatası"];
     
     let examCount = parseInt(localStorage.getItem('lgs_exam_count')) || 5;
-    let booksData = JSON.parse(localStorage.getItem('lgs_books_data')) || {
-        "Türkçe": [], "Matematik": [], "Fen Bilimleri": [], "T.C. İnkılap Tarihi": [], "Din Kültürü": [], "İngilizce": []
-    };
+    let booksData = JSON.parse(localStorage.getItem('lgs_books_data')) || {};
+    for (const key of Object.keys(defaultLgsData)) {
+        if (!booksData[key]) booksData[key] = [];
+    }
+
     let studyLogs = JSON.parse(localStorage.getItem('lgs_study_logs')) || [];
     let questionsData = JSON.parse(localStorage.getItem('lgs_questions')) || [];
 
@@ -320,8 +360,16 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
         if(btn) btn.classList.add('active');
+        
+        if(tabId === 'kitap') renderBooks();
         if(tabId === 'eksik') generateReport();
-        if(tabId === 'calisma') renderStudyTracking();
+        if(tabId === 'calisma') {
+            renderStudyTracking();
+            let dateInp = document.getElementById('log-date');
+            if(dateInp) {
+                dateInp.valueAsDate = new Date();
+            }
+        }
         if(tabId === 'sorular') renderQuestions();
     }
 
@@ -335,8 +383,22 @@
         }, 150);
     }
 
+    function formatMinutes(totalMinutes) {
+        if (!totalMinutes || totalMinutes <= 0) return "0 dk";
+        let hours = Math.floor(totalMinutes / 60);
+        let mins = totalMinutes % 60;
+        if (hours > 0 && mins > 0) {
+            return `${hours} sa ${mins} dk (${totalMinutes} dk)`;
+        } else if (hours > 0) {
+            return `${hours} sa (${totalMinutes} dk)`;
+        } else {
+            return `${totalMinutes} dk`;
+        }
+    }
+
     function renderTopics() {
         const container = document.getElementById('subjects-container');
+        if(!container) return;
         container.innerHTML = '';
         let grandTotal = 0, grandChecked = 0;
 
@@ -346,6 +408,16 @@
             
             let subjectChecked = 0;
             let subjectTotal = topics.length;
+
+            let htmlHeader = `
+                <div class="subject-header">
+                    <h3>${subject}</h3>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="subject-progress" id="badge_${subject}">0/0 (%0)</span>
+                        <button class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem; padding:3px 8px;">➕ Konu Ekle</button>
+                    </div>
+                </div>
+            `;
 
             let htmlTopics = `<div class="grid-2">`;
             topics.forEach((topic, idx) => {
@@ -357,26 +429,74 @@
                     subjectChecked++;
                 }
 
-                htmlTopics += `<label class="checkbox-label">
-                    <input type="checkbox" data-key="${key}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
-                    <span>${topic}</span>
-                </label>`;
+                htmlTopics += `
+                <div class="topic-row">
+                    <div class="topic-row-left">
+                        <label class="checkbox-label">
+                            <input type="checkbox" data-key="${key}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
+                            <span>${topic}</span>
+                        </label>
+                    </div>
+                    <div class="topic-actions no-print">
+                        <button class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)" title="Yukarı Taşı">⬆️</button>
+                        <button class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)" title="Aşağı Taşı">⬇️</button>
+                        <button class="icon-btn" onclick="editTopic('${subject}', ${idx})" title="Düzenle">✏️</button>
+                        <button class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" title="Sil" style="color:var(--danger);">🗑️</button>
+                    </div>
+                </div>`;
             });
             htmlTopics += `</div>`;
 
-            let subjectPercent = Math.round((subjectChecked / subjectTotal) * 100);
-            
-            let htmlHeader = `
-                <div class="subject-header">
-                    <h3>${subject}</h3>
-                    <span class="subject-progress" id="badge_${subject}">${subjectChecked}/${subjectTotal} (%${subjectPercent})</span>
-                </div>
-            `;
-
             div.innerHTML = htmlHeader + htmlTopics;
             container.appendChild(div);
+
+            let subjectPercent = subjectTotal > 0 ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
+            let badge = div.querySelector(`#badge_${subject}`);
+            if(badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${subjectPercent})`;
         }
         updateGrandProgressPercent(grandChecked, grandTotal);
+    }
+
+    function addNewTopic(subject) {
+        let name = prompt(`"${subject}" dersi için yeni konu adı giriniz:`);
+        if(name && name.trim()) {
+            lgsData[subject].push(name.trim());
+            saveTopicsState();
+        }
+    }
+
+    function editTopic(subject, idx) {
+        let oldName = lgsData[subject][idx];
+        let newName = prompt(`Konu adını düzenleyin:`, oldName);
+        if(newName && newName.trim() && newName !== oldName) {
+            lgsData[subject][idx] = newName.trim();
+            saveTopicsState();
+        }
+    }
+
+    function deleteTopic(subject, idx) {
+        if(confirm(`"${lgsData[subject][idx]}" konusunu silmek istediğinize emin misiniz?`)) {
+            lgsData[subject].splice(idx, 1);
+            saveTopicsState();
+        }
+    }
+
+    function moveTopic(subject, idx, direction) {
+        let targetIdx = idx + direction;
+        if(targetIdx < 0 || targetIdx >= lgsData[subject].length) return;
+        
+        let temp = lgsData[subject][idx];
+        lgsData[subject][idx] = lgsData[subject][targetIdx];
+        lgsData[subject][targetIdx] = temp;
+        
+        saveTopicsState();
+    }
+
+    function saveTopicsState() {
+        localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+        renderTopics();
+        renderExamTable();
+        renderBooks();
     }
 
     function updateProgress() {
@@ -394,7 +514,7 @@
                     subChecked++;
                 }
             });
-            let subPercent = Math.round((subChecked / topics.length) * 100);
+            let subPercent = topics.length > 0 ? Math.round((subChecked / topics.length) * 100) : 0;
             let badge = document.getElementById(`badge_${subject}`);
             if(badge) {
                 badge.innerText = `${subChecked}/${topics.length} (%${subPercent})`;
@@ -410,12 +530,15 @@
 
     function renderExamTable() {
         let header = document.getElementById('exam-table-header');
+        if(!header) return;
         header.innerHTML = '<th>Konu / Alan</th>';
         for (let d = 1; d <= examCount; d++) {
-            header.innerHTML += `<th style="text-align:center;">Deneme ${d}</th>`;
+            let displayName = examNames[d] || `Deneme ${d}`;
+            header.innerHTML += `<th style="text-align:center;" class="editable-header" onclick="editExamName(${d})" title="Deneme adını değiştirmek için tıklayın">${displayName} ✏️</th>`;
         }
 
         let tbody = document.getElementById('exam-table-body');
+        if(!tbody) return;
         tbody.innerHTML = '';
 
         for (const [subject, topics] of Object.entries(lgsData)) {
@@ -457,6 +580,16 @@
         }
     }
 
+    function editExamName(dIndex) {
+        let currentName = examNames[dIndex] || `Deneme ${dIndex}`;
+        let newName = prompt(`${dIndex}. Deneme için özel bir isim girin:`, currentName);
+        if(newName !== null && newName.trim() !== "") {
+            examNames[dIndex] = newName.trim();
+            localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
+            renderExamTable();
+        }
+    }
+
     function styleSelect(sel) {
         sel.style.background = "white";
         sel.style.color = "#1e293b";
@@ -474,14 +607,17 @@
 
     function removeExamColumn() {
         if(examCount > 1) {
+            delete examNames[examCount];
             examCount--;
             localStorage.setItem('lgs_exam_count', examCount);
+            localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
             renderExamTable();
         }
     }
 
     function renderBooks() {
         let container = document.getElementById('books-container');
+        if(!container) return;
         container.innerHTML = '';
 
         for (const subject of Object.keys(lgsData)) {
@@ -495,7 +631,7 @@
 
             let books = booksData[subject] || [];
             books.forEach((b, bIdx) => {
-                html += `<label class="checkbox-label" style="justify-content:space-between;">
+                html += `<label class="checkbox-label" style="justify-content:space-between; width:100%;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="checkbox" onchange="toggleBook('${subject}', ${bIdx})" ${b.completed ? 'checked' : ''}>
                         <span style="${b.completed ? 'text-decoration:line-through; color:#94a3b8;' : ''}">${b.name}</span>
@@ -511,6 +647,7 @@
 
     function addBook(subject) {
         let inp = document.getElementById(`book_inp_${subject}`);
+        if(!inp) return;
         let name = inp.value.trim();
         if(name) {
             if(!booksData[subject]) booksData[subject] = [];
@@ -522,9 +659,11 @@
     }
 
     function toggleBook(subject, idx) {
-        booksData[subject][idx].completed = !booksData[subject][idx].completed;
-        localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
-        renderBooks();
+        if(booksData[subject] && booksData[subject][idx]) {
+            booksData[subject][idx].completed = !booksData[subject][idx].completed;
+            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
+            renderBooks();
+        }
     }
 
     function deleteBook(subject, idx) {
@@ -538,24 +677,24 @@
     function addStudyLog() {
         let date = document.getElementById('log-date').value;
         let subject = document.getElementById('log-subject').value;
-        let hours = parseFloat(document.getElementById('log-hours').value) || 0;
+        let minutes = parseInt(document.getElementById('log-minutes').value) || 0;
         let questions = parseInt(document.getElementById('log-questions').value) || 0;
 
         if(!date) {
             alert("Lütfen bir tarih seçin!");
             return;
         }
-        if(hours === 0 && questions === 0) {
+        if(minutes === 0 && questions === 0) {
             alert("Lütfen en az çalışma süresi veya soru sayısı girin!");
             return;
         }
 
-        studyLogs.push({ date, subject, hours, questions });
+        studyLogs.push({ date, subject, minutes, questions });
         studyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
         
-        document.getElementById('log-hours').value = '';
+        document.getElementById('log-minutes').value = '';
         document.getElementById('log-questions').value = '';
         
         renderStudyTracking();
@@ -571,6 +710,7 @@
 
     function renderStudyTracking() {
         let logsBody = document.getElementById('study-logs-body');
+        if(!logsBody) return;
         logsBody.innerHTML = '';
         
         if(studyLogs.length === 0) {
@@ -581,7 +721,7 @@
                 tr.innerHTML = `
                     <td>${log.date}</td>
                     <td>${log.subject}</td>
-                    <td>${log.hours} sa</td>
+                    <td>${log.minutes} dk</td>
                     <td>${log.questions} soru</td>
                     <td class="no-print" style="text-align:center;"><span onclick="deleteStudyLog(${idx})" style="color:var(--danger); cursor:pointer; font-weight:bold;" title="Kaydı Sil">✕</span></td>
                 `;
@@ -595,9 +735,9 @@
         let summary = {};
         Object.keys(lgsData).forEach(sub => {
             summary[sub] = {
-                weeklyHours: 0, weeklyQ: 0,
-                monthlyHours: 0, monthlyQ: 0,
-                totalHours: 0, totalQ: 0
+                weeklyMins: 0, weeklyQ: 0,
+                monthlyMins: 0, monthlyQ: 0,
+                totalMins: 0, totalQ: 0
             };
         });
 
@@ -606,45 +746,46 @@
             let diffDays = Math.round((now - logDate) / oneDay);
 
             if(summary[log.subject]) {
-                summary[log.subject].totalHours += log.hours;
+                summary[log.subject].totalMins += log.minutes;
                 summary[log.subject].totalQ += log.questions;
 
                 if(diffDays >= 0 && diffDays <= 30) {
-                    summary[log.subject].monthlyHours += log.hours;
+                    summary[log.subject].monthlyMins += log.minutes;
                     summary[log.subject].monthlyQ += log.questions;
                 }
 
                 if(diffDays >= 0 && diffDays <= 7) {
-                    summary[log.subject].weeklyHours += log.hours;
+                    summary[log.subject].weeklyMins += log.minutes;
                     summary[log.subject].weeklyQ += log.questions;
                 }
             }
         });
 
         let summaryBody = document.getElementById('study-summary-body');
+        if(!summaryBody) return;
         summaryBody.innerHTML = '';
 
-        let grandWeeklyH = 0, grandWeeklyQ = 0;
-        let grandMonthlyH = 0, grandMonthlyQ = 0;
-        let grandTotalH = 0, grandTotalQ = 0;
+        let grandWeeklyM = 0, grandWeeklyQ = 0;
+        let grandMonthlyM = 0, grandMonthlyQ = 0;
+        let grandTotalM = 0, grandTotalQ = 0;
 
         Object.keys(lgsData).forEach(sub => {
             let data = summary[sub];
-            grandWeeklyH += data.weeklyHours;
+            grandWeeklyM += data.weeklyMins;
             grandWeeklyQ += data.weeklyQ;
-            grandMonthlyH += data.monthlyHours;
+            grandMonthlyM += data.monthlyMins;
             grandMonthlyQ += data.monthlyQ;
-            grandTotalH += data.totalHours;
+            grandTotalM += data.totalMins;
             grandTotalQ += data.totalQ;
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-weight:600; color:var(--primary);">${sub}</td>
-                <td>${data.weeklyHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${formatMinutes(data.weeklyMins)}</td>
                 <td>${data.weeklyQ} soru</td>
-                <td>${data.monthlyHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${formatMinutes(data.monthlyMins)}</td>
                 <td>${data.monthlyQ} soru</td>
-                <td>${data.totalHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${formatMinutes(data.totalMins)}</td>
                 <td>${data.totalQ} soru</td>
             `;
             summaryBody.appendChild(tr);
@@ -655,11 +796,11 @@
         totalTr.style.fontWeight = "bold";
         totalTr.innerHTML = `
             <td style="color:var(--primary);">GENEL TOPLAM</td>
-            <td>${grandWeeklyH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${formatMinutes(grandWeeklyM)}</td>
             <td>${grandWeeklyQ} soru</td>
-            <td>${grandMonthlyH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${formatMinutes(grandMonthlyM)}</td>
             <td>${grandMonthlyQ} soru</td>
-            <td>${grandTotalH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${formatMinutes(grandTotalM)}</td>
             <td>${grandTotalQ} soru</td>
         `;
         summaryBody.appendChild(totalTr);
@@ -728,6 +869,7 @@
 
     function renderQuestions() {
         let container = document.getElementById('questions-list-container');
+        if(!container) return;
         let filterSubject = document.getElementById('filter-question-subject').value;
         container.innerHTML = '';
 
@@ -740,15 +882,16 @@
 
         filtered.forEach((q) => {
             let card = document.createElement('div');
-            card.style.cssText = "background:white; border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px; page-break-inside: avoid;";
+            card.className = "question-card";
+            card.style.cssText = "background:white; border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;";
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
                     <span><b>Ders:</b> <span style="color:var(--primary);">${q.subject}</span> | <b>Tarih:</b> ${q.date}</span>
                     <button class="btn btn-danger no-print" onclick="deleteQuestion(${q.id})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
                 </div>
-                <div><p style="font-size:0.85rem; margin-bottom:8px;"><b>Not:</b> ${q.note}</p></div>
+                <div><p style="font-size:0.85rem; margin-bottom:6px;"><b>Not:</b> ${q.note}</p></div>
                 <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:5px; border:1px solid #f1f5f9;">
-                    <img src="${q.image}" style="max-width:100%; max-height:400px; border-radius:6px; object-fit:contain;" alt="Soru Fotoğrafı">
+                    <img src="${q.image}" class="question-img" style="max-width:100%; max-height:350px; border-radius:6px; object-fit:contain;" alt="Soru Fotoğrafı">
                 </div>
             `;
             container.appendChild(card);
@@ -765,6 +908,7 @@
 
     function generateReport() {
         let container = document.getElementById('report-container');
+        if(!container) return;
         container.innerHTML = '';
         let hasData = false;
 
@@ -774,7 +918,8 @@
                 let errs = [];
                 for(let d=1; d<=examCount; d++) {
                     let val = localStorage.getItem(`exam_${subject}_${tIdx}_d${d}`);
-                    if(val && val !== "-") errs.push(`Deneme ${d}: ${val}`);
+                    let examLabel = examNames[d] || `Deneme ${d}`;
+                    if(val && val !== "-") errs.push(`${examLabel}: ${val}`);
                 }
                 if(errs.length > 0) subIssues.push({ topic, errs });
             });
@@ -816,6 +961,8 @@
         localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
         localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
         localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
+        localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+        localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
 
         let alertBox = document.getElementById('save-alert');
         alertBox.style.display = 'block';
