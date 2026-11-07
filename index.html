@@ -1,59 +1,744 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="LGS öğrenci takip sistemi — anonim demo">
-  <title>8. Sınıf LGS Öğrenci Takip Sistemi — Demo</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#1e293b;background:#f8fafc;--p:#4f46e5;--border:#e2e8f0}
-    *{box-sizing:border-box}body{margin:0;padding:16px}.wrap{max-width:950px;margin:auto;background:white;border-radius:16px;box-shadow:0 10px 25px #0000000d;overflow:hidden}
-    header{background:var(--p);color:white;padding:22px;text-align:center}header h1{font-size:1.35rem;margin:0 0 6px}header p{margin:0;opacity:.9}.notice{margin:16px;padding:12px;border-radius:8px;background:#fffbeb;color:#92400e;font-size:.9rem}
-    nav{display:flex;overflow:auto;background:#f1f5f9;border-bottom:1px solid var(--border)}nav button{flex:1;min-width:max-content;border:0;padding:13px;background:none;color:#64748b;font-weight:700;cursor:pointer}nav button.active{color:var(--p);background:white;border-bottom:3px solid var(--p)}main{padding:18px}.pane{display:none}.pane.active{display:block}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0}.box h3{margin:0 0 10px;color:var(--p);font-size:1rem}.grid{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
-    label.item{display:flex;align-items:center;gap:9px;background:white;padding:9px 11px;border:1px solid #f1f5f9;border-radius:8px}input[type=checkbox]{width:18px;height:18px;accent-color:var(--p)}.badge{background:#e0e7ff;color:#3730a3;padding:6px 12px;border-radius:20px;font-weight:700}.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:8px}table{border-collapse:collapse;width:100%;min-width:560px;font-size:.88rem}td,th{padding:9px;border:1px solid var(--border);text-align:left}th{background:#f1f5f9}input,select{padding:9px;border:1px solid #cbd5e1;border-radius:7px;max-width:100%}.btn{border:0;border-radius:8px;padding:10px 14px;background:var(--p);color:white;font-weight:700;cursor:pointer}.btn.red{background:#e11d48}.actions{text-align:center;border-top:1px solid var(--border);padding:18px}.muted{color:#64748b;font-size:.85rem}.tag{display:inline-block;margin:4px;padding:3px 7px;border-radius:5px;background:#ffe4e6;color:#be123c;font-size:.8rem}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>8. Sınıf LGS Öğrenci Takip Sistemi</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --success: #059669;
+            --danger: #e11d48;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 10px; min-height: 100vh; }
+        .container { max-width: 950px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; position: relative; }
+        .header h1 { font-size: 1.25rem; margin-bottom: 5px; }
+        .header p { font-size: 0.85rem; opacity: 0.9; }
+        .logout-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+        .logout-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* Giriş Ekranı */
+        #login-screen { padding: 40px 20px; text-align: center; max-width: 400px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        #login-screen h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.3rem; }
+        #login-screen p { color: #64748b; font-size: 0.85rem; margin-bottom: 20px; }
+        .login-input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none; }
+        .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        .tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.82rem; color: #64748b; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .tab-btn.active { color: var(--primary); background: white; border-bottom: 3px solid var(--primary); }
+
+        .content { padding: 15px; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .section-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .subject-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
+        .subject-header h3 { color: var(--primary); font-size: 0.95rem; margin: 0; }
+        .subject-progress { font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 12px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        @media(min-width: 600px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+        label.checkbox-label { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #f1f5f9; cursor: pointer; font-size: 0.85rem; }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .badge { background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+
+        .table-responsive { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 600px; text-align: left; }
+        th, td { padding: 8px; border: 1px solid var(--border-color); }
+        th { background: #f1f5f9; color: #334155; }
+        tr:hover { background: #f8fafc; }
+
+        select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; background: white; }
+        
+        .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; text-decoration: none; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-dark { background: #334155; color: white; }
+
+        .actions-bar { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
+
+        .alert { background: #d1fae5; color: #065f46; padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center; }
+
+        .book-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .book-input-row input { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; }
+        
+        .report-item { background: white; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 8px; font-size: 0.85rem; }
+        .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 4px; margin-top: 4px; }
+        .tag-error { background: #ffe4e6; color: #be123c; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; color: black; }
+            .container { box-shadow: none; border: none; max-width: 100%; margin: 0; }
+            .tabs { display: none !important; }
+            .tab-pane { display: none !important; }
+            .tab-pane.active { display: block !important; }
+            .section-box { border: 1px solid #ccc; page-break-inside: avoid; background: white !important; }
+            select { border: 1px solid #cbd5e1; appearance: none; -webkit-appearance: none; }
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <header><h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1><p>Anonim demo — Örnek Öğrenci (8-A)</p></header>
-  <div class="notice"><strong>Demo uyarısı:</strong> Bu sayfa gerçek öğrenci bilgisi içermez. Veriler yalnızca bu tarayıcıda saklanır; güvenli giriş veya merkezi kayıt sistemi değildir. Herkese açık demoda gerçek kişisel bilgi girmeyin.</div>
-  <nav>
-    <button class="active" data-tab="konu">📚 Konular</button><button data-tab="deneme">📊 Denemeler</button><button data-tab="kitap">📖 Kitaplar</button><button data-tab="calisma">⏱️ Çalışma & Soru</button><button data-tab="eksik">⚠️ Eksik Raporu</button>
-  </nav>
-  <main>
-    <section id="konu" class="pane active"><div class="row"><h2>Ders Bazlı Konu Durumu</h2><span id="progress" class="badge">Genel Toplam: %0</span></div><div id="subjects"></div></section>
-    <section id="deneme" class="pane"><div class="row"><div><h2>Deneme Hata Analizi</h2><p class="muted">Hücrelerden hata durumunu seçin.</p></div><button class="btn" id="addExam">➕ Deneme Ekle</button></div><div class="table-wrap"><table><thead id="examHead"></thead><tbody id="examBody"></tbody></table></div></section>
-    <section id="kitap" class="pane"><h2>Ders Bazlı Kaynak Kitaplar</h2><div id="books" class="grid"></div></section>
-    <section id="calisma" class="pane"><h2>⏱️ Çalışma Süresi ve Soru Takibi</h2><div class="box"><h3>Yeni kayıt</h3><div class="grid"><label>Tarih <input type="date" id="date"></label><label>Ders <select id="subjectSelect"></select></label><label>Süre (saat) <input type="number" id="hours" min="0" step="0.25" placeholder="1.5"></label><label>Soru sayısı <input type="number" id="questions" min="0" step="1" placeholder="50"></label></div><p><button id="addLog" class="btn">Kayıt Ekle</button></p></div><div class="box"><h3>Çalışma kayıtları</h3><div class="table-wrap"><table><thead><tr><th>Tarih</th><th>Ders</th><th>Süre</th><th>Soru</th><th>Sil</th></tr></thead><tbody id="logs"></tbody></table></div></div></section>
-    <section id="eksik" class="pane"><h2>Deneme Eksik ve Hata Listesi</h2><div id="report"></div></section>
-    <div class="actions"><button class="btn" id="save">💾 Değişiklikleri Kaydet</button> <button class="btn" onclick="window.print()">🖨️ Yazdır / PDF</button><p id="saved" class="muted" aria-live="polite"></p></div>
-  </main>
+
+<div class="container">
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen">
+        <h2>🔒 Öğrenci Girişi</h2>
+        <p>Sisteme erişmek için lütfen <strong>Okul Numaranızı</strong> giriniz.</p>
+        <input type="text" id="school-no-input" class="login-input" placeholder="Örn: 778" autocomplete="off">
+        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="handleLogin()">Giriş Yap</button>
+        <div id="login-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;">Geçersiz okul numarası! Lütfen tekrar deneyin.</div>
+    </div>
+
+    <!-- ANA UYGULAMA -->
+    <div id="main-app" style="display: none;">
+        <div class="header no-print">
+            <button class="logout-btn" onclick="handleLogout()">🚪 Çıkış Yap</button>
+            <h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1>
+            <p id="student-welcome-text">Öğrenci: Yükleniyor...</p>
+        </div>
+
+        <div class="tabs no-print">
+            <button class="tab-btn active" onclick="switchTab('konu', this)">📚 Konular</button>
+            <button class="tab-btn" onclick="switchTab('deneme', this)">📊 Denemeler</button>
+            <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
+            <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma & Soru</button>
+            <button class="tab-btn" onclick="switchTab('eksik', this)">⚠️ Eksik Raporu</button>
+        </div>
+
+        <div class="content">
+            <!-- 1. KONU TAKİBİ -->
+            <div id="tab-konu" class="tab-pane active">
+                <div class="flex-between">
+                    <h2>Ders Bazlı Konu Durumu</h2>
+                    <span id="progress-text" class="badge">Genel Toplam: %0</span>
+                </div>
+                <div id="subjects-container"></div>
+            </div>
+
+            <!-- 2. DENEME ANALİZİ -->
+            <div id="tab-deneme" class="tab-pane">
+                <div class="flex-between">
+                    <div>
+                        <h2>Deneme Hata Analizi</h2>
+                        <p style="font-size: 0.75rem; color: #64748b;" class="no-print">Hücrelere tıklayarak durum seçin.</p>
+                    </div>
+                    <div class="no-print" style="display: flex; gap: 5px;">
+                        <button class="btn btn-primary" onclick="addExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➕ Deneme Ekle</button>
+                        <button class="btn btn-danger" onclick="removeExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➖ Sil</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="exam-table-header">
+                                <th>Konu / Alan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exam-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. KAYNAK KİTAPLAR -->
+            <div id="tab-kitap" class="tab-pane">
+                <h2 style="margin-bottom: 5px;">Ders Bazlı Kaynak Kitaplar</h2>
+                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 15px;" class="no-print">Çözülen soru bankalarını ekleyebilir, silebilir veya tamamlandı işaretleyebilirsiniz.</p>
+                <div id="books-container" class="grid-2"></div>
+            </div>
+
+            <!-- 4. ÇALIŞMA VE SORU TAKİBİ -->
+            <div id="tab-calisma" class="tab-pane">
+                <div class="flex-between">
+                    <h2>⏱️ Çalışma Süresi ve Soru Takibi</h2>
+                </div>
+                
+                <div class="section-box no-print">
+                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
+                    <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Tarih</label>
+                            <input type="date" id="log-date" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
+                            <select id="log-subject">
+                                <option value="Türkçe">Türkçe</option>
+                                <option value="Matematik">Matematik</option>
+                                <option value="Fen Bilimleri">Fen Bilimleri</option>
+                                <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
+                                <option value="Din Kültürü">Din Kültürü</option>
+                                <option value="İngilizce">İngilizce</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Saat)</label>
+                            <input type="number" id="log-hours" step="0.25" min="0" placeholder="Örn: 1.5" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
+                            <input type="number" id="log-questions" min="0" placeholder="Örn: 50" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Ders Bazlı Özet (Haftalık / Aylık / Toplam)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ders</th>
+                                    <th>Haftalık Süre</th>
+                                    <th>Haftalık Soru</th>
+                                    <th>Aylık Süre</th>
+                                    <th>Aylık Soru</th>
+                                    <th>Toplam Süre</th>
+                                    <th>Toplam Soru</th>
+                                </tr>
+                            </thead>
+                            <tbody id="study-summary-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Ders</th>
+                                    <th>Süre</th>
+                                    <th>Soru Sayısı</th>
+                                    <th class="no-print" style="width: 50px; text-align: center;">Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody id="study-logs-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. EKSİK RAPORU -->
+            <div id="tab-eksik" class="tab-pane">
+                <div class="flex-between">
+                    <h2>Deneme Eksik ve Hata Listesi</h2>
+                </div>
+                <div id="report-container"></div>
+            </div>
+
+            <!-- KAYDET VE YAZDIR BUTONLARI -->
+            <div class="actions-bar no-print">
+                <button class="btn btn-success" onclick="saveData()" style="padding: 12px 30px; font-size: 1rem;">💾 Değişiklikleri Kaydet</button>
+                <div id="save-alert" class="alert">✔ Başarıyla Kaydedildi!</div>
+                <button class="btn btn-dark" onclick="triggerPrint()" style="padding: 12px 30px; font-size: 1rem;">🖨️ Bulunduğun Ekranı Yazdır / PDF Yap</button>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script>
-'use strict';
-const subjects={
- 'Türkçe':['Sözcükte Anlam','Cümlede Anlam','Parçada Anlam','Fiilimsiler','Cümlenin Ögeleri','Fiilde Çatı','Yazım Kuralları','Noktalama İşaretleri','Metin Türleri ve Söz Sanatları','Anlatım Bozuklukları'],
- 'Matematik':['Çarpanlar ve Katlar','Üslü İfadeler','Kareköklü İfadeler','Veri Analizi','Basit Olayların Olma Olasılığı','Cebirsel İfadeler','Doğrusal Denklemler','Eşitsizlikler','Üçgenler','Eşlik ve Benzerlik','Dönüşüm Geometrisi','Geometrik Cisimler'],
- 'Fen Bilimleri':['Mevsimler ve İklim','DNA ve Genetik Kod','Basınç','Madde ve Endüstri','Basit Makineler','Enerji Dönüşümleri','Elektrik Yükleri'],
- 'T.C. İnkılap Tarihi':['Bir Kahraman Doğuyor','Millî Uyanış','Ya İstiklal Ya Ölüm','Atatürkçülük ve Çağdaşlaşan Türkiye','Demokratikleşme Çabaları','Atatürk Dönemi Dış Politika'],
- 'Din Kültürü':['Kader İnancı','Zekat ve Sadaka','Din ve Hayat',"Hz. Muhammed'in Örnekliği",'Kur’an-ı Kerim ve Özellikleri'],
- 'İngilizce':['Friendship','Teen Life','In The Kitchen','On The Phone','The Internet','Adventures','Tourism','Chores','Science','Natural Forces']
-};
-const options=['-','Konu Eksik','Süre Yetmedi','Boş Bırakıldı','Dikkat Hatası'];
-const store={get(k,d){try{return JSON.parse(localStorage.getItem('lgs_demo_'+k))??d}catch{return d}},set(k,v){localStorage.setItem('lgs_demo_'+k,JSON.stringify(v))}};
-let exams=store.get('exams',5), books=store.get('books',Object.fromEntries(Object.keys(subjects).map(s=>[s,[]]))), logs=store.get('logs',[]);
-const topicKey=(s,i)=>`topic_${s}_${i}`, examKey=(s,i,d)=>`exam_${s}_${i}_${d}`;
-function renderTopics(){const root=document.querySelector('#subjects');root.innerHTML='';let total=0,done=0;for(const [s,ts] of Object.entries(subjects)){let count=0;const box=document.createElement('div');box.className='box';const h=document.createElement('h3');h.textContent=s;box.append(h);const grid=document.createElement('div');grid.className='grid';ts.forEach((t,i)=>{total++;const label=document.createElement('label');label.className='item';const cb=document.createElement('input');cb.type='checkbox';cb.checked=store.get(topicKey(s,i),false);if(cb.checked){count++;done++}cb.onchange=()=>{store.set(topicKey(s,i),cb.checked);renderTopics()};label.append(cb,document.createTextNode(t));grid.append(label)});const p=document.createElement('p');p.className='muted';p.textContent=`Tamamlanan: ${count}/${ts.length}`;box.append(p,grid);root.append(box)}document.querySelector('#progress').textContent=`Genel Toplam: %${total?Math.round(done/total*100):0} (${done}/${total})`}
-function renderExams(){document.querySelector('#examHead').innerHTML='<tr><th>Konu / Alan</th>'+Array.from({length:exams},(_,i)=>`<th>Deneme ${i+1}</th>`).join('')+'</tr>';const body=document.querySelector('#examBody');body.innerHTML='';for(const [s,ts] of Object.entries(subjects)){const title=document.createElement('tr');title.innerHTML=`<th colspan="${exams+1}">${s}</th>`;body.append(title);ts.forEach((t,i)=>{const tr=document.createElement('tr');const td=document.createElement('td');td.textContent=t;tr.append(td);for(let d=0;d<exams;d++){const cell=document.createElement('td'),sel=document.createElement('select'),key=examKey(s,i,d);options.forEach(o=>{const op=document.createElement('option');op.textContent=op.value=o;sel.append(op)});sel.value=store.get(key,'-');sel.onchange=()=>store.set(key,sel.value);cell.append(sel);tr.append(cell)}body.append(tr)})}}
-function renderBooks(){const root=document.querySelector('#books');root.innerHTML='';for(const s of Object.keys(subjects)){const box=document.createElement('div');box.className='box';const h=document.createElement('h3');h.textContent=s;const inp=document.createElement('input');inp.placeholder='Kitap adı';const add=document.createElement('button');add.className='btn';add.textContent='Ekle';add.onclick=()=>{const name=inp.value.trim();if(name){(books[s]??=[]).push({name,done:false});store.set('books',books);renderBooks()}};box.append(h,inp,add);(books[s]||[]).forEach((b,i)=>{const label=document.createElement('label');label.className='item';const cb=document.createElement('input');cb.type='checkbox';cb.checked=b.done;cb.onchange=()=>{books[s][i].done=cb.checked;store.set('books',books)};const text=document.createElement('span');text.textContent=b.name;const del=document.createElement('button');del.className='btn red';del.textContent='Sil';del.onclick=()=>{books[s].splice(i,1);store.set('books',books);renderBooks()};label.append(cb,text,del);box.append(label)});root.append(box)}}
-function renderLogs(){const body=document.querySelector('#logs');body.innerHTML='';if(!logs.length){body.innerHTML='<tr><td colspan="5">Henüz kayıt eklenmedi.</td></tr>';return}logs.forEach((l,i)=>{const tr=document.createElement('tr');[l.date,l.subject,`${l.hours} sa`,`${l.questions} soru`].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});const td=document.createElement('td'),del=document.createElement('button');del.className='btn red';del.textContent='Sil';del.onclick=()=>{logs.splice(i,1);store.set('logs',logs);renderLogs()};td.append(del);tr.append(td);body.append(tr)})}
-function renderReport(){const root=document.querySelector('#report');root.innerHTML='';let found=0;for(const [s,ts] of Object.entries(subjects)){ts.forEach((t,i)=>{const errs=[];for(let d=0;d<exams;d++){const v=store.get(examKey(s,i,d),'-');if(v!=='-')errs.push(`Deneme ${d+1}: ${v}`)}if(errs.length){found++;const p=document.createElement('p');p.className='box';const strong=document.createElement('strong');strong.textContent=`${s} — ${t}: `;p.append(strong);errs.forEach(e=>{const tag=document.createElement('span');tag.className='tag';tag.textContent=e;p.append(tag)});root.append(p)}})}if(!found)root.innerHTML='<div class="box">🎉 Henüz deneme hatası işaretlenmedi.</div>'}
-document.querySelectorAll('nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('nav button,.pane').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='eksik')renderReport()});
-document.querySelector('#addExam').onclick=()=>{exams++;store.set('exams',exams);renderExams()};
-const select=document.querySelector('#subjectSelect');Object.keys(subjects).forEach(s=>{const o=document.createElement('option');o.textContent=o.value=s;select.append(o)});document.querySelector('#date').value=new Date().toISOString().slice(0,10);
-document.querySelector('#addLog').onclick=()=>{const date=document.querySelector('#date').value,hours=Number(document.querySelector('#hours').value)||0,questions=Number(document.querySelector('#questions').value)||0;if(!date||(!hours&&!questions)){alert('Tarih seçin ve süre veya soru sayısı girin.');return}logs.push({date,subject:select.value,hours,questions});logs.sort((a,b)=>b.date.localeCompare(a.date));store.set('logs',logs);document.querySelector('#hours').value='';document.querySelector('#questions').value='';renderLogs()};
-document.querySelector('#save').onclick=()=>{store.set('exams',exams);store.set('books',books);store.set('logs',logs);document.querySelector('#saved').textContent='Değişiklikler bu tarayıcıya kaydedildi.';setTimeout(()=>document.querySelector('#saved').textContent='',2500)};
-renderTopics();renderExams();renderBooks();renderLogs();
+    // 📌 DİLEDİĞİNİZ ÖĞRENCİLERİ BURAYA EKLEYEBİLİRSİNİZ (Okul Numarası = Şifre)
+    const embeddedDatabase = {
+        "778": { name: "MUZAFFER SARIKAYA", sinif: "8-C" },
+        "706": { name: "ALİ EYMEN AKPINAR", sinif: "8-C" },
+        "789": { name: "MUHAMMED SALİM EKİZ", sinif: "8-C" },
+        "725": { name: "HÜSEYİN YAHYA ERDOĞAN", sinif: "8-C" }
+    };
+
+    const lgsData = {
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri ve Söz Sanatları", "Anlatım Bozuklukları"],
+        "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
+        "Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"],
+        "T.C. İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Millî Uyanış", "Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları", "Atatürk Dönemi Dış Politika"],
+        "Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliği", "Kur'an-ı Kerim ve Özellikleri"],
+        "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"]
+    };
+
+    const examOptions = ["-", "Konu Eksik", "Süre Yetmedi", "Boş Bırakıldı", "Dikkat Hatası"];
+    
+    let currentStudentNo = null;
+    let currentStudentData = null;
+    let examCount = 5;
+    let booksData = {};
+    let studyLogs = [];
+
+    window.onload = function() {
+        let savedNo = localStorage.getItem('lgs_active_student');
+        if (savedNo && embeddedDatabase[savedNo]) {
+            loginStudent(savedNo);
+        } else {
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    };
+
+    function handleLogin() {
+        let inputNo = document.getElementById('school-no-input').value.trim();
+        let errEl = document.getElementById('login-error');
+
+        if (embeddedDatabase[inputNo]) {
+            errEl.style.display = 'none';
+            localStorage.setItem('lgs_active_student', inputNo);
+            loginStudent(inputNo);
+        } else {
+            errEl.style.display = 'block';
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('lgs_active_student');
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
+        document.getElementById('school-no-input').value = '';
+    }
+
+    function loginStudent(no) {
+        currentStudentNo = no;
+        currentStudentData = embeddedDatabase[no];
+
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('student-welcome-text').innerText = `Öğrenci: ${currentStudentData.name} (${currentStudentData.sinif} - No: ${no})`;
+
+        examCount = parseInt(localStorage.getItem(`lgs_exam_count_${no}`)) || 5;
+        booksData = JSON.parse(localStorage.getItem(`lgs_books_data_${no}`)) || {
+            "Türkçe": [], "Matematik": [], "Fen Bilimleri": [], "T.C. İnkılap Tarihi": [], "Din Kültürü": [], "İngilizce": []
+        };
+        studyLogs = JSON.parse(localStorage.getItem(`lgs_study_logs_${no}`)) || [];
+
+        renderTopics();
+        renderExamTable();
+        renderBooks();
+        renderStudyTracking();
+
+        let dateInp = document.getElementById('log-date');
+        if(dateInp) dateInp.valueAsDate = new Date();
+    }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        if(btn) btn.classList.add('active');
+        if(tabId === 'eksik') generateReport();
+        if(tabId === 'calisma') renderStudyTracking();
+    }
+
+    function triggerPrint() {
+        let activeTab = document.querySelector('.tab-pane.active');
+        if(activeTab && activeTab.id === 'tab-eksik') {
+            generateReport();
+        }
+        setTimeout(() => {
+            window.print();
+        }, 150);
+    }
+
+    function renderTopics() {
+        const container = document.getElementById('subjects-container');
+        container.innerHTML = '';
+        let grandTotal = 0, grandChecked = 0;
+
+        for (const [subject, topics] of Object.entries(lgsData)) {
+            let div = document.createElement('div');
+            div.className = "section-box";
+            
+            let subjectChecked = 0;
+            let subjectTotal = topics.length;
+
+            let htmlTopics = `<div class="grid-2">`;
+            topics.forEach((topic, idx) => {
+                grandTotal++;
+                let key = `topic_${currentStudentNo}_${subject}_${idx}`;
+                let isChecked = localStorage.getItem(key) === 'true';
+                if(isChecked) {
+                    grandChecked++;
+                    subjectChecked++;
+                }
+
+                htmlTopics += `<label class="checkbox-label">
+                    <input type="checkbox" data-key="${key}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
+                    <span>${topic}</span>
+                </label>`;
+            });
+            htmlTopics += `</div>`;
+
+            let subjectPercent = Math.round((subjectChecked / subjectTotal) * 100);
+            
+            let htmlHeader = `
+                <div class="subject-header">
+                    <h3>${subject}</h3>
+                    <span class="subject-progress" id="badge_${subject}">${subjectChecked}/${subjectTotal} (%${subjectPercent})</span>
+                </div>
+            `;
+
+            div.innerHTML = htmlHeader + htmlTopics;
+            container.appendChild(div);
+        }
+        updateGrandProgressPercent(grandChecked, grandTotal);
+    }
+
+    function updateProgress() {
+        let grandChecked = 0;
+        let grandTotal = 0;
+
+        for (const [subject, topics] of Object.entries(lgsData)) {
+            let subChecked = 0;
+            topics.forEach((topic, idx) => {
+                grandTotal++;
+                let key = `topic_${currentStudentNo}_${subject}_${idx}`;
+                let cb = document.querySelector(`input[data-key="${key}"]`);
+                if(cb && cb.checked) {
+                    grandChecked++;
+                    subChecked++;
+                }
+            });
+            let subPercent = Math.round((subChecked / topics.length) * 100);
+            let badge = document.getElementById(`badge_${subject}`);
+            if(badge) {
+                badge.innerText = `${subChecked}/${topics.length} (%${subPercent})`;
+            }
+        }
+        updateGrandProgressPercent(grandChecked, grandTotal);
+    }
+
+    function updateGrandProgressPercent(chk, total) {
+        let percent = total > 0 ? Math.round((chk / total) * 100) : 0;
+        document.getElementById('progress-text').innerText = `Genel Toplam: %${percent} (${chk}/${total})`;
+    }
+
+    function renderExamTable() {
+        let header = document.getElementById('exam-table-header');
+        header.innerHTML = '<th>Konu / Alan</th>';
+        for (let d = 1; d <= examCount; d++) {
+            header.innerHTML += `<th style="text-align:center;">Deneme ${d}</th>`;
+        }
+
+        let tbody = document.getElementById('exam-table-body');
+        tbody.innerHTML = '';
+
+        for (const [subject, topics] of Object.entries(lgsData)) {
+            let subTr = document.createElement('tr');
+            subTr.style.background = "#eef2ff";
+            subTr.style.fontWeight = "bold";
+            subTr.innerHTML = `<td colspan="${examCount + 1}" style="color: var(--primary);">${subject}</td>`;
+            tbody.appendChild(subTr);
+
+            topics.forEach((topic, tIdx) => {
+                let tr = document.createElement('tr');
+                let td = document.createElement('td');
+                td.innerText = topic;
+                tr.appendChild(td);
+
+                for (let d = 1; d <= examCount; d++) {
+                    let tdCell = document.createElement('td');
+                    let select = document.createElement('select');
+                    let key = `exam_${currentStudentNo}_${subject}_${tIdx}_d${d}`;
+                    select.setAttribute('data-exam-key', key);
+                    
+                    examOptions.forEach(opt => {
+                        let option = document.createElement('option');
+                        option.value = opt;
+                        option.innerText = opt;
+                        select.appendChild(option);
+                    });
+
+                    let val = localStorage.getItem(key);
+                    if(val) select.value = val;
+                    styleSelect(select);
+                    select.onchange = function() { styleSelect(this); };
+
+                    tdCell.appendChild(select);
+                    tr.appendChild(tdCell);
+                }
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    function styleSelect(sel) {
+        sel.style.background = "white";
+        sel.style.color = "#1e293b";
+        if (sel.value === "Konu Eksik") { sel.style.background = "#ffe4e6"; sel.style.color = "#be123c"; }
+        else if (sel.value === "Süre Yetmedi") { sel.style.background = "#fef3c7"; sel.style.color = "#b45309"; }
+        else if (sel.value === "Boş Bırakıldı") { sel.style.background = "#f3e8ff"; sel.style.color = "#6b21a8"; }
+        else if (sel.value === "Dikkat Hatası") { sel.style.background = "#e0f2fe"; sel.style.color = "#0369a1"; }
+    }
+
+    function addExamColumn() {
+        examCount++;
+        localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
+        renderExamTable();
+    }
+
+    function removeExamColumn() {
+        if(examCount > 1) {
+            examCount--;
+            localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
+            renderExamTable();
+        }
+    }
+
+    function renderBooks() {
+        let container = document.getElementById('books-container');
+        container.innerHTML = '';
+
+        for (const subject of Object.keys(lgsData)) {
+            let div = document.createElement('div');
+            div.className = "section-box";
+            let html = `<h3>${subject}</h3>
+                <div class="book-input-row no-print">
+                    <input type="text" id="book_inp_${subject}" placeholder="Kitap Adı Ekle...">
+                    <button class="btn btn-primary" onclick="addBook('${subject}')">Ekle</button>
+                </div><div style="display:flex; flex-direction:column; gap:5px;">`;
+
+            let books = booksData[subject] || [];
+            books.forEach((b, bIdx) => {
+                html += `<label class="checkbox-label" style="justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" onchange="toggleBook('${subject}', ${bIdx})" ${b.completed ? 'checked' : ''}>
+                        <span style="${b.completed ? 'text-decoration:line-through; color:#94a3b8;' : ''}">${b.name}</span>
+                    </div>
+                    <span class="no-print" onclick="deleteBook('${subject}', ${bIdx})" style="color:var(--danger); cursor:pointer; font-weight:bold;" title="Kitabı Sil">✕</span>
+                </label>`;
+            });
+            html += `</div>`;
+            div.innerHTML = html;
+            container.appendChild(div);
+        }
+    }
+
+    function addBook(subject) {
+        let inp = document.getElementById(`book_inp_${subject}`);
+        let name = inp.value.trim();
+        if(name) {
+            if(!booksData[subject]) booksData[subject] = [];
+            booksData[subject].push({ name: name, completed: false });
+            inp.value = '';
+            localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+            renderBooks();
+        }
+    }
+
+    function toggleBook(subject, idx) {
+        booksData[subject][idx].completed = !booksData[subject][idx].completed;
+        localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+        renderBooks();
+    }
+
+    function deleteBook(subject, idx) {
+        if(confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
+            booksData[subject].splice(idx, 1);
+            localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+            renderBooks();
+        }
+    }
+
+    function addStudyLog() {
+        let date = document.getElementById('log-date').value;
+        let subject = document.getElementById('log-subject').value;
+        let hours = parseFloat(document.getElementById('log-hours').value) || 0;
+        let questions = parseInt(document.getElementById('log-questions').value) || 0;
+
+        if(!date) {
+            alert("Lütfen bir tarih seçin!");
+            return;
+        }
+        if(hours === 0 && questions === 0) {
+            alert("Lütfen en az çalışma süresi veya soru sayısı girin!");
+            return;
+        }
+
+        studyLogs.push({ date, subject, hours, questions });
+        studyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+        
+        document.getElementById('log-hours').value = '';
+        document.getElementById('log-questions').value = '';
+        
+        renderStudyTracking();
+    }
+
+    function deleteStudyLog(index) {
+        if(confirm("Bu çalışma kaydını silmek istediğinize emin misiniz?")) {
+            studyLogs.splice(index, 1);
+            localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+            renderStudyTracking();
+        }
+    }
+
+    function renderStudyTracking() {
+        let logsBody = document.getElementById('study-logs-body');
+        logsBody.innerHTML = '';
+        
+        if(studyLogs.length === 0) {
+            logsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">Henüz çalışma kaydı eklenmemiş.</td></tr>`;
+        } else {
+            studyLogs.forEach((log, idx) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.date}</td>
+                    <td>${log.subject}</td>
+                    <td>${log.hours} sa</td>
+                    <td>${log.questions} soru</td>
+                    <td class="no-print" style="text-align:center;"><span onclick="deleteStudyLog(${idx})" style="color:var(--danger); cursor:pointer; font-weight:bold;" title="Kaydı Sil">✕</span></td>
+                `;
+                logsBody.appendChild(tr);
+            });
+        }
+
+        let now = new Date();
+        let oneDay = 24 * 60 * 60 * 1000;
+
+        let summary = {};
+        Object.keys(lgsData).forEach(sub => {
+            summary[sub] = {
+                weeklyHours: 0, weeklyQ: 0,
+                monthlyHours: 0, monthlyQ: 0,
+                totalHours: 0, totalQ: 0
+            };
+        });
+
+        studyLogs.forEach(log => {
+            let logDate = new Date(log.date);
+            let diffDays = Math.round((now - logDate) / oneDay);
+
+            if(summary[log.subject]) {
+                summary[log.subject].totalHours += log.hours;
+                summary[log.subject].totalQ += log.questions;
+
+                if(diffDays >= 0 && diffDays <= 30) {
+                    summary[log.subject].monthlyHours += log.hours;
+                    summary[log.subject].monthlyQ += log.questions;
+                }
+
+                if(diffDays >= 0 && diffDays <= 7) {
+                    summary[log.subject].weeklyHours += log.hours;
+                    summary[log.subject].weeklyQ += log.questions;
+                }
+            }
+        });
+
+        let summaryBody = document.getElementById('study-summary-body');
+        summaryBody.innerHTML = '';
+
+        let grandWeeklyH = 0, grandWeeklyQ = 0;
+        let grandMonthlyH = 0, grandMonthlyQ = 0;
+        let grandTotalH = 0, grandTotalQ = 0;
+
+        Object.keys(lgsData).forEach(sub => {
+            let data = summary[sub];
+            grandWeeklyH += data.weeklyHours;
+            grandWeeklyQ += data.weeklyQ;
+            grandMonthlyH += data.monthlyHours;
+            grandMonthlyQ += data.monthlyQ;
+            grandTotalH += data.totalHours;
+            grandTotalQ += data.totalQ;
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:600; color:var(--primary);">${sub}</td>
+                <td>${data.weeklyHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${data.weeklyQ} soru</td>
+                <td>${data.monthlyHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${data.monthlyQ} soru</td>
+                <td>${data.totalHours.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+                <td>${data.totalQ} soru</td>
+            `;
+            summaryBody.appendChild(tr);
+        });
+
+        let totalTr = document.createElement('tr');
+        totalTr.style.background = "#eef2ff";
+        totalTr.style.fontWeight = "bold";
+        totalTr.innerHTML = `
+            <td style="color:var(--primary);">GENEL TOPLAM</td>
+            <td>${grandWeeklyH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${grandWeeklyQ} soru</td>
+            <td>${grandMonthlyH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${grandMonthlyQ} soru</td>
+            <td>${grandTotalH.toFixed(2).replace(/\.?0+$/, '')} sa</td>
+            <td>${grandTotalQ} soru</td>
+        `;
+        summaryBody.appendChild(totalTr);
+    }
+
+    function generateReport() {
+        let container = document.getElementById('report-container');
+        container.innerHTML = '';
+        let hasData = false;
+
+        for (const [subject, topics] of Object.entries(lgsData)) {
+            let subIssues = [];
+            topics.forEach((topic, tIdx) => {
+                let errs = [];
+                for(let d=1; d<=examCount; d++) {
+                    let val = localStorage.getItem(`exam_${currentStudentNo}_${subject}_${tIdx}_d${d}`);
+                    if(val && val !== "-") errs.push(`Deneme ${d}: ${val}`);
+                }
+                if(errs.length > 0) subIssues.push({ topic, errs });
+            });
+
+            if(subIssues.length > 0) {
+                hasData = true;
+                let box = document.createElement('div');
+                box.className = "section-box";
+                let html = `<h3 style="color:#b45309; margin-bottom:8px;">${subject} Deneme Analiz Özeti</h3>`;
+                subIssues.forEach(item => {
+                    html += `<div class="report-item"><b>${item.topic}:</b><div>`;
+                    item.errs.forEach(e => {
+                        html += `<span class="tag tag-error">${e}</span>`;
+                    });
+                    html += `</div></div>`;
+                });
+                box.innerHTML = html;
+                container.appendChild(box);
+            }
+        }
+
+        if(!hasData) {
+            container.innerHTML = `<div style="text-align:center; padding:20px; background:#f0fdf4; color:#166534; border-radius:8px;">🎉 Harika, denemelerde işaretlenmiş bir hata bulunmuyor!</div>`;
+        }
+    }
+
+    function saveData() {
+        document.querySelectorAll('#subjects-container input[type="checkbox"]').forEach(cb => {
+            let key = cb.getAttribute('data-key');
+            if(key) localStorage.setItem(key, cb.checked);
+        });
+
+        document.querySelectorAll('#exam-table-body select').forEach(sel => {
+            let key = sel.getAttribute('data-exam-key');
+            if(key) localStorage.setItem(key, sel.value);
+        });
+
+        localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
+        localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+        localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+
+        let alertBox = document.getElementById('save-alert');
+        alertBox.style.display = 'block';
+        setTimeout(() => alertBox.style.display = 'none', 2500);
+    }
 </script>
 </body>
 </html>
