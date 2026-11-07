@@ -353,7 +353,7 @@
     }
 
     let examNames = JSON.parse(localStorage.getItem('lgs_exam_names')) || {};
-    const examOptions = ["-", "Konu Eksik", "Süre Yetmedi", "Boş Bırakıldı", "Dikkat Hatası"];
+    const examOptions = ["-", "İşlem Hatası", "Soru Kökünü Yanlış Okuma", "Yorum / Mantık Yürütme Hatası"];
     
     let examCount = parseInt(localStorage.getItem('lgs_exam_count')) || 5;
     let booksData = JSON.parse(localStorage.getItem('lgs_books_data')) || {};
@@ -617,10 +617,9 @@
     function styleSelect(sel) {
         sel.style.background = "white";
         sel.style.color = "#1e293b";
-        if (sel.value === "Konu Eksik") { sel.style.background = "#ffe4e6"; sel.style.color = "#be123c"; }
-        else if (sel.value === "Süre Yetmedi") { sel.style.background = "#fef3c7"; sel.style.color = "#b45309"; }
-        else if (sel.value === "Boş Bırakıldı") { sel.style.background = "#f3e8ff"; sel.style.color = "#6b21a8"; }
-        else if (sel.value === "Dikkat Hatası") { sel.style.background = "#e0f2fe"; sel.style.color = "#0369a1"; }
+        if (sel.value === "İşlem Hatası") { sel.style.background = "#ffe4e6"; sel.style.color = "#be123c"; }
+        else if (sel.value === "Soru Kökünü Yanlış Okuma") { sel.style.background = "#fef3c7"; sel.style.color = "#b45309"; }
+        else if (sel.value === "Yorum / Mantık Yürütme Hatası") { sel.style.background = "#e0f2fe"; sel.style.color = "#0369a1"; }
     }
 
     function addExamColumn() {
