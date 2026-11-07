@@ -22,6 +22,8 @@
         .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         .header h1 { font-size: 1.25rem; margin-bottom: 5px; }
         .header p { font-size: 0.85rem; opacity: 0.9; }
+        .author-info { font-size: 0.8rem; margin-top: 8px; opacity: 0.95; font-weight: 500; }
+        .author-info a { color: #ffffff; text-decoration: underline; }
 
         .tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
         .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.78rem; color: #64748b; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
@@ -111,6 +113,9 @@
     <div class="header no-print">
         <h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1>
         <p>Konu Takibi, Deneme Analizi, Kaynak Kitaplar, Çalışma & Soru Havuzu</p>
+        <div class="author-info">
+            Yazar: <strong>Ali Tambuğa</strong> | E-posta: <a href="mailto:alifen60dnm@gmail.com">alifen60dnm@gmail.com</a>
+        </div>
     </div>
 
     <div class="tabs no-print">
@@ -316,7 +321,6 @@
         "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"]
     };
 
-    // Ders verilerini güvenli şekilde yükle
     let lgsData = {};
     try {
         const kayitliVeri = localStorage.getItem('lgs_custom_topics');
@@ -329,14 +333,12 @@
         lgsData = {};
     }
 
-    // Varsayılan dersleri ekle; mevcut ve dolu konu listelerine dokunma
     for (const [subject, topics] of Object.entries(defaultLgsData)) {
         if (!Array.isArray(lgsData[subject]) || lgsData[subject].length === 0) {
             lgsData[subject] = [...topics];
         }
     }
 
-    // Din Kültürü ve İngilizce derslerini eksik/boş olsalar da kesin olarak ekle
     if (!Array.isArray(lgsData["Din Kültürü"]) || lgsData["Din Kültürü"].length === 0) {
         lgsData["Din Kültürü"] = [...defaultLgsData["Din Kültürü"]];
     }
@@ -344,7 +346,6 @@
         lgsData["İngilizce"] = [...defaultLgsData["İngilizce"]];
     }
 
-    // Sonucu tarayıcı hafızasına kaydet
     try {
         localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
     } catch (e) {
@@ -513,10 +514,10 @@
 
     function saveTopicsState() {
         try {
-        localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
-    } catch (e) {
-        console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
-    }
+            localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+        } catch (e) {
+            console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
+        }
         renderTopics();
         renderExamTable();
         renderBooks();
@@ -985,10 +986,10 @@
         localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
         localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
         try {
-        localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
-    } catch (e) {
-        console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
-    }
+            localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+        } catch (e) {
+            console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
+        }
         localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
 
         let alertBox = document.getElementById('save-alert');
