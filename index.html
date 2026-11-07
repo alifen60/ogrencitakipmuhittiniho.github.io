@@ -316,21 +316,40 @@
         "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"]
     };
 
-    // Din Kültürü ve İngilizce'yi zorla ekleyen, eksik anahtarları tamamlayan kesinleştirilmiş yükleme mantığı
-    let lgsData = JSON.parse(localStorage.getItem('lgs_custom_topics')) || {};
-    
-    // Eğer hafızadaki veri eksik veya bozuksa, tüm standart dersleri tam olarak eşitle
+    // Ders verilerini güvenli şekilde yükle
+    let lgsData = {};
+    try {
+        const kayitliVeri = localStorage.getItem('lgs_custom_topics');
+        lgsData = kayitliVeri ? JSON.parse(kayitliVeri) : {};
+        if (!lgsData || typeof lgsData !== 'object' || Array.isArray(lgsData)) {
+            lgsData = {};
+        }
+    } catch (e) {
+        console.warn('Kayıtlı konu verisi okunamadı; varsayılan listeler kullanılacak.', e);
+        lgsData = {};
+    }
+
+    // Varsayılan dersleri ekle; mevcut ve dolu konu listelerine dokunma
     for (const [subject, topics] of Object.entries(defaultLgsData)) {
-        if (!lgsData[subject]) {
-            lgsData[subject] = topics;
+        if (!Array.isArray(lgsData[subject]) || lgsData[subject].length === 0) {
+            lgsData[subject] = [...topics];
         }
     }
-    
-    // Güvenlik önlemi: Din Kültürü veya İngilizce anahtarı herhangi bir sebepten yoksa direkt enjekte et
-    if(!lgsData["Din Kültürü"]) lgsData["Din Kültürü"] = defaultLgsData["Din Kültürü"];
-    if(!lgsData["İngilizce"]) lgsData["İngilizce"] = defaultLgsData["İngilizce"];
 
-    localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+    // Din Kültürü ve İngilizce derslerini eksik/boş olsalar da kesin olarak ekle
+    if (!Array.isArray(lgsData["Din Kültürü"]) || lgsData["Din Kültürü"].length === 0) {
+        lgsData["Din Kültürü"] = [...defaultLgsData["Din Kültürü"]];
+    }
+    if (!Array.isArray(lgsData["İngilizce"]) || lgsData["İngilizce"].length === 0) {
+        lgsData["İngilizce"] = [...defaultLgsData["İngilizce"]];
+    }
+
+    // Sonucu tarayıcı hafızasına kaydet
+    try {
+        localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+    } catch (e) {
+        console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
+    }
 
     let examNames = JSON.parse(localStorage.getItem('lgs_exam_names')) || {};
     const examOptions = ["-", "Konu Eksik", "Süre Yetmedi", "Boş Bırakıldı", "Dikkat Hatası"];
@@ -451,7 +470,7 @@
             container.appendChild(div);
 
             let subjectPercent = subjectTotal > 0 ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
-            let badge = div.querySelector(`#badge_${subject}`);
+            let badge = div.querySelector('.subject-progress');
             if(badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${subjectPercent})`;
         }
         updateGrandProgressPercent(grandChecked, grandTotal);
@@ -493,7 +512,11 @@
     }
 
     function saveTopicsState() {
+        try {
         localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+    } catch (e) {
+        console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
+    }
         renderTopics();
         renderExamTable();
         renderBooks();
@@ -961,7 +984,11 @@
         localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
         localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
         localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
+        try {
         localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
+    } catch (e) {
+        console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
+    }
         localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
 
         let alertBox = document.getElementById('save-alert');
