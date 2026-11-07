@@ -19,21 +19,12 @@
         body { background-color: var(--bg-color); color: var(--text-color); padding: 10px; min-height: 100vh; }
         .container { max-width: 950px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; position: relative; }
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         .header h1 { font-size: 1.25rem; margin-bottom: 5px; }
         .header p { font-size: 0.85rem; opacity: 0.9; }
-        .logout-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
-        .logout-btn:hover { background: rgba(255,255,255,0.3); }
 
-        /* Giriş Ekranı */
-        #login-screen { padding: 40px 20px; text-align: center; max-width: 400px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-        #login-screen h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.3rem; }
-        #login-screen p { color: #64748b; font-size: 0.85rem; margin-bottom: 20px; }
-        .login-input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none; }
-        .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        
         .tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.82rem; color: #64748b; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.78rem; color: #64748b; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
         .tab-btn.active { color: var(--primary); background: white; border-bottom: 3px solid var(--primary); }
 
         .content { padding: 15px; }
@@ -89,180 +80,212 @@
             .tab-pane.active { display: block !important; }
             .section-box { border: 1px solid #ccc; page-break-inside: avoid; background: white !important; }
             select { border: 1px solid #cbd5e1; appearance: none; -webkit-appearance: none; }
+            img { max-height: 500px !important; page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- GİRİŞ EKRANI -->
-    <div id="login-screen">
-        <h2>🔒 Öğrenci Girişi</h2>
-        <p>Sisteme erişmek için lütfen <strong>Okul Numaranızı</strong> giriniz.</p>
-        <input type="text" id="school-no-input" class="login-input" placeholder="Örn: 778" autocomplete="off">
-        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="handleLogin()">Giriş Yap</button>
-        <div id="login-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;">Geçersiz okul numarası! Lütfen tekrar deneyin.</div>
+    <div class="header no-print">
+        <h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1>
+        <p>Konu Takibi, Deneme Analizi, Kaynak Kitaplar, Çalışma & Soru Havuzu</p>
     </div>
 
-    <!-- ANA UYGULAMA -->
-    <div id="main-app" style="display: none;">
-        <div class="header no-print">
-            <button class="logout-btn" onclick="handleLogout()">🚪 Çıkış Yap</button>
-            <h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1>
-            <p id="student-welcome-text">Öğrenci: Yükleniyor...</p>
+    <div class="tabs no-print">
+        <button class="tab-btn active" onclick="switchTab('konu', this)">📚 Konular</button>
+        <button class="tab-btn" onclick="switchTab('deneme', this)">📊 Denemeler</button>
+        <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
+        <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma</button>
+        <button class="tab-btn" onclick="switchTab('sorular', this)">📸 Sorularım</button>
+        <button class="tab-btn" onclick="switchTab('eksik', this)">⚠️ Eksik</button>
+    </div>
+
+    <div class="content">
+        <!-- 1. KONU TAKİBİ -->
+        <div id="tab-konu" class="tab-pane active">
+            <div class="flex-between">
+                <h2>Ders Bazlı Konu Durumu</h2>
+                <span id="progress-text" class="badge">Genel Toplam: %0</span>
+            </div>
+            <div id="subjects-container"></div>
         </div>
 
-        <div class="tabs no-print">
-            <button class="tab-btn active" onclick="switchTab('konu', this)">📚 Konular</button>
-            <button class="tab-btn" onclick="switchTab('deneme', this)">📊 Denemeler</button>
-            <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
-            <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma & Soru</button>
-            <button class="tab-btn" onclick="switchTab('eksik', this)">⚠️ Eksik Raporu</button>
-        </div>
-
-        <div class="content">
-            <!-- 1. KONU TAKİBİ -->
-            <div id="tab-konu" class="tab-pane active">
-                <div class="flex-between">
-                    <h2>Ders Bazlı Konu Durumu</h2>
-                    <span id="progress-text" class="badge">Genel Toplam: %0</span>
+        <!-- 2. DENEME ANALİZİ -->
+        <div id="tab-deneme" class="tab-pane">
+            <div class="flex-between">
+                <div>
+                    <h2>Deneme Hata Analizi</h2>
+                    <p style="font-size: 0.75rem; color: #64748b;" class="no-print">Hücrelere tıklayarak durum seçin.</p>
                 </div>
-                <div id="subjects-container"></div>
+                <div class="no-print" style="display: flex; gap: 5px;">
+                    <button class="btn btn-primary" onclick="addExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➕ Deneme Ekle</button>
+                    <button class="btn btn-danger" onclick="removeExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➖ Sil</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr id="exam-table-header">
+                            <th>Konu / Alan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exam-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. KAYNAK KİTAPLAR -->
+        <div id="tab-kitap" class="tab-pane">
+            <h2 style="margin-bottom: 5px;">Ders Bazlı Kaynak Kitaplar</h2>
+            <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 15px;" class="no-print">Çözülen soru bankalarını ekleyebilir, silebilir veya tamamlandı işaretleyebilirsiniz.</p>
+            <div id="books-container" class="grid-2"></div>
+        </div>
+
+        <!-- 4. ÇALIŞMA VE SORU TAKİBİ -->
+        <div id="tab-calisma" class="tab-pane">
+            <div class="flex-between">
+                <h2>⏱️ Çalışma Süresi ve Soru Takibi</h2>
+            </div>
+            
+            <div class="section-box no-print">
+                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
+                <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Tarih</label>
+                        <input type="date" id="log-date" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
+                        <select id="log-subject">
+                            <option value="Türkçe">Türkçe</option>
+                            <option value="Matematik">Matematik</option>
+                            <option value="Fen Bilimleri">Fen Bilimleri</option>
+                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
+                            <option value="Din Kültürü">Din Kültürü</option>
+                            <option value="İngilizce">İngilizce</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Saat)</label>
+                        <input type="number" id="log-hours" step="0.25" min="0" placeholder="Örn: 1.5" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
+                        <input type="number" id="log-questions" min="0" placeholder="Örn: 50" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
             </div>
 
-            <!-- 2. DENEME ANALİZİ -->
-            <div id="tab-deneme" class="tab-pane">
-                <div class="flex-between">
-                    <div>
-                        <h2>Deneme Hata Analizi</h2>
-                        <p style="font-size: 0.75rem; color: #64748b;" class="no-print">Hücrelere tıklayarak durum seçin.</p>
-                    </div>
-                    <div class="no-print" style="display: flex; gap: 5px;">
-                        <button class="btn btn-primary" onclick="addExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➕ Deneme Ekle</button>
-                        <button class="btn btn-danger" onclick="removeExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➖ Sil</button>
-                    </div>
-                </div>
+            <div class="section-box">
+                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Ders Bazlı Özet (Haftalık / Aylık / Toplam)</h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr id="exam-table-header">
-                                <th>Konu / Alan</th>
+                            <tr>
+                                <th>Ders</th>
+                                <th>Haftalık Süre</th>
+                                <th>Haftalık Soru</th>
+                                <th>Aylık Süre</th>
+                                <th>Aylık Soru</th>
+                                <th>Toplam Süre</th>
+                                <th>Toplam Soru</th>
                             </tr>
                         </thead>
-                        <tbody id="exam-table-body"></tbody>
+                        <tbody id="study-summary-body"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 3. KAYNAK KİTAPLAR -->
-            <div id="tab-kitap" class="tab-pane">
-                <h2 style="margin-bottom: 5px;">Ders Bazlı Kaynak Kitaplar</h2>
-                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 15px;" class="no-print">Çözülen soru bankalarını ekleyebilir, silebilir veya tamamlandı işaretleyebilirsiniz.</p>
-                <div id="books-container" class="grid-2"></div>
+            <div class="section-box">
+                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Ders</th>
+                                <th>Süre</th>
+                                <th>Soru Sayısı</th>
+                                <th class="no-print" style="width: 50px; text-align: center;">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="study-logs-body"></tbody>
+                    </table>
+                </div>
             </div>
+        </div>
 
-            <!-- 4. ÇALIŞMA VE SORU TAKİBİ -->
-            <div id="tab-calisma" class="tab-pane">
-                <div class="flex-between">
-                    <h2>⏱️ Çalışma Süresi ve Soru Takibi</h2>
-                </div>
-                
-                <div class="section-box no-print">
-                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
-                    <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Tarih</label>
-                            <input type="date" id="log-date" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
-                            <select id="log-subject">
-                                <option value="Türkçe">Türkçe</option>
-                                <option value="Matematik">Matematik</option>
-                                <option value="Fen Bilimleri">Fen Bilimleri</option>
-                                <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
-                                <option value="Din Kültürü">Din Kültürü</option>
-                                <option value="İngilizce">İngilizce</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Saat)</label>
-                            <input type="number" id="log-hours" step="0.25" min="0" placeholder="Örn: 1.5" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
-                            <input type="number" id="log-questions" min="0" placeholder="Örn: 50" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
-                        </div>
+        <!-- 5. YAPAMADIĞIM SORULAR -->
+        <div id="tab-sorular" class="tab-pane">
+            <div class="flex-between">
+                <h2>📸 Yapamadığım Sorular (Soru Havuzu)</h2>
+            </div>
+            
+            <div class="section-box no-print">
+                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Soru Ekle (Fotoğraf Çek / Yükle)</h3>
+                <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
+                        <select id="question-subject">
+                            <option value="Türkçe">Türkçe</option>
+                            <option value="Matematik">Matematik</option>
+                            <option value="Fen Bilimleri">Fen Bilimleri</option>
+                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
+                            <option value="Din Kültürü">Din Kültürü</option>
+                            <option value="İngilizce">İngilizce</option>
+                        </select>
                     </div>
-                    <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
-                </div>
-
-                <div class="section-box">
-                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Ders Bazlı Özet (Haftalık / Aylık / Toplam)</h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Ders</th>
-                                    <th>Haftalık Süre</th>
-                                    <th>Haftalık Soru</th>
-                                    <th>Aylık Süre</th>
-                                    <th>Aylık Soru</th>
-                                    <th>Toplam Süre</th>
-                                    <th>Toplam Soru</th>
-                                </tr>
-                            </thead>
-                            <tbody id="study-summary-body"></tbody>
-                        </table>
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Fotoğraf Seç / Çek</label>
+                        <input type="file" id="question-image" accept="image/*" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; background:white;">
                     </div>
                 </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Not / Açıklama (İsteğe bağlı)</label>
+                    <input type="text" id="question-note" placeholder="Örn: Çarpanlar ve katlar yeni nesil soru..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                </div>
+                <button class="btn btn-primary" onclick="addQuestion()" style="width:100%;">Soruyu Kaydet</button>
+            </div>
 
-                <div class="section-box">
-                    <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Tarih</th>
-                                    <th>Ders</th>
-                                    <th>Süre</th>
-                                    <th>Soru Sayısı</th>
-                                    <th class="no-print" style="width: 50px; text-align: center;">Sil</th>
-                                </tr>
-                            </thead>
-                            <tbody id="study-logs-body"></tbody>
-                        </table>
+            <div class="section-box">
+                <div class="flex-between" style="margin-bottom: 10px;">
+                    <h3 style="font-size:0.95rem; color:var(--primary);">Kaydedilen Sorular</h3>
+                    <div class="no-print" style="width: 180px;">
+                        <select id="filter-question-subject" onchange="renderQuestions()">
+                            <option value="ALL">Tüm Dersler</option>
+                            <option value="Türkçe">Türkçe</option>
+                            <option value="Matematik">Matematik</option>
+                            <option value="Fen Bilimleri">Fen Bilimleri</option>
+                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
+                            <option value="Din Kültürü">Din Kültürü</option>
+                            <option value="İngilizce">İngilizce</option>
+                        </select>
                     </div>
                 </div>
+                <div id="questions-list-container" style="display: grid; grid-template-columns: 1fr; gap: 15px;"></div>
             </div>
+        </div>
 
-            <!-- 5. EKSİK RAPORU -->
-            <div id="tab-eksik" class="tab-pane">
-                <div class="flex-between">
-                    <h2>Deneme Eksik ve Hata Listesi</h2>
-                </div>
-                <div id="report-container"></div>
+        <!-- 6. EKSİK RAPORU -->
+        <div id="tab-eksik" class="tab-pane">
+            <div class="flex-between">
+                <h2>Deneme Eksik ve Hata Listesi</h2>
             </div>
+            <div id="report-container"></div>
+        </div>
 
-            <!-- KAYDET VE YAZDIR BUTONLARI -->
-            <div class="actions-bar no-print">
-                <button class="btn btn-success" onclick="saveData()" style="padding: 12px 30px; font-size: 1rem;">💾 Değişiklikleri Kaydet</button>
-                <div id="save-alert" class="alert">✔ Başarıyla Kaydedildi!</div>
-                <button class="btn btn-dark" onclick="triggerPrint()" style="padding: 12px 30px; font-size: 1rem;">🖨️ Bulunduğun Ekranı Yazdır / PDF Yap</button>
-            </div>
+        <!-- KAYDET VE YAZDIR BUTONLARI -->
+        <div class="actions-bar no-print">
+            <button class="btn btn-success" onclick="saveData()" style="padding: 12px 30px; font-size: 1rem;">💾 Değişiklikleri Kaydet</button>
+            <div id="save-alert" class="alert">✔ Başarıyla Kaydedildi!</div>
+            <button class="btn btn-dark" onclick="triggerPrint()" style="padding: 12px 30px; font-size: 1rem;">🖨️ Bulunduğun Ekranı Yazdır / PDF Yap</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 📌 DİLEDİĞİNİZ ÖĞRENCİLERİ BURAYA EKLEYEBİLİRSİNİZ (Okul Numarası = Şifre)
-    const embeddedDatabase = {
-        "778": { name: "MUZAFFER SARIKAYA", sinif: "8-C" },
-        "706": { name: "ALİ EYMEN AKPINAR", sinif: "8-C" },
-        "789": { name: "MUHAMMED SALİM EKİZ", sinif: "8-C" },
-        "725": { name: "HÜSEYİN YAHYA ERDOĞAN", sinif: "8-C" }
-    };
-
     const lgsData = {
         "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri ve Söz Sanatları", "Anlatım Bozuklukları"],
         "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
@@ -274,64 +297,23 @@
 
     const examOptions = ["-", "Konu Eksik", "Süre Yetmedi", "Boş Bırakıldı", "Dikkat Hatası"];
     
-    let currentStudentNo = null;
-    let currentStudentData = null;
-    let examCount = 5;
-    let booksData = {};
-    let studyLogs = [];
+    let examCount = parseInt(localStorage.getItem('lgs_exam_count')) || 5;
+    let booksData = JSON.parse(localStorage.getItem('lgs_books_data')) || {
+        "Türkçe": [], "Matematik": [], "Fen Bilimleri": [], "T.C. İnkılap Tarihi": [], "Din Kültürü": [], "İngilizce": []
+    };
+    let studyLogs = JSON.parse(localStorage.getItem('lgs_study_logs')) || [];
+    let questionsData = JSON.parse(localStorage.getItem('lgs_questions')) || [];
 
     window.onload = function() {
-        let savedNo = localStorage.getItem('lgs_active_student');
-        if (savedNo && embeddedDatabase[savedNo]) {
-            loginStudent(savedNo);
-        } else {
-            document.getElementById('login-screen').style.display = 'block';
-            document.getElementById('main-app').style.display = 'none';
-        }
-    };
-
-    function handleLogin() {
-        let inputNo = document.getElementById('school-no-input').value.trim();
-        let errEl = document.getElementById('login-error');
-
-        if (embeddedDatabase[inputNo]) {
-            errEl.style.display = 'none';
-            localStorage.setItem('lgs_active_student', inputNo);
-            loginStudent(inputNo);
-        } else {
-            errEl.style.display = 'block';
-        }
-    }
-
-    function handleLogout() {
-        localStorage.removeItem('lgs_active_student');
-        document.getElementById('main-app').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'block';
-        document.getElementById('school-no-input').value = '';
-    }
-
-    function loginStudent(no) {
-        currentStudentNo = no;
-        currentStudentData = embeddedDatabase[no];
-
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        document.getElementById('student-welcome-text').innerText = `Öğrenci: ${currentStudentData.name} (${currentStudentData.sinif} - No: ${no})`;
-
-        examCount = parseInt(localStorage.getItem(`lgs_exam_count_${no}`)) || 5;
-        booksData = JSON.parse(localStorage.getItem(`lgs_books_data_${no}`)) || {
-            "Türkçe": [], "Matematik": [], "Fen Bilimleri": [], "T.C. İnkılap Tarihi": [], "Din Kültürü": [], "İngilizce": []
-        };
-        studyLogs = JSON.parse(localStorage.getItem(`lgs_study_logs_${no}`)) || [];
-
         renderTopics();
         renderExamTable();
         renderBooks();
         renderStudyTracking();
+        renderQuestions();
 
         let dateInp = document.getElementById('log-date');
         if(dateInp) dateInp.valueAsDate = new Date();
-    }
+    };
 
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -340,6 +322,7 @@
         if(btn) btn.classList.add('active');
         if(tabId === 'eksik') generateReport();
         if(tabId === 'calisma') renderStudyTracking();
+        if(tabId === 'sorular') renderQuestions();
     }
 
     function triggerPrint() {
@@ -367,7 +350,7 @@
             let htmlTopics = `<div class="grid-2">`;
             topics.forEach((topic, idx) => {
                 grandTotal++;
-                let key = `topic_${currentStudentNo}_${subject}_${idx}`;
+                let key = `topic_${subject}_${idx}`;
                 let isChecked = localStorage.getItem(key) === 'true';
                 if(isChecked) {
                     grandChecked++;
@@ -404,7 +387,7 @@
             let subChecked = 0;
             topics.forEach((topic, idx) => {
                 grandTotal++;
-                let key = `topic_${currentStudentNo}_${subject}_${idx}`;
+                let key = `topic_${subject}_${idx}`;
                 let cb = document.querySelector(`input[data-key="${key}"]`);
                 if(cb && cb.checked) {
                     grandChecked++;
@@ -451,7 +434,7 @@
                 for (let d = 1; d <= examCount; d++) {
                     let tdCell = document.createElement('td');
                     let select = document.createElement('select');
-                    let key = `exam_${currentStudentNo}_${subject}_${tIdx}_d${d}`;
+                    let key = `exam_${subject}_${tIdx}_d${d}`;
                     select.setAttribute('data-exam-key', key);
                     
                     examOptions.forEach(opt => {
@@ -485,14 +468,14 @@
 
     function addExamColumn() {
         examCount++;
-        localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
+        localStorage.setItem('lgs_exam_count', examCount);
         renderExamTable();
     }
 
     function removeExamColumn() {
         if(examCount > 1) {
             examCount--;
-            localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
+            localStorage.setItem('lgs_exam_count', examCount);
             renderExamTable();
         }
     }
@@ -533,21 +516,21 @@
             if(!booksData[subject]) booksData[subject] = [];
             booksData[subject].push({ name: name, completed: false });
             inp.value = '';
-            localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
             renderBooks();
         }
     }
 
     function toggleBook(subject, idx) {
         booksData[subject][idx].completed = !booksData[subject][idx].completed;
-        localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+        localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
         renderBooks();
     }
 
     function deleteBook(subject, idx) {
         if(confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
             booksData[subject].splice(idx, 1);
-            localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
+            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
             renderBooks();
         }
     }
@@ -570,7 +553,7 @@
         studyLogs.push({ date, subject, hours, questions });
         studyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+        localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
         
         document.getElementById('log-hours').value = '';
         document.getElementById('log-questions').value = '';
@@ -581,7 +564,7 @@
     function deleteStudyLog(index) {
         if(confirm("Bu çalışma kaydını silmek istediğinize emin misiniz?")) {
             studyLogs.splice(index, 1);
-            localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+            localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
             renderStudyTracking();
         }
     }
@@ -682,6 +665,104 @@
         summaryBody.appendChild(totalTr);
     }
 
+    function addQuestion() {
+        let subject = document.getElementById('question-subject').value;
+        let note = document.getElementById('question-note').value.trim();
+        let fileInput = document.getElementById('question-image');
+
+        if (fileInput.files.length === 0) {
+            alert("Lütfen bir soru fotoğrafı seçin veya çekin!");
+            return;
+        }
+
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let img = new Image();
+            img.onload = function() {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                
+                let maxWidth = 800;
+                let maxHeight = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                questionsData.push({
+                    id: Date.now(),
+                    subject: subject,
+                    note: note || "Açıklama girilmedi",
+                    image: compressedDataUrl,
+                    date: new Date().toLocaleDateString('tr-TR')
+                });
+
+                localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
+                
+                fileInput.value = '';
+                document.getElementById('question-note').value = '';
+                renderQuestions();
+                alert("Soru başarıyla kaydedildi!");
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function renderQuestions() {
+        let container = document.getElementById('questions-list-container');
+        let filterSubject = document.getElementById('filter-question-subject').value;
+        container.innerHTML = '';
+
+        let filtered = questionsData.filter(q => filterSubject === 'ALL' || q.subject === filterSubject);
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-size:0.85rem;">Bu filtreye uygun kayıtlı soru bulunmuyor.</div>`;
+            return;
+        }
+
+        filtered.forEach((q) => {
+            let card = document.createElement('div');
+            card.style.cssText = "background:white; border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px; page-break-inside: avoid;";
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
+                    <span><b>Ders:</b> <span style="color:var(--primary);">${q.subject}</span> | <b>Tarih:</b> ${q.date}</span>
+                    <button class="btn btn-danger no-print" onclick="deleteQuestion(${q.id})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
+                </div>
+                <div><p style="font-size:0.85rem; margin-bottom:8px;"><b>Not:</b> ${q.note}</p></div>
+                <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:5px; border:1px solid #f1f5f9;">
+                    <img src="${q.image}" style="max-width:100%; max-height:400px; border-radius:6px; object-fit:contain;" alt="Soru Fotoğrafı">
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function deleteQuestion(id) {
+        if(confirm("Bu soruyu silmek istediğinize emin misiniz?")) {
+            questionsData = questionsData.filter(q => q.id !== id);
+            localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
+            renderQuestions();
+        }
+    }
+
     function generateReport() {
         let container = document.getElementById('report-container');
         container.innerHTML = '';
@@ -692,7 +773,7 @@
             topics.forEach((topic, tIdx) => {
                 let errs = [];
                 for(let d=1; d<=examCount; d++) {
-                    let val = localStorage.getItem(`exam_${currentStudentNo}_${subject}_${tIdx}_d${d}`);
+                    let val = localStorage.getItem(`exam_${subject}_${tIdx}_d${d}`);
                     if(val && val !== "-") errs.push(`Deneme ${d}: ${val}`);
                 }
                 if(errs.length > 0) subIssues.push({ topic, errs });
@@ -731,9 +812,10 @@
             if(key) localStorage.setItem(key, sel.value);
         });
 
-        localStorage.setItem(`lgs_exam_count_${currentStudentNo}`, examCount);
-        localStorage.setItem(`lgs_books_data_${currentStudentNo}`, JSON.stringify(booksData));
-        localStorage.setItem(`lgs_study_logs_${currentStudentNo}`, JSON.stringify(studyLogs));
+        localStorage.setItem('lgs_exam_count', examCount);
+        localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
+        localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
+        localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
 
         let alertBox = document.getElementById('save-alert');
         alertBox.style.display = 'block';
