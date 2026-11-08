@@ -247,6 +247,7 @@
         <div id="tab-sorular" class="tab-pane">
             <div class="flex-between">
                 <h2>📸 Yapamadığım Sorular (Soru Havuzu)</h2>
+                <span id="storage-text" class="badge" style="background: #e0f2fe; color: #0369a1;">Depolama: %0</span>
             </div>
             
             <div class="section-box no-print">
@@ -370,10 +371,36 @@
         renderBooks();
         renderStudyTracking();
         renderQuestions();
+        updateStorageUsage();
 
         let dateInp = document.getElementById('log-date');
         if(dateInp) dateInp.valueAsDate = new Date();
     };
+
+    function updateStorageUsage() {
+        let totalBytes = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                totalBytes += (localStorage[key].length + key.length) * 2;
+            }
+        }
+        
+        const maxBytes = 5 * 1024 * 1024;
+        let percent = ((totalBytes / maxBytes) * 100).toFixed(1);
+
+        const storageBadge = document.getElementById('storage-text');
+        if (storageBadge) {
+            storageBadge.innerText = `Depolama: %${percent}`;
+            
+            if (percent > 80) {
+                storageBadge.style.background = "#ffe4e6";
+                storageBadge.style.color = "#be123c";
+            } else {
+                storageBadge.style.background = "#e0f2fe";
+                storageBadge.style.color = "#0369a1";
+            }
+        }
+    }
 
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -521,6 +548,7 @@
         renderTopics();
         renderExamTable();
         renderBooks();
+        updateStorageUsage();
     }
 
     function updateProgress() {
@@ -611,6 +639,7 @@
             examNames[dIndex] = newName.trim();
             localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
             renderExamTable();
+            updateStorageUsage();
         }
     }
 
@@ -626,6 +655,7 @@
         examCount++;
         localStorage.setItem('lgs_exam_count', examCount);
         renderExamTable();
+        updateStorageUsage();
     }
 
     function removeExamColumn() {
@@ -635,6 +665,7 @@
             localStorage.setItem('lgs_exam_count', examCount);
             localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
             renderExamTable();
+            updateStorageUsage();
         }
     }
 
@@ -678,6 +709,7 @@
             inp.value = '';
             localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
             renderBooks();
+            updateStorageUsage();
         }
     }
 
@@ -686,6 +718,7 @@
             booksData[subject][idx].completed = !booksData[subject][idx].completed;
             localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
             renderBooks();
+            updateStorageUsage();
         }
     }
 
@@ -694,6 +727,7 @@
             booksData[subject].splice(idx, 1);
             localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
             renderBooks();
+            updateStorageUsage();
         }
     }
 
@@ -721,6 +755,7 @@
         document.getElementById('log-questions').value = '';
         
         renderStudyTracking();
+        updateStorageUsage();
     }
 
     function deleteStudyLog(index) {
@@ -728,6 +763,7 @@
             studyLogs.splice(index, 1);
             localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
             renderStudyTracking();
+            updateStorageUsage();
         }
     }
 
@@ -883,6 +919,7 @@
                 fileInput.value = '';
                 document.getElementById('question-note').value = '';
                 renderQuestions();
+                updateStorageUsage();
                 alert("Soru başarıyla kaydedildi!");
             };
             img.src = e.target.result;
@@ -926,6 +963,7 @@
             questionsData = questionsData.filter(q => q.id !== id);
             localStorage.setItem('lgs_questions', JSON.stringify(questionsData));
             renderQuestions();
+            updateStorageUsage();
         }
     }
 
@@ -990,6 +1028,8 @@
             console.warn('Konu listesi tarayıcı hafızasına kaydedilemedi:', e);
         }
         localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
+
+        updateStorageUsage();
 
         let alertBox = document.getElementById('save-alert');
         alertBox.style.display = 'block';
