@@ -43,6 +43,19 @@
         .topic-actions { display: flex; gap: 4px; align-items: center; }
         .icon-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; opacity: 0.7; transition: opacity 0.2s; }
         .icon-btn:hover { opacity: 1; background: #f1f5f9; }
+        /* Dokunmatik ekranlarda butonların güvenilir tıklanması */
+        button, .icon-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .mobile-confirm-overlay {
+            position: fixed; inset: 0; z-index: 99999; display: flex;
+            align-items: center; justify-content: center; padding: 20px;
+            background: rgba(15, 23, 42, .55);
+        }
+        .mobile-confirm-box {
+            width: 100%; max-width: 340px; background: #fff; color: #1e293b;
+            border-radius: 14px; padding: 20px; box-shadow: 0 12px 35px rgba(0,0,0,.25);
+        }
+        .mobile-confirm-actions { display: flex; gap: 10px; margin-top: 18px; }
+        .mobile-confirm-actions button { flex: 1; min-height: 44px; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 8px; }
         @media(min-width: 600px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
@@ -430,12 +443,51 @@
     }
 
     function deleteDBQuestion(id) {
+        return new Promise((resolve, reject) => {
+            if (!db) {
+                reject(new Error("Soru veritabanı henüz hazır değil."));
+                return;
+            }
+            let tx;
+            try {
+                tx = db.transaction("questions", "readwrite");
+                tx.objectStore("questions").delete(id);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => reject(tx.error || new Error("Soru silinemedi."));
+                tx.onabort = () => reject(tx.error || new Error("Soru silme işlemi iptal edildi."));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    // Mobil tarayıcıların yerel confirm penceresine bağlı kalmayan onay kutusu
+    function askDeleteConfirmation(message) {
         return new Promise((resolve) => {
-            if (!db) { resolve(); return; }
-            const tx = db.transaction("questions", "readwrite");
-            const store = tx.objectStore("questions");
-            store.delete(id);
-            tx.oncomplete = () => resolve();
+            const overlay = document.createElement("div");
+            overlay.className = "mobile-confirm-overlay";
+            overlay.innerHTML = `
+                <div class="mobile-confirm-box" role="dialog" aria-modal="true">
+                    <div style="font-size:1rem;font-weight:700;margin-bottom:8px;">Silme Onayı</div>
+                    <div style="font-size:.9rem;line-height:1.45;"></div>
+                    <div class="mobile-confirm-actions">
+                        <button type="button" class="btn btn-dark">Vazgeç</button>
+                        <button type="button" class="btn btn-danger">Sil</button>
+                    </div>
+                </div>`;
+            overlay.querySelector(".mobile-confirm-box > div:nth-child(2)").textContent = message;
+            const buttons = overlay.querySelectorAll("button");
+            const finish = (answer) => {
+                overlay.remove();
+                resolve(answer);
+            };
+            buttons[0].addEventListener("click", () => finish(false));
+            buttons[1].addEventListener("click", () => finish(true));
+            overlay.addEventListener("click", (event) => {
+                if (event.target === overlay) finish(false);
+            });
+            document.body.appendChild(overlay);
+            buttons[1].focus();
         });
     }
 
@@ -566,7 +618,7 @@
                     <h3>${subject}</h3>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="subject-progress" id="badge_${subject}">0/0 (%0)</span>
-                        <button class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem; padding:3px 8px;">➕ Konu Ekle</button>
+                        <button type="button" class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem; padding:3px 8px;">➕ Konu Ekle</button>
                     </div>
                 </div>
             `;
@@ -590,10 +642,10 @@
                         </label>
                     </div>
                     <div class="topic-actions no-print">
-                        <button class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)" title="Yukarı Taşı">⬆️</button>
-                        <button class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)" title="Aşağı Taşı">⬇️</button>
-                        <button class="icon-btn" onclick="editTopic('${subject}', ${idx})" title="Düzenle">✏️</button>
-                        <button class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" title="Sil" style="color:var(--danger);">🗑️</button>
+                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)" title="Yukarı Taşı">⬆️</button>
+                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)" title="Aşağı Taşı">⬇️</button>
+                        <button type="button" class="icon-btn" onclick="editTopic('${subject}', ${idx})" title="Düzenle">✏️</button>
+                        <button type="button" class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" title="Sil" style="color:var(--danger);">🗑️</button>
                     </div>
                 </div>`;
             });
@@ -626,8 +678,9 @@
         }
     }
 
-    function deleteTopic(subject, idx) {
-        if(confirm(`"${lgsData[subject][idx]}" konusunu silmek istediğinize emin misiniz?`)) {
+    async function deleteTopic(subject, idx) {
+        if (!lgsData[subject] || !lgsData[subject][idx]) return;
+        if (await askDeleteConfirmation(`"${lgsData[subject][idx]}" konusunu silmek istiyor musunuz?`)) {
             lgsData[subject].splice(idx, 1);
             saveTopicsState();
         }
@@ -829,18 +882,19 @@
             let html = `<h3>${subject}</h3>
                 <div class="book-input-row no-print">
                     <input type="text" id="book_inp_${subject}" placeholder="Kitap Adı Ekle...">
-                    <button class="btn btn-primary" onclick="addBook('${subject}')">Ekle</button>
-                </div><div style="display:flex; flex-direction:column; gap:5px;">`;
+                    <button type="button" class="btn btn-primary" onclick="addBook('${subject}')">Ekle</button>
+                </div><div style="display:flex; flex-direction:column; gap:6px;">`;
 
             let books = booksData[subject] || [];
             books.forEach((b, bIdx) => {
-                html += `<label class="checkbox-label" style="justify-content:space-between; width:100%;">
-                    <div style="display:flex; align-items:center; gap:8px;">
+                // Edge uyumluluğu için tıklanabilir silme butonu bağımsız <button> yapıldı
+                html += `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:white; padding:6px 10px; border-radius:8px; border:1px solid #f1f5f9;">
+                    <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; flex:1; cursor:pointer; margin:0;">
                         <input type="checkbox" onchange="toggleBook('${subject}', ${bIdx})" ${b.completed ? 'checked' : ''}>
                         <span style="${b.completed ? 'text-decoration:line-through; color:#94a3b8;' : ''}">${b.name}</span>
-                    </div>
-                    <span class="no-print" onclick="deleteBook('${subject}', ${bIdx})" style="color:var(--danger); cursor:pointer; font-weight:bold;" title="Kitabı Sil">✕</span>
-                </label>`;
+                    </label>
+                    <button type="button" class="no-print icon-btn" onclick="deleteBook('${subject}', ${bIdx})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1rem; padding:2px 8px;" title="Kitabı Sil">✕</button>
+                </div>`;
             });
             html += `</div>`;
             div.innerHTML = html;
@@ -869,11 +923,18 @@
         }
     }
 
-    function deleteBook(subject, idx) {
-        if(confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
+    async function deleteBook(subject, idx) {
+        if (!booksData[subject] || !booksData[subject][idx]) return;
+        const bookName = booksData[subject][idx].name || "Bu kitap";
+        if (await askDeleteConfirmation(`"${bookName}" kitabını silmek istiyor musunuz?`)) {
             booksData[subject].splice(idx, 1);
-            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
-            renderBooks();
+            try {
+                localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
+                renderBooks();
+            } catch (error) {
+                alert("Kitap silinemedi. Tarayıcı depolama alanı yazmaya kapalı olabilir.");
+                console.error("Kitap silme hatası:", error);
+            }
         }
     }
 
@@ -903,8 +964,9 @@
         renderStudyTracking();
     }
 
-    function deleteStudyLog(index) {
-        if(confirm("Bu çalışma kaydını silmek istediğinize emin misiniz?")) {
+    async function deleteStudyLog(index) {
+        if (!studyLogs[index]) return;
+        if (await askDeleteConfirmation("Bu çalışma kaydını silmek istiyor musunuz?")) {
             studyLogs.splice(index, 1);
             localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
             renderStudyTracking();
@@ -926,7 +988,7 @@
                     <td>${log.subject}</td>
                     <td>${log.minutes} dk</td>
                     <td>${log.questions} soru</td>
-                    <td class="no-print" style="text-align:center;"><span onclick="deleteStudyLog(${idx})" style="color:var(--danger); cursor:pointer; font-weight:bold;" title="Kaydı Sil">✕</span></td>
+                    <td class="no-print" style="text-align:center;"><button type="button" class="icon-btn" onclick="deleteStudyLog(${idx})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1rem;" title="Kaydı Sil">✕</button></td>
                 `;
                 logsBody.appendChild(tr);
             });
@@ -1120,14 +1182,14 @@
             let noteHtml = `
                 <div style="font-size:0.85rem; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
                     <span>${hasNote ? `<b>Not:</b> ${q.note}` : ''}</span>
-                    <button class="btn btn-primary no-print" onclick="editQuestionNote(${q.id})" style="padding:2px 6px; font-size:0.7rem;">✏️ ${hasNote ? 'Düzenle' : 'Not Ekle'}</button>
+                    <button type="button" class="btn btn-primary no-print" onclick="editQuestionNote(${q.id})" style="padding:2px 6px; font-size:0.7rem;">✏️ ${hasNote ? 'Düzenle' : 'Not Ekle'}</button>
                 </div>
             `;
 
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
                     <span><b>Soru ${idx + 1}</b> | <b>Ders:</b> <span style="color:var(--primary);">${q.subject}</span> | <b>Tarih:</b> ${q.date}</span>
-                    <button class="btn btn-danger no-print" onclick="deleteQuestion(${q.id})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
+                    <button type="button" class="btn btn-danger no-print" onclick="deleteQuestion(${q.id})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
                 </div>
                 ${noteHtml}
                 <div class="Onizle_imageContent">
@@ -1139,10 +1201,17 @@
     }
 
     async function deleteQuestion(id) {
-        if(confirm("Bu soruyu silmek istediğinize emin misiniz?")) {
-            await deleteDBQuestion(id);
-            questionsData = questionsData.filter(q => q.id !== id);
-            renderQuestions();
+        const question = questionsData.find(q => q.id === id);
+        if (!question) return;
+        if (await askDeleteConfirmation("Bu soruyu silmek istiyor musunuz?")) {
+            try {
+                await deleteDBQuestion(id);
+                questionsData = questionsData.filter(q => q.id !== id);
+                renderQuestions();
+            } catch (error) {
+                console.error("Soru silme hatası:", error);
+                alert("Soru silinemedi. Sayfayı yenileyip tekrar deneyin.");
+            }
         }
     }
 
