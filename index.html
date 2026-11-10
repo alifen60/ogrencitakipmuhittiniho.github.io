@@ -3,33 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>8. Sınıf LGS Öğrenci Takip Sistemi</title>
+    <title>8. Sınıf LGS Öğrenci Takip ve Akıllı Ders Programı</title>
     <style>
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #1e293b;
+            --text-muted: #64748b;
             --border-color: #e2e8f0;
             --success: #059669;
             --danger: #e11d48;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 10px; min-height: 100vh; }
-        .container { max-width: 950px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        .header h1 { font-size: 1.25rem; margin-bottom: 5px; }
+        #auth-overlay {
+            position: fixed; inset: 0; z-index: 100000; background: rgba(15, 23, 42, 0.85);
+            display: flex; align-items: center; justify-content: center; padding: 15px;
+        }
+        .auth-card {
+            background: #fff; width: 100%; max-width: 380px; border-radius: 16px; padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .auth-card h2 { color: var(--primary); font-size: 1.3rem; margin-bottom: 8px; text-align: center; }
+        .auth-card p { font-size: 0.82rem; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
+        .auth-tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .auth-tab { flex: 1; padding: 8px; background: none; border: none; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; text-align: center; }
+        .auth-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        .container { max-width: 1200px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; display: none; }
+        
+        .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .header h1 { font-size: 1.25rem; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
         .header p { font-size: 0.85rem; opacity: 0.9; }
-        .author-info { font-size: 0.8rem; margin-top: 8px; opacity: 0.95; font-weight: 500; }
+        .author-info { font-size: 0.8rem; opacity: 0.95; font-weight: 500; display: flex; align-items: center; gap: 15px; }
         .author-info a { color: #ffffff; text-decoration: underline; }
 
         .tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.78rem; color: #64748b; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .tab-btn { flex: 1; padding: 12px 10px; text-align: center; background: none; border: none; font-weight: 600; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
         .tab-btn.active { color: var(--primary); background: white; border-bottom: 3px solid var(--primary); }
 
-        .content { padding: 15px; }
+        .content { padding: 20px; }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
 
@@ -43,8 +62,8 @@
         .topic-actions { display: flex; gap: 4px; align-items: center; }
         .icon-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; opacity: 0.7; transition: opacity 0.2s; }
         .icon-btn:hover { opacity: 1; background: #f1f5f9; }
-        /* Dokunmatik ekranlarda butonların güvenilir tıklanması */
         button, .icon-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        
         .mobile-confirm-overlay {
             position: fixed; inset: 0; z-index: 99999; display: flex;
             align-items: center; justify-content: center; padding: 20px;
@@ -72,21 +91,20 @@
         th { background: #f1f5f9; color: #334155; }
         tr:hover { background: #f8fafc; }
 
-        select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; background: white; }
+        select, input[type="text"], input[type="password"], input[type="date"], input[type="number"] { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; }
         
-        .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; text-decoration: none; }
+        .btn { padding: 8px 14px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; text-decoration: none; }
         .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: .6; cursor: wait; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-dark { background: #334155; color: white; }
 
         .actions-bar { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; }
-
         .alert { background: #d1fae5; color: #065f46; padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: none; text-align: center; }
 
         .book-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        .book-input-row input { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; }
         
         .report-item { background: white; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 8px; font-size: 0.85rem; }
         .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 4px; margin-top: 4px; }
@@ -95,161 +113,170 @@
         .editable-header { cursor: pointer; transition: background 0.2s; }
         .editable-header:hover { background: #e2e8f0; }
 
-        /* Soru görselleri ve kart düzeni */
-        .question-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-sizing: border-box;
-            width: 100%;
-        }
-        .Onizle_imageContent {
-            position: relative;
-            text-align: center;
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 8px;
-            border: 1px solid #f1f5f9;
-            max-width: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .question-img {
-            max-width: 100% !important;
-            height: auto !important;
-            max-height: 550px !important;
-            object-fit: contain !important;
-            border-radius: 6px;
-            display: block;
-            margin: 0 auto;
-        }
+        .schedule-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; margin-top: 15px; }
+        .schedule-container table { min-width: 900px; }
+        .schedule-container th, .schedule-container td { text-align: center; }
+        .time-col { background: #f8fafc; font-weight: 600; font-size: 0.85rem; width: 100px; }
+        .slot-cell { height: 75px; vertical-align: top; position: relative; cursor: pointer; transition: background 0.2s; }
+        .slot-cell:hover { background: #f8fafc; }
+        .disabled-slot { background: #f8fafc; opacity: 0.4; cursor: default; }
+        .lesson-card { padding: 6px; border-radius: 6px; font-size: 0.75rem; text-align: left; height: 100%; display: flex; flex-direction: column; justify-content: space-between; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .lesson-title { font-weight: 700; font-size: 0.78rem; }
+        .lesson-topic { font-size: 0.68rem; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lesson-meta { display: flex; justify-content: space-between; font-size: 0.62rem; opacity: 0.85; margin-top: 1px; }
 
-        /* YAZDIRMA OPTİMİZASYONU - İLK BOŞ SAYFA PROBLEMİNİ GİDERME */
+        .color-tr { background-color: #ef4444; }
+        .color-mat { background-color: #3b82f6; }
+        .color-fen { background-color: #10b981; }
+        .color-ink { background-color: #f59e0b; }
+        .color-din { background-color: #8b5cf6; }
+        .color-ing { background-color: #ec4899; }
+        .color-lgs { background-color: #ea580c; }
+        .color-def { background-color: #64748b; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200000; padding: 15px; }
+        .modal { background: var(--card-bg); border-radius: var(--radius); width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+        .hours-edit-list { max-height: 250px; overflow-y: auto; margin-bottom: 16px; }
+        .hour-edit-item { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+
+        .question-card { background: white; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .Onizle_imageContent { position: relative; text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px; border: 1px solid #f1f5f9; max-width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .question-img { max-width: 100% !important; height: auto !important; max-height: 550px !important; object-fit: contain !important; border-radius: 6px; display: block; margin: 0 auto; }
+
+        /* YAZDIRMA OPTİMİZASYONLARI */
         @media print {
-            @page {
-                size: auto;
-                margin: 10mm;
-            }
-            body {
-                background: white !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                color: black !important;
-            }
-            .container {
-                box-shadow: none !important;
-                border: none !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .no-print, .tabs, .header, .actions-bar {
-                display: none !important;
-            }
-            .tab-pane {
-                display: none !important;
-            }
-            .tab-pane.active {
-                display: block !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .section-box {
-                border: none !important;
-                background: white !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            #questions-list-container {
-                display: block !important;
-            }
-            .question-card {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                margin-bottom: 15px !important;
-                border: 1px solid #ccc !important;
-                box-shadow: none !important;
-            }
-            .question-img {
-                max-height: 480px !important;
-                width: auto !important;
-                object-fit: contain !important;
-            }
-        }
+            @page { size: A4 portrait; margin: 8mm; }
+            body { background: white !important; padding: 0 !important; color: black !important; font-size: 8pt !important; }
+            .container { box-shadow: none !important; border: none !important; max-width: 100% !important; width: 100% !important; display: block !important; margin: 0 !important; padding: 0 !important; }
+            .no-print, .tabs, .header, .actions-bar, #auth-overlay { display: none !important; }
+            .tab-pane { display: none !important; }
+            .tab-pane.active { display: block !important; margin: 0 !important; padding: 0 !important; }
+            
+            /* Çalışma raporunda yalnızca aylık ders toplamları kalır. */
+            #tab-calisma .study-entry-box,
+            #tab-calisma .study-history-box { display: none !important; }
+            #tab-calisma .study-summary-box { display: block !important; border: 0 !important; padding: 0 !important; margin: 0 !important; }
+            #tab-calisma .study-summary-box h3 { font-size: 16pt !important; margin: 0 0 10mm !important; color: #000 !important; }
+            #tab-calisma #study-summary-body tr > *:nth-child(2),
+            #tab-calisma #study-summary-body tr > *:nth-child(3),
+            #tab-calisma #study-summary-body tr > *:nth-child(6),
+            #tab-calisma #study-summary-body tr > *:nth-child(7),
+            #tab-calisma .study-summary-box thead tr > *:nth-child(2),
+            #tab-calisma .study-summary-box thead tr > *:nth-child(3),
+            #tab-calisma .study-summary-box thead tr > *:nth-child(6),
+            #tab-calisma .study-summary-box thead tr > *:nth-child(7) { display: none !important; }
+            #tab-calisma .table-responsive { overflow: visible !important; border: 0 !important; }
+            #tab-calisma table { min-width: 0 !important; width: 100% !important; font-size: 10pt !important; }
+            #tab-calisma th, #tab-calisma td { padding: 7px !important; }
+            #tab-calisma #study-summary-body tr { break-inside: avoid !important; }
 
-        /* Öğrenci hesabı ekranı */
-        .auth-screen { position: fixed; inset: 0; z-index: 99999; display: none; align-items: center; justify-content: center; padding: 18px; background: #eef2ff; }
-        .auth-screen.visible { display: flex; }
-        .auth-card { width: 100%; max-width: 430px; background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 18px 55px rgba(15,23,42,.16); }
-        .auth-card h2 { color: #3730a3; margin-bottom: 8px; text-align: center; font-size: 1.35rem; }
-        .auth-card .auth-subtitle { color: #64748b; text-align: center; font-size: .9rem; margin-bottom: 18px; line-height: 1.5; }
-        .auth-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-        .auth-tabs button { flex: 1; border: 1px solid #c7d2fe; background: #f8fafc; color: #475569; border-radius: 9px; padding: 10px; font-weight: 700; cursor: pointer; }
-        .auth-tabs button.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-        .auth-field { margin: 12px 0; }
-        .auth-field label { display: block; font-size: .85rem; font-weight: 700; margin-bottom: 6px; color: #334155; }
-        .auth-field input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 16px; }
-        .auth-submit { width: 100%; padding: 13px; margin-top: 8px; border: 0; border-radius: 9px; background: #4f46e5; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .auth-message { min-height: 22px; margin-top: 10px; font-size: .85rem; color: #be123c; text-align: center; }
-        .auth-note { margin-top: 14px; padding: 10px; border-radius: 9px; background: #fff7ed; color: #9a3412; font-size: .78rem; line-height: 1.45; }
-        .account-bar { margin-top: 8px; font-size: .8rem; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
-        .account-bar button { border: 1px solid rgba(255,255,255,.75); background: transparent; color: white; border-radius: 7px; padding: 5px 9px; cursor: pointer; font-weight: 600; }
-        body.auth-locked { overflow: hidden; }
-        body.auth-locked .container { visibility: hidden; }
+            .schedule-container { box-shadow: none !important; border: none !important; overflow: visible !important; margin-top: 0 !important; }
+            table { width: 100% !important; border-collapse: collapse !important; font-size: 7.5pt !important; }
+            th, td { padding: 3px !important; border: 1px solid #333 !important; }
+            .slot-cell { height: 45px !important; }
+            .lesson-card { padding: 2px 4px !important; background: #e2e8f0 !important; color: #000 !important; border: 1px solid #64748b !important; box-shadow: none !important; }
+            .lesson-title { font-weight: bold !important; font-size: 7.5pt !important; color: #000 !important; }
+            .lesson-topic { font-size: 6.5pt !important; color: #1e293b !important; }
+            .lesson-meta { font-size: 6pt !important; color: #334155 !important; }
+            .question-card { break-inside: avoid; border: 1px solid #ccc !important; margin-bottom: 10px; }
+            #tab-sorular #questions-list-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 5mm !important; }
+            #tab-sorular .question-card { padding: 3mm !important; margin: 0 !important; }
+            #tab-sorular .Onizle_imageContent { padding: 1mm !important; border: 0 !important; background: #fff !important; }
+            #tab-sorular .question-img { width: 100% !important; max-width: 100% !important; height: auto !important; max-height: 105mm !important; object-fit: contain !important; }
+            #tab-calisma { width: 100% !important; }
+        }
     </style>
 </head>
-<body class="auth-locked">
+<body>
 
-<div id="student-auth-screen" class="auth-screen" aria-modal="true" role="dialog" aria-labelledby="auth-title">
+<div id="auth-overlay">
     <div class="auth-card">
-        <h2 id="auth-title">🎓 Öğrenci Girişi</h2>
-        <p class="auth-subtitle">Kendi hesabını oluştur veya mevcut hesabınla giriş yap.</p>
-        <div class="auth-tabs">
-            <button type="button" id="auth-login-tab">Giriş Yap</button>
-            <button type="button" id="auth-signup-tab">Hesap Oluştur</button>
+        <h2 id="auth-title">Giriş Yap</h2>
+        <p id="auth-subtitle">LGS Takip & Program Sistemine Hoş Geldiniz</p>
+        
+        <div class="auth-tabs no-print">
+            <button type="button" class="auth-tab active" id="tab-login-btn" onclick="switchAuthMode('login')">Giriş Yap</button>
+            <button type="button" class="auth-tab" id="tab-register-btn" onclick="switchAuthMode('register')">Kayıt Ol</button>
         </div>
-        <form id="student-auth-form">
-            <div class="auth-field">
-                <label for="auth-username">Kullanıcı adı</label>
-                <input id="auth-username" name="username" autocomplete="username" minlength="3" maxlength="24" required placeholder="Örn. ogrenci01">
+
+        <div id="form-login">
+            <div style="margin-bottom: 12px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adı</label>
+                <input type="text" id="login-username" placeholder="Kullanıcı adınızı girin">
             </div>
-            <div class="auth-field">
-                <label for="auth-password">Şifre</label>
-                <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="En az 6 karakter">
+            <div style="margin-bottom: 15px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Parola</label>
+                <input type="password" id="login-password" placeholder="Parolanızı girin">
             </div>
-            <div class="auth-field" id="auth-confirm-wrap" style="display:none;">
-                <label for="auth-confirm">Şifre tekrar</label>
-                <input id="auth-confirm" name="confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Şifreni tekrar yaz">
+            <button type="button" class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="handleLogin()">Giriş Yap</button>
+            <div style="text-align: center;">
+                <a href="#" onclick="switchAuthMode('forgot'); return false;" style="font-size: 0.78rem; color: var(--primary); text-decoration: none;">Şifremi Unuttum?</a>
             </div>
-            <button class="auth-submit" id="auth-submit" type="submit">Giriş Yap</button>
-            <div id="auth-message" class="auth-message" role="status"></div>
-        </form>
-        <div class="auth-note">Bilgiler bu cihazın bu tarayıcısında saklanır. Tarayıcı verileri silinirse kayıtlar kaybolabilir. Başka bilgisayarda aynı hesapla giriş yapmak kayıtları taşımaz.</div>
+        </div>
+
+        <div id="form-register" style="display: none;">
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adı Belirle</label>
+                <input type="text" id="reg-username" placeholder="Kullanıcı adı">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Parola Belirle</label>
+                <input type="password" id="reg-password" placeholder="Güçlü bir parola">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Güvenlik Sorusu: En sevdiğiniz hayvan?</label>
+                <input type="text" id="reg-animal" placeholder="Örn: Kedi, At, Kartal...">
+            </div>
+            <button type="button" class="btn btn-success" style="width:100%;" onclick="handleRegister()">Hesap Oluştur ve Başla</button>
+        </div>
+
+        <div id="form-forgot" style="display: none;">
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adınız</label>
+                <input type="text" id="forgot-username" placeholder="Kayıtlı kullanıcı adınız">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Güvenlik Sorusunun Cevabı (En sevdiğiniz hayvan)</label>
+                <input type="text" id="forgot-animal" placeholder="Kayıttaki cevap">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Yeni Parola Belirle</label>
+                <input type="password" id="forgot-newpass" placeholder="Yeni parolanız">
+            </div>
+            <button type="button" class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="handleForgotReset()">Parolayı Sıfırla</button>
+            <div style="text-align: center;">
+                <a href="#" onclick="switchAuthMode('login'); return false;" style="font-size: 0.78rem; color: var(--primary); text-decoration: none;">← Giriş Ekranına Dön</a>
+            </div>
+        </div>
+
+        <div id="auth-error" style="color: var(--danger); font-size: 0.78rem; text-align: center; margin-top: 10px; font-weight: 600;"></div>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="main-container">
     <div class="header no-print">
-        <h1>🎯 8. Sınıf LGS Öğrenci Takip Sistemi</h1>
-        <p>Konu Takibi, Deneme Analizi, Kaynak Kitaplar, Çalışma & Soru Havuzu</p>
-        <div class="author-info">
-            Yazar: <strong>Ali Tambuğa</strong> | E-posta: <a href="mailto:alifen60dnm@gmail.com">alifen60dnm@gmail.com</a>
+        <div>
+            <h1>🎯 8. Sınıf LGS Öğrenci Takip & Program</h1>
+            <p>IndexedDB ile cihazınızda öğrenci bazlı veri saklama</p>
         </div>
-        <div class="account-bar no-print">
-            <span id="active-student-name"></span>
-            <button type="button" onclick="logoutStudent()">Çıkış Yap</button>
+        <div class="author-info">
+            <span>Yazar: <strong>Ali Tambuğa</strong> | <a href="mailto:alifen60dnm@gmail.com">alifen60dnm@gmail.com</a></span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn btn-success" onclick="exportUserBackup()" style="padding: 6px 10px; font-size: 0.75rem;">⬇️ Yedek İndir</button>
+                <button type="button" class="btn btn-dark" onclick="document.getElementById('backup-import-file').click()" style="padding: 6px 10px; font-size: 0.75rem;">⬆️ Yedek Yükle</button>
+                <input type="file" id="backup-import-file" accept=".json,application/json" style="display:none" onchange="importUserBackup(this)">
+                <button type="button" class="btn btn-dark" onclick="handleLogout()" style="padding: 6px 12px; font-size: 0.75rem;">Çıkış Yap</button>
+            </div>
         </div>
     </div>
 
     <div class="tabs no-print">
         <button class="tab-btn active" onclick="switchTab('konu', this)">📚 Konular</button>
+        <button class="tab-btn" onclick="switchTab('program', this)">📅 Ders Programı</button>
         <button class="tab-btn" onclick="switchTab('deneme', this)">📊 Denemeler</button>
         <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
         <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma</button>
@@ -262,12 +289,58 @@
         <div id="tab-konu" class="tab-pane active">
             <div class="flex-between">
                 <h2>Ders Bazlı Konu Durumu</h2>
-                <span id="progress-text" class="badge">Genel Toplam: %0</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn btn-primary no-print" onclick="openAddCustomSubjectModal()" style="font-size:0.8rem;">➕ Özel Kategori Ekle</button>
+                    <span id="progress-text" class="badge">Genel Toplam: %0</span>
+                </div>
             </div>
             <div id="subjects-container"></div>
         </div>
 
-        <!-- 2. DENEME ANALİZİ -->
+        <!-- 2. DERS PROGRAMI -->
+        <div id="tab-program" class="tab-pane">
+            <div class="flex-between">
+                <div>
+                    <h2>Haftalık Ders Programı</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);" class="no-print">Hücrelere tıklayarak ders ekleyebilir, saatleri birleştirebilir veya LGS denemesi yerleştirebilirsiniz.</p>
+                </div>
+                <div class="no-print" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn" onclick="openHoursModal()">⏱️ Günlük Saatleri Düzenle</button>
+                    <button class="btn btn-primary" onclick="triggerPrint()">🖨️ Yazdır / PDF Kaydet</button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;" class="no-print">
+                <div class="section-box" style="margin:0; border-left: 4px solid #3b82f6;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Haftalık Toplam Etkinlik</div>
+                    <div id="stat-total-lessons" style="font-size: 1.4rem; font-weight: 700; margin-top: 2px;">0 Saat</div>
+                </div>
+                <div class="section-box" style="margin:0; border-left: 4px solid #10b981;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Haftalık Soru Hedefi</div>
+                    <div id="stat-total-questions" style="font-size: 1.4rem; font-weight: 700; margin-top: 2px;">0 Soru</div>
+                </div>
+            </div>
+
+            <div class="schedule-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-col">Saat</th>
+                            <th>Pazartesi</th>
+                            <th>Salı</th>
+                            <th>Çarşamba</th>
+                            <th>Perşembe</th>
+                            <th>Cuma</th>
+                            <th>Cumartesi</th>
+                            <th>Pazar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. DENEME ANALİZİ -->
         <div id="tab-deneme" class="tab-pane">
             <div class="flex-between">
                 <div>
@@ -278,7 +351,7 @@
                     <button class="btn btn-primary" onclick="addExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➕ Deneme Ekle</button>
                     <button class="btn btn-danger" onclick="removeExamColumn()" style="font-size: 0.75rem; padding: 6px 10px;">➖ Sil</button>
                     <button class="btn btn-primary" onclick="addCustomExamOption()" style="font-size: 0.75rem; padding: 6px 10px; background: var(--success);">➕ Hata Türü Ekle</button>
-                    <button class="btn btn-dark" onclick="manageExamOptions()" style="font-size: 0.75rem; padding: 6px 10px; background: #334155;">✏️ Türleri Düzenle</button>
+                    <button class="btn btn-dark" onclick="manageExamOptions()" style="font-size: 0.75rem; padding: 6px 10px;">✏️ Türleri Düzenle</button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -293,60 +366,54 @@
             </div>
         </div>
 
-        <!-- 3. KAYNAK KİTAPLAR -->
+        <!-- 4. KAYNAK KİTAPLAR -->
         <div id="tab-kitap" class="tab-pane">
             <h2 style="margin-bottom: 5px;">Ders Bazlı Kaynak Kitaplar</h2>
             <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 15px;" class="no-print">Çözülen soru bankalarını ekleyebilir, silebilir veya tamamlandı işaretleyebilirsiniz.</p>
             <div id="books-container" class="grid-2"></div>
         </div>
 
-        <!-- 4. ÇALIŞMA VE SORU TAKİBİ -->
+        <!-- 5. ÇALIŞMA VE SORU TAKİBİ -->
         <div id="tab-calisma" class="tab-pane">
             <div class="flex-between">
                 <h2>⏱️ Çalışma Süresi ve Soru Takibi</h2>
+                <button class="btn btn-primary no-print" onclick="triggerPrint()">🖨️ Raporu Yazdır</button>
             </div>
             
-            <div class="section-box no-print">
+            <div class="section-box no-print study-entry-box">
                 <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
                 <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Tarih</label>
-                        <input type="date" id="log-date" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        <input type="date" id="log-date">
                     </div>
                     <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
-                        <select id="log-subject">
-                            <option value="Türkçe">Türkçe</option>
-                            <option value="Matematik">Matematik</option>
-                            <option value="Fen Bilimleri">Fen Bilimleri</option>
-                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
-                            <option value="Din Kültürü">Din Kültürü</option>
-                            <option value="İngilizce">İngilizce</option>
-                        </select>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders / Kategori</label>
+                        <select id="log-subject"></select>
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Dakika)</label>
-                        <input type="number" id="log-minutes" min="0" placeholder="Örn: 45" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        <input type="number" id="log-minutes" min="0" placeholder="Örn: 45">
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
-                        <input type="number" id="log-questions" min="0" placeholder="Örn: 50" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                        <input type="number" id="log-questions" min="0" placeholder="Örn: 50">
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
             </div>
 
-            <div class="section-box">
-                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Ders Bazlı Özet (Haftalık / Aylık / Toplam)</h3>
+            <div class="section-box study-summary-box">
+                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Aylık Çözülen Soru Raporu</h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>Ders</th>
+                                <th>Ders / Kategori</th>
                                 <th>Haftalık Süre</th>
                                 <th>Haftalık Soru</th>
-                                <th>Aylık Süre</th>
-                                <th>Aylık Soru</th>
+                                <th>Bu Ay Süre</th>
+                                <th>Bu Ay Soru</th>
                                 <th>Toplam Süre</th>
                                 <th>Toplam Soru</th>
                             </tr>
@@ -356,14 +423,14 @@
                 </div>
             </div>
 
-            <div class="section-box">
+            <div class="section-box study-history-box">
                 <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
                                 <th>Tarih</th>
-                                <th>Ders</th>
+                                <th>Ders / Kategori</th>
                                 <th>Süre</th>
                                 <th>Soru Sayısı</th>
                                 <th class="no-print" style="width: 50px; text-align: center;">Sil</th>
@@ -375,15 +442,16 @@
             </div>
         </div>
 
-        <!-- 5. YAPAMADIĞIM SORULAR -->
+        <!-- 6. YAPAMADIĞIM SORULAR -->
         <div id="tab-sorular" class="tab-pane">
             <div class="flex-between">
                 <h2>📸 Yapamadığım Sorular (Soru Havuzu)</h2>
                 <span id="question-count-badge" class="badge" style="background: #e0f2fe; color: #0369a1;">Toplam Soru: 0</span>
             </div>
 
-            <!-- EN ÜSTE EKLENEN HIZLI BUTONLAR -->
             <div class="no-print" style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: flex-end; flex-wrap: wrap;">
+                <button class="btn btn-success" onclick="openExamGeneratorModal()">📝 Seçilen Sorulardan Deneme Oluştur</button>
+                <button class="btn no-print" onclick="clearQuestionSelection()">Seçimi Temizle</button>
                 <button class="btn btn-success" onclick="saveData()">💾 Değişiklikleri Kaydet</button>
                 <button class="btn btn-dark" onclick="triggerPrint()">🖨️ Soruları Yazdır / PDF Yap</button>
             </div>
@@ -392,24 +460,17 @@
                 <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Soru Ekle (Fotoğraf Çek / Yükle)</h3>
                 <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
                     <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders</label>
-                        <select id="question-subject">
-                            <option value="Türkçe">Türkçe</option>
-                            <option value="Matematik">Matematik</option>
-                            <option value="Fen Bilimleri">Fen Bilimleri</option>
-                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
-                            <option value="Din Kültürü">Din Kültürü</option>
-                            <option value="İngilizce">İngilizce</option>
-                        </select>
+                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders / Kategori</label>
+                        <select id="question-subject"></select>
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Fotoğrafları Seç (Birden fazla seçilebilir)</label>
-                        <input type="file" id="question-image" accept="image/*" multiple style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; background:white;">
+                        <input type="file" id="question-image" accept="image/*" multiple style="padding:6px; background:white;">
                     </div>
                 </div>
                 <div style="margin-bottom: 10px;">
                     <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Not / Açıklama (İsteğe bağlı)</label>
-                    <input type="text" id="question-note" placeholder="Örn: Çarpanlar ve katlar yeni nesil soru..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                    <input type="text" id="question-note" placeholder="Örn: Çarpanlar ve katlar yeni nesil soru...">
                 </div>
                 <button class="btn btn-primary" onclick="addQuestions()" style="width:100%;">Seçilen Soruları Kaydet</button>
             </div>
@@ -420,12 +481,6 @@
                     <div style="width: 180px;">
                         <select id="filter-question-subject" onchange="renderQuestions()">
                             <option value="ALL">Tüm Dersler</option>
-                            <option value="Türkçe">Türkçe</option>
-                            <option value="Matematik">Matematik</option>
-                            <option value="Fen Bilimleri">Fen Bilimleri</option>
-                            <option value="T.C. İnkılap Tarihi">T.C. İnkılap Tarihi</option>
-                            <option value="Din Kültürü">Din Kültürü</option>
-                            <option value="İngilizce">İngilizce</option>
                         </select>
                     </div>
                 </div>
@@ -433,7 +488,7 @@
             </div>
         </div>
 
-        <!-- 6. EKSİK RAPORU -->
+        <!-- 7. EKSİK RAPORU -->
         <div id="tab-eksik" class="tab-pane">
             <div class="flex-between">
                 <h2>Deneme Eksik ve Hata Listesi</h2>
@@ -441,237 +496,241 @@
             <div id="report-container"></div>
         </div>
 
-        <!-- KAYDET VE YAZDIR BUTONLARI -->
         <div class="actions-bar no-print">
             <button class="btn btn-success" onclick="saveData()" style="padding: 12px 30px; font-size: 1rem;">💾 Değişiklikleri Kaydet</button>
             <div id="save-alert" class="alert">✔ Başarıyla Kaydedildi!</div>
-            <button class="btn btn-dark" onclick="triggerPrint()" style="padding: 12px 30px; font-size: 1rem;">🖨️ Bulunduğun Ekranı Yazdır / PDF Yap</button>
         </div>
     </div>
 </div>
 
-<script>
-/* --- ÖĞRENCİ HESABI VE VERİ AYRIMI ---
-   Bu sürüm sunucu kullanmaz. Her hesap yalnızca oluşturulduğu tarayıcıda saklanır.
-*/
-(function () {
-    const ACCOUNTS_KEY = 'lgs_auth_accounts_v1';
-    const CURRENT_KEY = 'lgs_auth_current_v1';
-    const MIGRATED_KEY = 'lgs_auth_legacy_migrated_v1';
-    const rawGet = Storage.prototype.getItem;
-    const rawSet = Storage.prototype.setItem;
-    const rawRemove = Storage.prototype.removeItem;
-    const rawKey = Storage.prototype.key;
-    const rawLength = Object.getOwnPropertyDescriptor(Storage.prototype, 'length');
-    const authKeys = new Set([ACCOUNTS_KEY, CURRENT_KEY, MIGRATED_KEY]);
-    let accounts = [];
-    try { accounts = JSON.parse(rawGet.call(localStorage, ACCOUNTS_KEY) || '[]'); } catch (_) { accounts = []; }
-    if (!Array.isArray(accounts)) accounts = [];
+<!-- Ders Programı Modalı -->
+<div class="modal-overlay" id="lessonModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Ders Ekle</h3>
+      <button class="btn" style="padding: 2px 8px;" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Ders / Kategori / Deneme Seçin</label>
+      <select id="modalSubject" onchange="updateModalTopics()"></select>
+    </div>
+    <div class="form-group">
+      <label>Çalışılacak Konu (Konular Sayfasından)</label>
+      <select id="modalTopic"></select>
+    </div>
+    <div class="form-group">
+      <label>Etkinlik Türü</label>
+      <select id="modalType">
+        <option value="Konu Anlatımı">Konu Anlatımı</option>
+        <option value="Soru Çözümü">Soru Çözümü</option>
+        <option value="Deneme Sınavı">Deneme Sınavı</option>
+        <option value="Genel Tekrar">Genel Tekrar</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Hücre Birleştirme (Kaç Saat Sürsün?)</label>
+      <select id="modalSpan">
+        <option value="1">1 Saat (Normal Hücre)</option>
+        <option value="2">2 Saat (2 Hücreyi Birleştir)</option>
+        <option value="3">3 Saat (3 Hücreyi Birleştir)</option>
+        <option value="4">4 Saat (4 Hücreyi Birleştir)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Hedef Soru Sayısı</label>
+      <input type="number" id="modalTarget" placeholder="Örn: 50" value="0">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btnDeleteLesson" style="display:none;" onclick="deleteLesson()">Sil</button>
+      <button class="btn" onclick="closeModal()">İptal</button>
+      <button class="btn btn-primary" onclick="saveLesson()">Kaydet</button>
+    </div>
+  </div>
+</div>
 
-    let currentId = rawGet.call(localStorage, CURRENT_KEY);
-    let currentAccount = accounts.find(a => a && a.id === currentId);
-    if (!currentAccount) {
-        currentId = null;
-        rawRemove.call(localStorage, CURRENT_KEY);
-    }
+<!-- Saatleri Düzenle Modalı -->
+<div class="modal-overlay" id="hoursModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Günlük Saatleri Düzenle</h3>
+      <button class="btn" style="padding: 2px 8px;" onclick="closeHoursModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Gün Seçin</label>
+      <select id="editDaySelect" onchange="onEditDayChange()">
+        <option value="Pazartesi">Pazartesi</option>
+        <option value="Salı">Salı</option>
+        <option value="Çarşamba">Çarşamba</option>
+        <option value="Perşembe">Perşembe</option>
+        <option value="Cuma">Cuma</option>
+        <option value="Cumartesi">Cumartesi</option>
+        <option value="Pazar">Pazar</option>
+      </select>
+    </div>
+    <div class="hours-edit-list" id="hoursEditList"></div>
+    <button class="btn" onclick="addHourInput()" style="width:100%; justify-content:center; margin-bottom: 12px;">+ Bu Güne Saat Ekle</button>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeHoursModal()">İptal</button>
+      <button class="btn btn-primary" onclick="saveHours()">Kaydet</button>
+    </div>
+  </div>
+</div>
 
-    // Uygulamanın tüm localStorage kayıtlarını kullanıcı adına göre ayır.
-    const prefix = currentId ? ('lgs_student_' + currentId + '_') : 'lgs_student_locked_';
-    Storage.prototype.getItem = function (key) {
-        if (this !== localStorage || authKeys.has(String(key))) return rawGet.call(this, key);
-        return rawGet.call(this, prefix + key);
-    };
-    Storage.prototype.setItem = function (key, value) {
-        if (this !== localStorage || authKeys.has(String(key))) return rawSet.call(this, key, value);
-        return rawSet.call(this, prefix + key, value);
-    };
-    Storage.prototype.removeItem = function (key) {
-        if (this !== localStorage || authKeys.has(String(key))) return rawRemove.call(this, key);
-        return rawRemove.call(this, prefix + key);
-    };
-
-    const screen = document.getElementById('student-auth-screen');
-    const form = document.getElementById('student-auth-form');
-    const loginTab = document.getElementById('auth-login-tab');
-    const signupTab = document.getElementById('auth-signup-tab');
-    const confirmWrap = document.getElementById('auth-confirm-wrap');
-    const confirmInput = document.getElementById('auth-confirm');
-    const submit = document.getElementById('auth-submit');
-    const message = document.getElementById('auth-message');
-    let mode = accounts.length ? 'login' : 'signup';
-
-    function setMode(nextMode) {
-        mode = nextMode;
-        const signup = mode === 'signup';
-        loginTab.classList.toggle('active', !signup);
-        signupTab.classList.toggle('active', signup);
-        confirmWrap.style.display = signup ? 'block' : 'none';
-        confirmInput.required = signup;
-        document.getElementById('auth-password').autocomplete = signup ? 'new-password' : 'current-password';
-        submit.textContent = signup ? 'Hesap Oluştur ve Gir' : 'Giriş Yap';
-        message.textContent = '';
-    }
-    loginTab.addEventListener('click', () => setMode('login'));
-    signupTab.addEventListener('click', () => setMode('signup'));
-
-    async function passwordHash(password, salt) {
-        if (!window.crypto || !crypto.subtle || !window.TextEncoder) {
-            throw new Error('Şifreleme özelliği kullanılamıyor. Lütfen uygulamayı GitHub Pages üzerindeki https adresinden aç.');
-        }
-        const bytes = new TextEncoder().encode(salt + ':' + password);
-        const digest = await crypto.subtle.digest('SHA-256', bytes);
-        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function newId() {
-        return (crypto.randomUUID ? crypto.randomUUID() : ('ogr_' + Date.now() + '_' + Math.random().toString(36).slice(2)));
-    }
-
-    function migrateOldLocalDataToFirstAccount(id) {
-        // Önceki sürümdeki kayıtları ilk oluşturulan hesaba taşır; eski anahtarları silmez.
-        if (rawGet.call(localStorage, MIGRATED_KEY) === '1') return;
-        const keys = [];
-        const len = localStorage.length;
-        for (let i = 0; i < len; i++) {
-            const key = rawKey.call(localStorage, i);
-            if (key && !authKeys.has(key) && !key.startsWith('lgs_student_')) keys.push(key);
-        }
-        const targetPrefix = 'lgs_student_' + id + '_';
-        keys.forEach(key => {
-            const value = rawGet.call(localStorage, key);
-            if (value !== null) rawSet.call(localStorage, targetPrefix + key, value);
-        });
-        rawSet.call(localStorage, MIGRATED_KEY, '1');
-    }
-
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        message.style.color = '#be123c';
-        message.textContent = 'İşlem yapılıyor...';
-        submit.disabled = true;
-        try {
-            const username = document.getElementById('auth-username').value.trim();
-            const password = document.getElementById('auth-password').value;
-            if (!/^[\p{L}\p{N}_.-]{3,24}$/u.test(username)) {
-                throw new Error('Kullanıcı adı 3-24 karakter olmalı; harf, rakam, nokta, tire veya alt çizgi kullanabilirsin.');
-            }
-            const normalized = username.toLocaleLowerCase('tr-TR');
-            if (mode === 'signup') {
-                if (password.length < 6) throw new Error('Şifre en az 6 karakter olmalı.');
-                if (password !== confirmInput.value) throw new Error('Şifreler birbiriyle aynı değil.');
-                if (accounts.some(a => a.username.toLocaleLowerCase('tr-TR') === normalized)) {
-                    throw new Error('Bu kullanıcı adı daha önce alınmış. Başka bir ad dene.');
-                }
-                const id = newId();
-                const salt = newId();
-                const hash = await passwordHash(password, salt);
-                const account = { id, username, salt, hash };
-                const isFirst = accounts.length === 0;
-                accounts.push(account);
-                rawSet.call(localStorage, ACCOUNTS_KEY, JSON.stringify(accounts));
-                if (isFirst) migrateOldLocalDataToFirstAccount(id);
-                rawSet.call(localStorage, CURRENT_KEY, id);
-                location.reload();
-                return;
-            } else {
-                const account = accounts.find(a => a.username.toLocaleLowerCase('tr-TR') === normalized);
-                if (!account) throw new Error('Bu kullanıcı adı bulunamadı.');
-                const hash = await passwordHash(password, account.salt);
-                if (hash !== account.hash) throw new Error('Şifre hatalı. Tekrar dene.');
-                rawSet.call(localStorage, CURRENT_KEY, account.id);
-                location.reload();
-                return;
-            }
-        } catch (err) {
-            message.textContent = err && err.message ? err.message : 'Bir hata oluştu. Tekrar dene.';
-        } finally {
-            submit.disabled = false;
-        }
-    });
-
-    if (currentAccount) {
-        document.body.classList.remove('auth-locked');
-        document.getElementById('active-student-name').textContent = '👤 ' + currentAccount.username;
-        screen.classList.remove('visible');
-    } else {
-        document.body.classList.add('auth-locked');
-        screen.classList.add('visible');
-        setMode(mode);
-    }
-
-    window.LGS_AUTH_USER_ID = currentId || 'locked';
-
-    window.logoutStudent = function () {
-        rawRemove.call(localStorage, CURRENT_KEY);
-        location.reload();
-    };
-})();
-</script>
+<!-- Soru Havuzundan Deneme Sınavı Oluşturma Modalı -->
+<div class="modal-overlay" id="examGenModal">
+  <div class="modal" style="max-width: 520px;">
+    <div class="modal-header">
+      <h3>📝 Soru Havuzundan Deneme Sınavı Oluştur</h3>
+      <button class="btn" style="padding: 2px 8px;" onclick="closeExamGeneratorModal()">✕</button>
+    </div>
+    <div id="exam-selection-info" style="font-size:.82rem;color:var(--primary);margin-bottom:12px;"></div>
+    <div class="form-group">
+      <label>Sınav Başlığı / Adı</label>
+      <input type="text" id="genExamTitle" value="Özel Soru Havuzu Denemesi">
+    </div>
+    <div class="form-group">
+      <label>Ders Filtresi</label>
+      <select id="genExamSubject">
+        <option value="ALL">Tüm Dersler / Kategoriler</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Soru Sayısı Limit (0 = Hepsi)</label>
+      <input type="number" id="genExamLimit" value="0" min="0">
+      <small style="display:block;color:var(--text-muted);margin-top:5px;">Soru havuzunda kutucuğunu işaretlediğiniz sorular varsa önce onlar kullanılır.</small>
+    </div>
+    <div class="form-group">
+      <label>Elle Soru Yaz (İsteğe bağlı)</label>
+      <textarea id="genExamManualQuestions" rows="4" placeholder="Her satıra bir soru yazın. Yazdığınız sorular seçilen soruların sonuna eklenir." style="width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:6px;font:inherit;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeExamGeneratorModal()">İptal</button>
+      <button class="btn btn-success" onclick="generateAndPrintExam()">🖨️ Sınav Kitapçığını Oluştur ve Yazdır</button>
+    </div>
+  </div>
+</div>
 
 <script>
-    // --- INDEXEDB VERİTABANI YÖNETİMİ ---
     let db;
+    let currentUsername = null;
+    let selectedQuestionIds = new Set();
+    const DB_NAME = "LGS_Takip_And_Program_DB_V5";
+    const DB_VERSION = 1;
+
     function initDB() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open("LGS_Takip_DB_" + (window.LGS_AUTH_USER_ID || "locked"), 1);
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
             request.onupgradeneeded = function(e) {
                 db = e.target.result;
-                if (!db.objectStoreNames.contains("questions")) {
-                    db.createObjectStore("questions", { keyPath: "id" });
-                }
+                if (!db.objectStoreNames.contains("app_settings")) db.createObjectStore("app_settings", { keyPath: "key" });
+                if (!db.objectStoreNames.contains("users")) db.createObjectStore("users", { keyPath: "username" });
+                if (!db.objectStoreNames.contains("questions")) db.createObjectStore("questions", { keyPath: "id" });
             };
-            request.onsuccess = function(e) {
-                db = e.target.result;
-                resolve(db);
-            };
-            request.onerror = function(e) {
-                console.error("IndexedDB bağlantı hatası:", e);
-                reject(e);
-            };
+            request.onsuccess = function(e) { db = e.target.result; resolve(db); };
+            request.onerror = function(e) { reject(e); };
         });
     }
 
-    function getDBQuestions() {
+    function getDBSetting(key, defaultValue) {
         return new Promise((resolve) => {
-            if (!db) { resolve([]); return; }
-            const tx = db.transaction("questions", "readonly");
-            const store = tx.objectStore("questions");
+            if (!db) { resolve(defaultValue); return; }
+            const tx = db.transaction("app_settings", "readonly");
+            const store = tx.objectStore("app_settings");
+            const req = store.get(key);
+            req.onsuccess = () => resolve(req.result ? req.result.val : defaultValue);
+            req.onerror = () => resolve(defaultValue);
+        });
+    }
+
+    function saveDBSetting(key, val) {
+        return new Promise((resolve, reject) => {
+            if (!db) { reject(new Error("Veritabanı hazır değil.")); return; }
+            const tx = db.transaction("app_settings", "readwrite");
+            tx.objectStore("app_settings").put({ key: key, val: val });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new Error("Kayıt yapılamadı."));
+            tx.onabort = () => reject(tx.error || new Error("Kayıt iptal edildi."));
+        });
+    }
+
+    function migrateLegacyUserSettingKeys(username) {
+        return new Promise((resolve, reject) => {
+            if (!db) { resolve(); return; }
+            const normalized = String(username || "").toLowerCase();
+            const tx = db.transaction("app_settings", "readwrite");
+            const store = tx.objectStore("app_settings");
             const req = store.getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => resolve([]);
+            req.onsuccess = () => {
+                const records = req.result || [];
+                records.forEach(record => {
+                    const key = String(record.key || "");
+                    const oldSuffix = "_" + normalized;
+                    if (key.toLowerCase().startsWith("lgs_") && key.toLowerCase().endsWith(oldSuffix) && key !== key.toLowerCase()) {
+                        const newKey = key.slice(0, key.length - normalized.length) + normalized;
+                        const exists = store.get(newKey);
+                        exists.onsuccess = () => { if (!exists.result) store.put({ key: newKey, val: record.val }); };
+                    }
+                });
+            };
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error || new Error("Eski kayıtlar taşınamadı."));
+        });
+    }
+
+    function getDBUser(username) {
+        return new Promise((resolve) => {
+            if (!db) { resolve(null); return; }
+            const tx = db.transaction("users", "readonly");
+            const store = tx.objectStore("users");
+            const req = store.get(username.trim().toLowerCase());
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    }
+
+    function saveDBUser(userObj) {
+        return new Promise((resolve, reject) => {
+            if (!db) { reject(new Error("Veritabanı hazır değil.")); return; }
+            const tx = db.transaction("users", "readwrite");
+            userObj.username = userObj.username.trim().toLowerCase();
+            tx.objectStore("users").put(userObj);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new Error("Kullanıcı kaydedilemedi."));
+            tx.onabort = () => reject(tx.error || new Error("Kullanıcı kaydı iptal edildi."));
+        });
+    }
+
+    function getDBQuestions(username) {
+        return new Promise((resolve, reject) => {
+            if (!db) { reject(new Error("Veritabanı hazır değil.")); return; }
+            const tx = db.transaction("questions", "readonly");
+            const req = tx.objectStore("questions").getAll();
+            req.onsuccess = () => resolve((req.result || []).filter(q => String(q.user || "").toLowerCase() === String(username || "").toLowerCase()));
+            req.onerror = () => reject(req.error || new Error("Sorular okunamadı."));
         });
     }
 
     function saveDBQuestion(questionObj) {
-        return new Promise((resolve) => {
-            if (!db) { resolve(); return; }
+        return new Promise((resolve, reject) => {
+            if (!db) { reject(new Error("Veritabanı hazır değil.")); return; }
             const tx = db.transaction("questions", "readwrite");
-            const store = tx.objectStore("questions");
-            store.put(questionObj);
-            tx.oncomplete = () => resolve();
+            tx.objectStore("questions").put(questionObj);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new Error("Soru kaydedilemedi."));
+            tx.onabort = () => reject(tx.error || new Error("Soru kaydı iptal edildi."));
         });
     }
 
     function deleteDBQuestion(id) {
         return new Promise((resolve, reject) => {
-            if (!db) {
-                reject(new Error("Soru veritabanı henüz hazır değil."));
-                return;
-            }
-            let tx;
-            try {
-                tx = db.transaction("questions", "readwrite");
-                tx.objectStore("questions").delete(id);
-                tx.oncomplete = () => resolve(true);
-                tx.onerror = () => reject(tx.error || new Error("Soru silinemedi."));
-                tx.onabort = () => reject(tx.error || new Error("Soru silme işlemi iptal edildi."));
-            } catch (error) {
-                reject(error);
-            }
+            if (!db) { reject(new Error("DB hazır değil")); return; }
+            const tx = db.transaction("questions", "readwrite");
+            tx.objectStore("questions").delete(id);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
         });
     }
 
-    // Mobil tarayıcıların yerel confirm penceresine bağlı kalmayan onay kutusu
     function askDeleteConfirmation(message) {
         return new Promise((resolve) => {
             const overlay = document.createElement("div");
@@ -687,87 +746,206 @@
                 </div>`;
             overlay.querySelector(".mobile-confirm-box > div:nth-child(2)").textContent = message;
             const buttons = overlay.querySelectorAll("button");
-            const finish = (answer) => {
-                overlay.remove();
-                resolve(answer);
-            };
+            const finish = (answer) => { overlay.remove(); resolve(answer); };
             buttons[0].addEventListener("click", () => finish(false));
             buttons[1].addEventListener("click", () => finish(true));
-            overlay.addEventListener("click", (event) => {
-                if (event.target === overlay) finish(false);
-            });
             document.body.appendChild(overlay);
             buttons[1].focus();
         });
     }
 
-    // --- UYGULAMA MEVCUT KODLARI ---
     const defaultLgsData = {
-        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri ve Söz Sanatları", "Anlatım Bozuklukları"],
-        "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri", "Anlatım Bozuklukları"],
+        "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler"],
         "Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"],
-        "T.C. İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Millî Uyanış", "Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları", "Atatürk Dönemi Dış Politika"],
-        "Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliği", "Kur'an-ı Kerim ve Özellikleri"],
-        "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"]
+        "T.C. İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Millî Uyanış", "Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları"],
+        "Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliği", "Kur'an-ı Kerim"],
+        "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism"],
+        "LGS Denemesi": ["Genel Deneme (Sözel + Sayısal)", "Sözel Bölüm Denemesi", "Sayısal Bölüm Denemesi", "Branş Denemesi", "Deneme Analizi"]
     };
 
-    let lgsData = {};
-    try {
-        const kayitliVeri = localStorage.getItem('lgs_custom_topics');
-        lgsData = kayitliVeri ? JSON.parse(kayitliVeri) : {};
-        if (!lgsData || typeof lgsData !== 'object' || Array.isArray(lgsData)) {
-            lgsData = {};
-        }
-    } catch (e) {
-        lgsData = {};
-    }
+    const DAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+    const DEFAULT_FULL_HOURS = ["09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 13:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00"];
 
-    for (const [subject, topics] of Object.entries(defaultLgsData)) {
-        if (!Array.isArray(lgsData[subject]) || lgsData[subject].length === 0) {
-            lgsData[subject] = [...topics];
-        }
-    }
-
-    let examNames = JSON.parse(localStorage.getItem('lgs_exam_names')) || {};
-    
+    let lgsData = {}, examNames = {};
     const defaultExamOptions = ["-", "İşlem Hatası", "Soru Kökünü Yanlış Okuma", "Yorum / Mantık Yürütme Hatası", "Bilgi Eksikliği"];
-    let customExamOptions = JSON.parse(localStorage.getItem('lgs_custom_exam_options')) || [];
-    
-    function getAllExamOptions() {
-        return [...defaultExamOptions, ...customExamOptions];
-    }
-    
-    let examCount = parseInt(localStorage.getItem('lgs_exam_count')) || 5;
-    let booksData = JSON.parse(localStorage.getItem('lgs_books_data')) || {};
-    for (const key of Object.keys(defaultLgsData)) {
-        if (!booksData[key]) booksData[key] = [];
-    }
+    let customExamOptions = [], examCount = 5, booksData = {}, studyLogs = [], questionsData = [], examSelections = {}, topicChecks = {};
+    let scheduleData = {}, dayHoursData = {};
+    let activeSlot = null, tempDayHours = {};
 
-    let studyLogs = JSON.parse(localStorage.getItem('lgs_study_logs')) || [];
-    let questionsData = [];
+    function getAllExamOptions() { return [...defaultExamOptions, ...customExamOptions]; }
+
+    // Türkçe başta, LGS Denemesi en sonda, özel kategoriler ortada
+    function getOrderedSubjectKeys() {
+        let core = ["Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi", "Din Kültürü", "İngilizce"];
+        let allKeys = Object.keys(lgsData);
+        let custom = allKeys.filter(k => !core.includes(k) && k !== "LGS Denemesi");
+        let ordered = [];
+        
+        core.forEach(c => { if(lgsData[c]) ordered.push(c); });
+        custom.forEach(c => ordered.push(c));
+        if(lgsData["LGS Denemesi"]) ordered.push("LGS Denemesi");
+        
+        allKeys.forEach(k => { if(!ordered.includes(k)) ordered.push(k); });
+        return ordered;
+    }
 
     window.onload = async function() {
         await initDB();
-        
-        let oldQuestions = JSON.parse(localStorage.getItem('lgs_questions')) || [];
-        if (oldQuestions.length > 0) {
-            for (let q of oldQuestions) {
-                await saveDBQuestion(q);
-            }
-            localStorage.removeItem('lgs_questions');
+        let activeUser = await getDBSetting('active_user', null);
+        if (activeUser) {
+            await launchApp(activeUser);
+        } else {
+            let tx = db.transaction("users", "readonly");
+            let req = tx.objectStore("users").count();
+            req.onsuccess = () => {
+                if (req.result === 0) {
+                    switchAuthMode('register');
+                    document.getElementById('auth-subtitle').textContent = "İlk kullanıcı hesabınızı oluşturun.";
+                }
+            };
         }
+    };
 
-        questionsData = await getDBQuestions();
+    function switchAuthMode(mode) {
+        document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+        document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+        document.getElementById('form-forgot').style.display = mode === 'forgot' ? 'block' : 'none';
+        document.getElementById('tab-login-btn').classList.toggle('active', mode === 'login');
+        document.getElementById('tab-register-btn').classList.toggle('active', mode === 'register');
+        document.getElementById('auth-error').textContent = '';
+        
+        if(mode === 'forgot') {
+            document.getElementById('auth-title').textContent = "Şifremi Unuttum";
+            document.getElementById('auth-subtitle').textContent = "Güvenlik sorusuyla parolanızı yenileyin.";
+        } else if(mode === 'register') {
+            document.getElementById('auth-title').textContent = "Kayıt Ol";
+            document.getElementById('auth-subtitle').textContent = "Yeni bir kullanıcı hesabı oluşturun.";
+        } else {
+            document.getElementById('auth-title').textContent = "Giriş Yap";
+            document.getElementById('auth-subtitle').textContent = "LGS Takip & Program Sistemine Hoş Geldiniz";
+        }
+    }
+
+    async function hashCredential(value, caseInsensitive = false) {
+        let normalized = String(value || "").trim();
+        if (caseInsensitive) normalized = normalized.toLocaleLowerCase("tr-TR");
+        if (window.crypto && crypto.subtle) {
+            const bytes = new TextEncoder().encode(normalized);
+            const digest = await crypto.subtle.digest("SHA-256", bytes);
+            return "sha256:" + Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+        return "plain:" + normalized;
+    }
+
+    async function verifyCredential(input, storedHash, legacyValue, caseInsensitive = false) {
+        if (storedHash) return (await hashCredential(input, caseInsensitive)) === storedHash;
+        const entered = String(input || "").trim();
+        const saved = String(legacyValue || "").trim();
+        return caseInsensitive ? entered.toLocaleLowerCase("tr-TR") === saved.toLocaleLowerCase("tr-TR") : entered === saved;
+    }
+
+    async function handleRegister() {
+        let username = document.getElementById('reg-username').value.trim().toLowerCase();
+        let password = document.getElementById('reg-password').value.trim();
+        let animal = document.getElementById('reg-animal').value.trim();
+        let errEl = document.getElementById('auth-error');
+
+        if (!username || !password || !animal) { errEl.textContent = "Lütfen tüm alanları doldurun!"; return; }
+        if (password.length < 6) { errEl.textContent = "Parola en az 6 karakter olmalıdır."; return; }
+        let existing = await getDBUser(username);
+        if (existing) { errEl.textContent = "Bu kullanıcı adı zaten alınmış!"; return; }
+
+        let newUser = { username, passwordHash: await hashCredential(password), animalHash: await hashCredential(animal, true) };
+        await saveDBUser(newUser);
+        await saveDBSetting('active_user', username);
+        await launchApp(username);
+    }
+
+    async function handleLogin() {
+        let username = document.getElementById('login-username').value.trim().toLowerCase();
+        let password = document.getElementById('login-password').value.trim();
+        let errEl = document.getElementById('auth-error');
+
+        if (!username || !password) { errEl.textContent = "Kullanıcı adı ve parola girilmelidir!"; return; }
+        let user = await getDBUser(username);
+        if (!user || !(await verifyCredential(password, user.passwordHash, user.password))) { errEl.textContent = "Kullanıcı adı veya parola hatalı!"; return; }
+        if (!user.passwordHash) { user.passwordHash = await hashCredential(password); delete user.password; }
+        await saveDBUser(user);
+        await saveDBSetting('active_user', user.username);
+        await launchApp(user.username);
+    }
+
+    async function handleForgotReset() {
+        let username = document.getElementById('forgot-username').value.trim().toLowerCase();
+        let animal = document.getElementById('forgot-animal').value.trim();
+        let newPass = document.getElementById('forgot-newpass').value.trim();
+        let errEl = document.getElementById('auth-error');
+
+        if (!username || !animal || !newPass) { errEl.textContent = "Tüm alanları doldurun!"; return; }
+        if (newPass.length < 6) { errEl.textContent = "Yeni parola en az 6 karakter olmalıdır."; return; }
+        let user = await getDBUser(username);
+        let answerOk = user && (user.animalHash ? await verifyCredential(animal, user.animalHash, null, true) : await verifyCredential(animal, null, user.animal, true));
+        if (!user || !answerOk) { errEl.textContent = "Kullanıcı adı veya güvenlik sorusunun cevabı hatalı!"; return; }
+
+        user.passwordHash = await hashCredential(newPass);
+        delete user.password;
+        if (!user.animalHash && user.animal) user.animalHash = await hashCredential(user.animal, true);
+        delete user.animal;
+        await saveDBUser(user);
+        alert("Parola güncellendi! Şimdi giriş yapabilirsiniz.");
+        switchAuthMode('login');
+    }
+
+    async function handleLogout() {
+        await saveDBSetting('active_user', null);
+        currentUsername = null; questionsData = []; selectedQuestionIds.clear();
+        document.getElementById('auth-overlay').style.display = 'flex';
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('login-password').value = '';
+    }
+
+    async function launchApp(username) {
+        username = String(username || "").trim().toLowerCase();
+        currentUsername = username;
+        await migrateLegacyUserSettingKeys(username);
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+
+        lgsData = await getDBSetting(`lgs_custom_topics_${username}`, JSON.parse(JSON.stringify(defaultLgsData)));
+        examNames = await getDBSetting(`lgs_exam_names_${username}`, {});
+        customExamOptions = await getDBSetting(`lgs_custom_exam_options_${username}`, []);
+        examCount = await getDBSetting(`lgs_exam_count_${username}`, 5);
+        booksData = await getDBSetting(`lgs_books_data_${username}`, {});
+        studyLogs = await getDBSetting(`lgs_study_logs_${username}`, []);
+        examSelections = await getDBSetting(`lgs_exam_selections_${username}`, {});
+        topicChecks = await getDBSetting(`lgs_topic_checks_${username}`, {});
+        scheduleData = await getDBSetting(`lgs_schedule_${username}`, {});
+        
+        let defaultHours = {};
+        DAYS.forEach(d => defaultHours[d] = [...DEFAULT_FULL_HOURS]);
+        dayHoursData = await getDBSetting(`lgs_day_hours_${username}`, defaultHours);
+
+        questionsData = await getDBQuestions(username);
+        selectedQuestionIds.clear();
+
+        for (const key of Object.keys(defaultLgsData)) {
+            if (!booksData[key]) booksData[key] = [];
+            if (!lgsData[key]) lgsData[key] = [...defaultLgsData[key]];
+        }
 
         renderTopics();
         renderExamTable();
         renderBooks();
         renderStudyTracking();
         renderQuestions();
+        renderScheduleTable();
+        updateProgramStats();
+        updateSubjectDropdowns();
 
         let dateInp = document.getElementById('log-date');
         if(dateInp) dateInp.valueAsDate = new Date();
-    };
+    }
 
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -780,34 +958,423 @@
         if(tabId === 'calisma') {
             renderStudyTracking();
             let dateInp = document.getElementById('log-date');
-            if(dateInp) {
-                dateInp.valueAsDate = new Date();
-            }
+            if(dateInp) dateInp.valueAsDate = new Date();
         }
         if(tabId === 'sorular') renderQuestions();
+        if(tabId === 'program') {
+            renderScheduleTable();
+            updateProgramStats();
+            updateSubjectDropdowns();
+        }
     }
 
     function triggerPrint() {
-        let activeTab = document.querySelector('.tab-pane.active');
-        if(activeTab && activeTab.id === 'tab-eksik') {
-            generateReport();
+        const active = document.querySelector('.tab-pane.active');
+        document.body.dataset.printTarget = active ? active.id : '';
+        window.print();
+    }
+    window.addEventListener('afterprint', () => { delete document.body.dataset.printTarget; });
+
+    async function openAddCustomSubjectModal() {
+        let subName = prompt("Eklemek istediğiniz yeni ders, deneme veya kategori adını girin (Örn: Paragraf Kampı, Rehberlik):");
+        if (subName && subName.trim() !== "") {
+            let name = subName.trim();
+            if (!lgsData[name]) {
+                lgsData[name] = ["Genel Çalışma", "Tekrar ve Soru Çözümü"];
+                await saveTopicsState();
+                updateSubjectDropdowns();
+                alert(`"${name}" kategorisi başarıyla eklendi! Artık programda seçebilirsiniz.`);
+            } else {
+                alert("Bu kategori zaten mevcut.");
+            }
         }
-        setTimeout(() => {
-            window.print();
-        }, 150);
     }
 
-    function formatMinutes(totalMinutes) {
-        if (!totalMinutes || totalMinutes <= 0) return "0 dk";
-        let hours = Math.floor(totalMinutes / 60);
-        let mins = totalMinutes % 60;
-        if (hours > 0 && mins > 0) {
-            return `${hours} sa ${mins} dk (${totalMinutes} dk)`;
-        } else if (hours > 0) {
-            return `${hours} sa (${totalMinutes} dk)`;
-        } else {
-            return `${totalMinutes} dk`;
+    async function deleteSubjectCategory(subject) {
+        let core = ["Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi", "Din Kültürü", "İngilizce", "LGS Denemesi"];
+        if (core.includes(subject)) {
+            alert("Bu ana ders/kategori silinemez!");
+            return;
         }
+        if (await askDeleteConfirmation(`"${subject}" özel kategorisini ve tüm konularını silmek istiyor musunuz?`)) {
+            delete lgsData[subject];
+            await saveTopicsState();
+            updateSubjectDropdowns();
+            alert("Kategori silindi.");
+        }
+    }
+
+    function updateSubjectDropdowns() {
+        const orderedSubjects = getOrderedSubjectKeys();
+
+        const modalSubSelect = document.getElementById('modalSubject');
+        if (modalSubSelect) {
+            const currentSelected = modalSubSelect.value;
+            modalSubSelect.innerHTML = '';
+            orderedSubjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                modalSubSelect.appendChild(opt);
+            });
+            if (lgsData[currentSelected]) modalSubSelect.value = currentSelected;
+            updateModalTopics();
+        }
+
+        const logSubSelect = document.getElementById('log-subject');
+        if (logSubSelect) {
+            const currentSelectedLog = logSubSelect.value;
+            logSubSelect.innerHTML = '';
+            orderedSubjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                logSubSelect.appendChild(opt);
+            });
+            if (lgsData[currentSelectedLog]) logSubSelect.value = currentSelectedLog;
+        }
+
+        const qSubSelect = document.getElementById('question-subject');
+        if (qSubSelect) {
+            const currentSelectedQ = qSubSelect.value;
+            qSubSelect.innerHTML = '';
+            orderedSubjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                qSubSelect.appendChild(opt);
+            });
+            if (lgsData[currentSelectedQ]) qSubSelect.value = currentSelectedQ;
+        }
+
+        const fQSubSelect = document.getElementById('filter-question-subject');
+        if (fQSubSelect) {
+            const currentFilteredQ = fQSubSelect.value;
+            fQSubSelect.innerHTML = '<option value="ALL">Tüm Dersler</option>';
+            orderedSubjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                fQSubSelect.appendChild(opt);
+            });
+            if (currentFilteredQ && (currentFilteredQ === 'ALL' || lgsData[currentFilteredQ])) {
+                fQSubSelect.value = currentFilteredQ;
+            }
+        }
+
+        const genExamSub = document.getElementById('genExamSubject');
+        if (genExamSub) {
+            genExamSub.innerHTML = '<option value="ALL">Tüm Dersler / Kategoriler</option>';
+            orderedSubjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                genExamSub.appendChild(opt);
+            });
+        }
+    }
+
+    // --- SORU HAVUZUNDAN / ELLE DENEME SINAVI OLUŞTURMA ---
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function toggleQuestionSelection(id, checked) {
+        if (checked) selectedQuestionIds.add(Number(id));
+        else selectedQuestionIds.delete(Number(id));
+        const badge = document.getElementById('question-count-badge');
+        if (badge) badge.textContent = `Toplam Soru: ${questionsData.length} · Seçilen: ${selectedQuestionIds.size}`;
+    }
+
+    function clearQuestionSelection() {
+        selectedQuestionIds.clear();
+        renderQuestions();
+    }
+
+    function openExamGeneratorModal() {
+        document.getElementById('examGenModal').style.display = 'flex';
+        const info = document.getElementById('exam-selection-info');
+        if (info) info.textContent = selectedQuestionIds.size ? `${selectedQuestionIds.size} soru seçildi. Deneme bu sorulardan hazırlanacak.` : 'Soru seçmediyseniz ders filtresine göre sorular alınır.';
+    }
+
+    function closeExamGeneratorModal() {
+        document.getElementById('examGenModal').style.display = 'none';
+    }
+
+    function generateAndPrintExam() {
+        const title = document.getElementById('genExamTitle').value.trim() || "Özel Soru Havuzu Denemesi";
+        const subFilter = document.getElementById('genExamSubject').value;
+        const limit = Math.max(0, parseInt(document.getElementById('genExamLimit').value, 10) || 0);
+        const manualLines = document.getElementById('genExamManualQuestions').value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+        let chosen = selectedQuestionIds.size
+            ? questionsData.filter(q => selectedQuestionIds.has(Number(q.id)))
+            : questionsData.filter(q => subFilter === "ALL" || q.subject === subFilter);
+        if (!selectedQuestionIds.size && limit > 0) chosen = chosen.slice(0, limit);
+        const examItems = [...chosen, ...manualLines.map((text, i) => ({ id: `manual-${i}`, subject: 'Elle Yazılan Soru', text, image: '', note: '' }))];
+        if (!examItems.length) { alert("Deneme oluşturmak için soru seçin veya elle soru yazın."); return; }
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) { alert("Yeni pencere açılamadı. Tarayıcıda açılır pencere izni verin."); return; }
+        const safeTitle = escapeHtml(title);
+        let htmlContent = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${safeTitle}</title>
+        <style>
+          @page { size: A4 portrait; margin: 8mm; }
+          * { box-sizing: border-box; }
+          body { font-family: Arial, sans-serif; color:#111; margin:0; font-size:10pt; }
+          .exam-header { text-align:center; border-bottom:2px solid #222; padding-bottom:4mm; margin-bottom:5mm; }
+          .exam-header h1 { font-size:16pt; margin:0 0 2mm; }
+          .student-info { display:flex; justify-content:space-between; gap:5mm; border:1px solid #555; padding:3mm; margin-bottom:5mm; font-weight:600; font-size:9pt; }
+          .question-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4mm; align-items:start; }
+          .exam-question { border:1px solid #bbb; border-radius:2mm; padding:3mm; break-inside:avoid; page-break-inside:avoid; min-width:0; }
+          .q-meta { display:flex; justify-content:space-between; gap:2mm; font-weight:bold; font-size:8.5pt; margin-bottom:2mm; }
+          .q-note { font-size:8pt; margin-bottom:2mm; }
+          .q-text { white-space:pre-wrap; font-size:10pt; line-height:1.35; overflow-wrap:anywhere; }
+          .q-img-container { text-align:center; width:100%; }
+          .q-img { display:block; max-width:100%; width:auto; height:auto; max-height:105mm; object-fit:contain; margin:0 auto; }
+          @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+          @media screen { body { padding:10mm; max-width:210mm; margin:auto; } }
+        </style></head><body>
+        <div class="exam-header"><h1>${safeTitle}</h1><div>8. Sınıf LGS Deneme Sınavı</div></div>
+        <div class="student-info"><span>Adı Soyadı: __________________</span><span>Sınıf / No: __________</span><span>Tarih: ${new Date().toLocaleDateString('tr-TR')}</span></div><div class="question-grid">`;
+        examItems.forEach((q, idx) => {
+            htmlContent += `<article class="exam-question"><div class="q-meta"><span>Soru ${idx+1}</span><span>${escapeHtml(q.subject || '')}</span></div>`;
+            if (q.note) htmlContent += `<div class="q-note">${escapeHtml(q.note)}</div>`;
+            if (q.text) htmlContent += `<div class="q-text">${escapeHtml(q.text)}</div>`;
+            if (q.image) htmlContent += `<div class="q-img-container"><img src="${q.image}" class="q-img" alt="Soru ${idx+1}"></div>`;
+            htmlContent += `</article>`;
+        });
+        htmlContent += `</div></body></html>`;
+        printWindow.document.open(); printWindow.document.write(htmlContent); printWindow.document.close();
+        closeExamGeneratorModal();
+        const doPrint = () => { printWindow.focus(); printWindow.print(); };
+        const imgs = Array.from(printWindow.document.images);
+        Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }))).then(() => setTimeout(doPrint, 250));
+    }
+
+    function renderScheduleTable() {
+        const tbody = document.getElementById('schedule-body');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        let allHoursSet = new Set();
+        DAYS.forEach(day => {
+            if(dayHoursData[day]) dayHoursData[day].forEach(h => allHoursSet.add(h));
+        });
+        
+        const uniqueHours = Array.from(allHoursSet).sort((a, b) => {
+            const getStartHour = str => parseInt(str.split(':')[0]) || 0;
+            return getStartHour(a) - getStartHour(b);
+        });
+
+        let skipCells = {};
+        DAYS.forEach(d => skipCells[d] = {});
+
+        uniqueHours.forEach((hour, hIndex) => {
+            const tr = document.createElement('tr');
+            const timeTd = document.createElement('td');
+            timeTd.className = 'time-col';
+            timeTd.innerText = hour;
+            tr.appendChild(timeTd);
+
+            DAYS.forEach(day => {
+                if (skipCells[day][hIndex]) return;
+
+                const td = document.createElement('td');
+                const hasThisHour = dayHoursData[day] && dayHoursData[day].includes(hour);
+                const key = `${day}_${hour}`;
+                
+                if (!hasThisHour) {
+                    td.className = 'slot-cell disabled-slot';
+                    tr.appendChild(td);
+                    return;
+                }
+
+                td.className = 'slot-cell';
+                if(scheduleData[key]) {
+                    const item = scheduleData[key];
+                    const span = item.span && item.span > 1 ? item.span : 1;
+                    
+                    if (span > 1) {
+                        td.setAttribute('rowspan', span);
+                        for (let s = 1; s < span; s++) {
+                            let nextHIndex = hIndex + s;
+                            if (nextHIndex < uniqueHours.length) {
+                                skipCells[day][nextHIndex] = true;
+                            }
+                        }
+                    }
+
+                    let colorClass = "color-def";
+                    if (item.subject === "LGS Denemesi") colorClass = "color-lgs";
+                    else if (item.subject === "Türkçe") colorClass = "color-tr";
+                    else if (item.subject === "Matematik") colorClass = "color-mat";
+                    else if (item.subject === "Fen Bilimleri") colorClass = "color-fen";
+                    else if (item.subject === "T.C. İnkılap Tarihi") colorClass = "color-ink";
+                    else if (item.subject === "Din Kültürü") colorClass = "color-din";
+                    else if (item.subject === "İngilizce") colorClass = "color-ing";
+
+                    td.innerHTML = `
+                        <div class="lesson-card ${colorClass}">
+                            <div class="lesson-title">${item.subject}</div>
+                            <div class="lesson-topic">${item.topic}</div>
+                            <div class="lesson-meta">
+                                <span>${item.type}</span>
+                                <span>${item.target > 0 ? item.target + ' Soru' : ''}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                td.onclick = () => openModal(day, hour);
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openModal(day, hour) {
+        activeSlot = { day, hour };
+        const key = `${day}_${hour}`;
+        const item = scheduleData[key];
+
+        updateSubjectDropdowns();
+        const subKeys = getOrderedSubjectKeys();
+        if (subKeys.length > 0) {
+            document.getElementById('modalSubject').value = item ? item.subject : subKeys[0];
+        }
+        updateModalTopics();
+
+        if(item) {
+            document.getElementById('modalSubject').value = item.subject;
+            updateModalTopics();
+            document.getElementById('modalTopic').value = item.topic;
+            document.getElementById('modalType').value = item.type;
+            document.getElementById('modalSpan').value = item.span || 1;
+            document.getElementById('modalTarget').value = item.target;
+            document.getElementById('btnDeleteLesson').style.display = 'block';
+            document.getElementById('modalTitle').innerText = `${day} (${hour}) - Ders Düzenle`;
+        } else {
+            document.getElementById('modalType').value = "Konu Anlatımı";
+            document.getElementById('modalSpan').value = 1;
+            document.getElementById('modalTarget').value = 40;
+            document.getElementById('btnDeleteLesson').style.display = 'none';
+            document.getElementById('modalTitle').innerText = `${day} (${hour}) - Ders Ekle`;
+        }
+        document.getElementById('lessonModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('lessonModal').style.display = 'none';
+        activeSlot = null;
+    }
+
+    function updateModalTopics() {
+        const subject = document.getElementById('modalSubject').value;
+        const topicSelect = document.getElementById('modalTopic');
+        if(!topicSelect) return;
+        topicSelect.innerHTML = '';
+        
+        const topics = lgsData[subject] || ["Genel Çalışma"];
+        topics.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; 
+            opt.innerText = t;
+            topicSelect.appendChild(opt);
+        });
+    }
+
+    async function saveLesson() {
+        if(!activeSlot) return;
+        const key = `${activeSlot.day}_${activeSlot.hour}`;
+        scheduleData[key] = {
+            subject: document.getElementById('modalSubject').value,
+            topic: document.getElementById('modalTopic').value,
+            type: document.getElementById('modalType').value,
+            span: parseInt(document.getElementById('modalSpan').value) || 1,
+            target: parseInt(document.getElementById('modalTarget').value) || 0
+        };
+
+        let activeUser = await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_schedule_${activeUser}`, scheduleData);
+        renderScheduleTable();
+        updateProgramStats();
+        closeModal();
+    }
+
+    async function deleteLesson() {
+        if(activeSlot) {
+            const key = `${activeSlot.day}_${activeSlot.hour}`;
+            if(scheduleData[key]) {
+                delete scheduleData[key];
+                let activeUser = await getDBSetting('active_user', 'default');
+                await saveDBSetting(`lgs_schedule_${activeUser}`, scheduleData);
+                renderScheduleTable();
+                updateProgramStats();
+                closeModal();
+            }
+        }
+    }
+
+    function openHoursModal() {
+        tempDayHours = JSON.parse(JSON.stringify(dayHoursData));
+        document.getElementById('editDaySelect').value = "Pazartesi";
+        currentEditingDay = "Pazartesi";
+        loadHoursForSelectedDay();
+        document.getElementById('hoursModal').style.display = 'flex';
+    }
+
+    function closeHoursModal() {
+        document.getElementById('hoursModal').style.display = 'none';
+    }
+
+    let currentEditingDay = "Pazartesi";
+    function onEditDayChange() {
+        saveCurrentDayInputToTemp();
+        currentEditingDay = document.getElementById('editDaySelect').value;
+        loadHoursForSelectedDay();
+    }
+
+    function saveCurrentDayInputToTemp() {
+        const inputs = document.querySelectorAll('#hoursEditList input');
+        const hours = [];
+        inputs.forEach(inp => { let txt = inp.value.trim(); if(txt) hours.push(txt); });
+        tempDayHours[currentEditingDay] = hours;
+    }
+
+    function loadHoursForSelectedDay() {
+        const container = document.getElementById('hoursEditList');
+        container.innerHTML = '';
+        const hours = tempDayHours[currentEditingDay] || [];
+        hours.forEach(h => addHourInput(h));
+    }
+
+    function addHourInput(val = '') {
+        const container = document.getElementById('hoursEditList');
+        const div = document.createElement('div');
+        div.className = 'hour-edit-item';
+        div.innerHTML = `
+            <input type="text" value="${val}" placeholder="Örn: 09:00 - 10:00">
+            <button class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 6px 10px;">✕</button>
+        `;
+        container.appendChild(div);
+    }
+
+    async function saveHours() {
+        saveCurrentDayInputToTemp();
+        dayHoursData = JSON.parse(JSON.stringify(tempDayHours));
+        let activeUser = await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_day_hours_${activeUser}`, dayHoursData);
+        renderScheduleTable();
+        closeHoursModal();
+    }
+
+    function updateProgramStats() {
+        const lessons = Object.values(scheduleData);
+        const totalHours = lessons.reduce((acc, curr) => acc + (curr.span || 1), 0);
+        const totalQuestions = lessons.reduce((acc, curr) => acc + (curr.target || 0), 0);
+        const l1 = document.getElementById('stat-total-lessons');
+        const l2 = document.getElementById('stat-total-questions');
+        if(l1) l1.innerText = `${totalHours} Saat`;
+        if(l2) l2.innerText = `${totalQuestions} Soru`;
     }
 
     function renderTopics() {
@@ -815,19 +1382,24 @@
         if(!container) return;
         container.innerHTML = '';
         let grandTotal = 0, grandChecked = 0;
+        const orderedSubjects = getOrderedSubjectKeys();
+        let core = ["Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi", "Din Kültürü", "İngilizce", "LGS Denemesi"];
 
-        for (const [subject, topics] of Object.entries(lgsData)) {
+        orderedSubjects.forEach(subject => {
+            let topics = lgsData[subject] || [];
             let div = document.createElement('div');
             div.className = "section-box";
-            
-            let subjectChecked = 0;
-            let subjectTotal = topics.length;
+            let subjectChecked = 0, subjectTotal = topics.length;
+
+            let isCustom = !core.includes(subject);
+            let deleteCategoryBtn = isCustom ? `<button type="button" class="btn btn-danger no-print" onclick="deleteSubjectCategory('${subject}')" style="font-size:0.7rem; padding:3px 8px;">🗑️ Kategoriyi Sil</button>` : '';
 
             let htmlHeader = `
                 <div class="subject-header">
                     <h3>${subject}</h3>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="subject-progress" id="badge_${subject}">0/0 (%0)</span>
+                        ${deleteCategoryBtn}
                         <button type="button" class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem; padding:3px 8px;">➕ Konu Ekle</button>
                     </div>
                 </div>
@@ -837,11 +1409,8 @@
             topics.forEach((topic, idx) => {
                 grandTotal++;
                 let key = `topic_${subject}_${idx}`;
-                let isChecked = localStorage.getItem(key) === 'true';
-                if(isChecked) {
-                    grandChecked++;
-                    subjectChecked++;
-                }
+                let isChecked = topicChecks[key] === true;
+                if(isChecked) { grandChecked++; subjectChecked++; }
 
                 htmlTopics += `
                 <div class="topic-row">
@@ -852,44 +1421,36 @@
                         </label>
                     </div>
                     <div class="topic-actions no-print">
-                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)" title="Yukarı Taşı">⬆️</button>
-                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)" title="Aşağı Taşı">⬇️</button>
-                        <button type="button" class="icon-btn" onclick="editTopic('${subject}', ${idx})" title="Düzenle">✏️</button>
-                        <button type="button" class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" title="Sil" style="color:var(--danger);">🗑️</button>
+                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)">⬆️</button>
+                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)">⬇️</button>
+                        <button type="button" class="icon-btn" onclick="editTopic('${subject}', ${idx})">✏️</button>
+                        <button type="button" class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" style="color:var(--danger);">🗑️</button>
                     </div>
                 </div>`;
             });
             htmlTopics += `</div>`;
-
             div.innerHTML = htmlHeader + htmlTopics;
             container.appendChild(div);
 
             let subjectPercent = subjectTotal > 0 ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
             let badge = div.querySelector('.subject-progress');
             if(badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${subjectPercent})`;
-        }
+        });
         updateGrandProgressPercent(grandChecked, grandTotal);
     }
 
     function addNewTopic(subject) {
         let name = prompt(`"${subject}" dersi için yeni konu adı giriniz:`);
-        if(name && name.trim()) {
-            lgsData[subject].push(name.trim());
-            saveTopicsState();
-        }
+        if(name && name.trim()) { lgsData[subject].push(name.trim()); saveTopicsState(); }
     }
 
     function editTopic(subject, idx) {
         let oldName = lgsData[subject][idx];
         let newName = prompt(`Konu adını düzenleyin:`, oldName);
-        if(newName && newName.trim() && newName !== oldName) {
-            lgsData[subject][idx] = newName.trim();
-            saveTopicsState();
-        }
+        if(newName && newName.trim() && newName !== oldName) { lgsData[subject][idx] = newName.trim(); saveTopicsState(); }
     }
 
     async function deleteTopic(subject, idx) {
-        if (!lgsData[subject] || !lgsData[subject][idx]) return;
         if (await askDeleteConfirmation(`"${lgsData[subject][idx]}" konusunu silmek istiyor musunuz?`)) {
             lgsData[subject].splice(idx, 1);
             saveTopicsState();
@@ -899,44 +1460,39 @@
     function moveTopic(subject, idx, direction) {
         let targetIdx = idx + direction;
         if(targetIdx < 0 || targetIdx >= lgsData[subject].length) return;
-        
         let temp = lgsData[subject][idx];
         lgsData[subject][idx] = lgsData[subject][targetIdx];
         lgsData[subject][targetIdx] = temp;
-        
         saveTopicsState();
     }
 
-    function saveTopicsState() {
-        try {
-            localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
-        } catch (e) {}
-        renderTopics();
-        renderExamTable();
-        renderBooks();
+    async function saveTopicsState() {
+        let activeUser = await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
+        renderTopics(); renderExamTable(); renderBooks(); updateSubjectDropdowns();
     }
 
-    function updateProgress() {
-        let grandChecked = 0;
-        let grandTotal = 0;
-
-        for (const [subject, topics] of Object.entries(lgsData)) {
+    async function updateProgress() {
+        let grandChecked = 0, grandTotal = 0;
+        const orderedSubjects = getOrderedSubjectKeys();
+        orderedSubjects.forEach(subject => {
+            let topics = lgsData[subject] || [];
             let subChecked = 0;
             topics.forEach((topic, idx) => {
                 grandTotal++;
                 let key = `topic_${subject}_${idx}`;
                 let cb = document.querySelector(`input[data-key="${key}"]`);
-                if(cb && cb.checked) {
-                    grandChecked++;
-                    subChecked++;
+                if(cb) {
+                    topicChecks[key] = cb.checked;
+                    if(cb.checked) { grandChecked++; subChecked++; }
                 }
             });
             let subPercent = topics.length > 0 ? Math.round((subChecked / topics.length) * 100) : 0;
             let badge = document.getElementById(`badge_${subject}`);
-            if(badge) {
-                badge.innerText = `${subChecked}/${topics.length} (%${subPercent})`;
-            }
-        }
+            if(badge) badge.innerText = `${subChecked}/${topics.length} (%${subPercent})`;
+        });
+        let activeUser = currentUsername || await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
         updateGrandProgressPercent(grandChecked, grandTotal);
     }
 
@@ -951,27 +1507,24 @@
         header.innerHTML = '<th>Konu / Alan</th>';
         for (let d = 1; d <= examCount; d++) {
             let displayName = examNames[d] || `Deneme ${d}`;
-            header.innerHTML += `<th style="text-align:center;" class="editable-header" onclick="editExamName(${d})" title="Deneme adını değiştirmek için tıklayın">${displayName} ✏️</th>`;
+            header.innerHTML += `<th style="text-align:center;" class="editable-header" onclick="editExamName(${d})" title="Adı değiştirmek için tıklayın">${displayName} ✏️</th>`;
         }
 
         let tbody = document.getElementById('exam-table-body');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-
+        if(!tbody) return; tbody.innerHTML = '';
         let currentOptions = getAllExamOptions();
+        const orderedSubjects = getOrderedSubjectKeys();
 
-        for (const [subject, topics] of Object.entries(lgsData)) {
+        orderedSubjects.forEach(subject => {
+            let topics = lgsData[subject] || [];
             let subTr = document.createElement('tr');
-            subTr.style.background = "#eef2ff";
-            subTr.style.fontWeight = "bold";
+            subTr.style.background = "#eef2ff"; subTr.style.fontWeight = "bold";
             subTr.innerHTML = `<td colspan="${examCount + 1}" style="color: var(--primary);">${subject}</td>`;
             tbody.appendChild(subTr);
 
             topics.forEach((topic, tIdx) => {
                 let tr = document.createElement('tr');
-                let td = document.createElement('td');
-                td.innerText = topic;
-                tr.appendChild(td);
+                let td = document.createElement('td'); td.innerText = topic; tr.appendChild(td);
 
                 for (let d = 1; d <= examCount; d++) {
                     let tdCell = document.createElement('td');
@@ -981,381 +1534,312 @@
                     
                     currentOptions.forEach(opt => {
                         let option = document.createElement('option');
-                        option.value = opt;
-                        option.innerText = opt;
-                        select.appendChild(option);
+                        option.value = opt; option.innerText = opt; select.appendChild(option);
                     });
 
-                    let val = localStorage.getItem(key);
+                    let val = examSelections[key];
                     if(val) {
                         if (!currentOptions.includes(val)) {
                             let option = document.createElement('option');
-                            option.value = val;
-                            option.innerText = val;
-                            select.appendChild(option);
+                            option.value = val; option.innerText = val; select.appendChild(option);
                         }
                         select.value = val;
                     }
                     styleSelect(select);
                     select.onchange = function() { styleSelect(this); };
-
                     tdCell.appendChild(select);
                     tr.appendChild(tdCell);
                 }
                 tbody.appendChild(tr);
             });
-        }
+        });
     }
 
-    function editExamName(dIndex) {
+    async function editExamName(dIndex) {
         let currentName = examNames[dIndex] || `Deneme ${dIndex}`;
         let newName = prompt(`${dIndex}. Deneme için özel bir isim girin:`, currentName);
         if(newName !== null && newName.trim() !== "") {
             examNames[dIndex] = newName.trim();
-            localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
+            let activeUser = await getDBSetting('active_user', 'default');
+            await saveDBSetting(`lgs_exam_names_${activeUser}`, examNames);
             renderExamTable();
         }
     }
 
-    function addCustomExamOption() {
+    async function addCustomExamOption() {
         let customOpt = prompt("Eklemek istediğiniz yeni hata/eksik türünü girin:");
         if (customOpt && customOpt.trim() !== "") {
             let val = customOpt.trim();
-            let allOpts = getAllExamOptions();
-            if (!allOpts.includes(val)) {
+            if (!getAllExamOptions().includes(val)) {
                 customExamOptions.push(val);
-                localStorage.setItem('lgs_custom_exam_options', JSON.stringify(customExamOptions));
+                let activeUser = await getDBSetting('active_user', 'default');
+                await saveDBSetting(`lgs_custom_exam_options_${activeUser}`, customExamOptions);
                 renderExamTable();
-                alert(`"${val}" hata türü başarıyla eklendi!`);
-            } else {
-                alert("Bu hata türü zaten listede mevcut.");
             }
         }
     }
 
-    function manageExamOptions() {
-        if (customExamOptions.length === 0) {
-            alert("Henüz eklenmiş özel bir hata türü yok. '➕ Hata Türü Ekle' butonunu kullanabilirsiniz.");
-            return;
-        }
-
+    async function manageExamOptions() {
+        if (customExamOptions.length === 0) { alert("Özel hata türü yok."); return; }
         let listStr = customExamOptions.map((item, index) => `${index + 1}. ${item}`).join("\n");
-        let choice = prompt(`Silmek istediğiniz özel hata türünün numarasını girin:\n\n${listStr}`);
-        
+        let choice = prompt(`Silinecek hata türü numarası:\n\n${listStr}`);
         if (choice !== null && choice.trim() !== "") {
             let idx = parseInt(choice) - 1;
             if (!isNaN(idx) && idx >= 0 && idx < customExamOptions.length) {
-                let removed = customExamOptions.splice(idx, 1)[0];
-                localStorage.setItem('lgs_custom_exam_options', JSON.stringify(customExamOptions));
+                customExamOptions.splice(idx, 1);
+                let activeUser = await getDBSetting('active_user', 'default');
+                await saveDBSetting(`lgs_custom_exam_options_${activeUser}`, customExamOptions);
                 renderExamTable();
-                alert(`"${removed}" hata türü listeden silindi.`);
-            } else {
-                alert("Geçersiz seçim!");
             }
         }
     }
 
     function styleSelect(sel) {
-        sel.style.background = "white";
-        sel.style.color = "#1e293b";
+        sel.style.background = "white"; sel.style.color = "#1e293b";
         if (sel.value === "İşlem Hatası") { sel.style.background = "#ffe4e6"; sel.style.color = "#be123c"; }
         else if (sel.value === "Soru Kökünü Yanlış Okuma") { sel.style.background = "#fef3c7"; sel.style.color = "#b45309"; }
         else if (sel.value === "Yorum / Mantık Yürütme Hatası") { sel.style.background = "#e0f2fe"; sel.style.color = "#0369a1"; }
         else if (sel.value === "Bilgi Eksikliği") { sel.style.background = "#f3e8ff"; sel.style.color = "#6b21a8"; }
-        else if (sel.value !== "-") { sel.style.background = "#f1f5f9"; sel.style.color = "#334155"; }
     }
 
-    function addExamColumn() {
+    async function addExamColumn() {
         examCount++;
-        localStorage.setItem('lgs_exam_count', examCount);
+        let activeUser = await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_exam_count_${activeUser}`, examCount);
         renderExamTable();
     }
 
-    function removeExamColumn() {
+    async function removeExamColumn() {
         if(examCount > 1) {
-            delete examNames[examCount];
-            examCount--;
-            localStorage.setItem('lgs_exam_count', examCount);
-            localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
+            delete examNames[examCount]; examCount--;
+            let activeUser = await getDBSetting('active_user', 'default');
+            await saveDBSetting(`lgs_exam_count_${activeUser}`, examCount);
+            await saveDBSetting(`lgs_exam_names_${activeUser}`, examNames);
             renderExamTable();
         }
     }
 
     function renderBooks() {
         let container = document.getElementById('books-container');
-        if(!container) return;
-        container.innerHTML = '';
+        if(!container) return; container.innerHTML = '';
+        const orderedSubjects = getOrderedSubjectKeys();
 
-        for (const subject of Object.keys(lgsData)) {
-            let div = document.createElement('div');
-            div.className = "section-box";
+        orderedSubjects.forEach(subject => {
+            let div = document.createElement('div'); div.className = "section-box";
             let html = `<h3>${subject}</h3>
-                <div class="book-input-row no-print">
+                <div class="book-input-row no-print" style="display:flex; gap:8px; margin-bottom:10px;">
                     <input type="text" id="book_inp_${subject}" placeholder="Kitap Adı Ekle...">
                     <button type="button" class="btn btn-primary" onclick="addBook('${subject}')">Ekle</button>
                 </div><div style="display:flex; flex-direction:column; gap:6px;">`;
 
             let books = booksData[subject] || [];
             books.forEach((b, bIdx) => {
-                // Edge uyumluluğu için tıklanabilir silme butonu bağımsız <button> yapıldı
-                html += `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:white; padding:6px 10px; border-radius:8px; border:1px solid #f1f5f9;">
+                html += `<div style="display:flex; align-items:center; justify-content:space-between; background:white; padding:6px 10px; border-radius:8px; border:1px solid #f1f5f9;">
                     <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; flex:1; cursor:pointer; margin:0;">
                         <input type="checkbox" onchange="toggleBook('${subject}', ${bIdx})" ${b.completed ? 'checked' : ''}>
                         <span style="${b.completed ? 'text-decoration:line-through; color:#94a3b8;' : ''}">${b.name}</span>
                     </label>
-                    <button type="button" class="no-print icon-btn" onclick="deleteBook('${subject}', ${bIdx})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1rem; padding:2px 8px;" title="Kitabı Sil">✕</button>
+                    <button type="button" class="no-print icon-btn" onclick="deleteBook('${subject}', ${bIdx})" style="color:var(--danger); font-size:1rem;">✕</button>
                 </div>`;
             });
-            html += `</div>`;
-            div.innerHTML = html;
-            container.appendChild(div);
-        }
+            html += `</div>`; div.innerHTML = html; container.appendChild(div);
+        });
     }
 
-    function addBook(subject) {
+    async function addBook(subject) {
         let inp = document.getElementById(`book_inp_${subject}`);
-        if(!inp) return;
-        let name = inp.value.trim();
+        if(!inp) return; let name = inp.value.trim();
         if(name) {
             if(!booksData[subject]) booksData[subject] = [];
             booksData[subject].push({ name: name, completed: false });
             inp.value = '';
-            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
+            let activeUser = await getDBSetting('active_user', 'default');
+            await saveDBSetting(`lgs_books_data_${activeUser}`, booksData);
             renderBooks();
         }
     }
 
-    function toggleBook(subject, idx) {
+    async function toggleBook(subject, idx) {
         if(booksData[subject] && booksData[subject][idx]) {
             booksData[subject][idx].completed = !booksData[subject][idx].completed;
-            localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
+            let activeUser = await getDBSetting('active_user', 'default');
+            await saveDBSetting(`lgs_books_data_${activeUser}`, booksData);
             renderBooks();
         }
     }
 
     async function deleteBook(subject, idx) {
-        if (!booksData[subject] || !booksData[subject][idx]) return;
-        const bookName = booksData[subject][idx].name || "Bu kitap";
-        if (await askDeleteConfirmation(`"${bookName}" kitabını silmek istiyor musunuz?`)) {
+        if (await askDeleteConfirmation("Bu kitabı silmek istiyor musunuz?")) {
             booksData[subject].splice(idx, 1);
-            try {
-                localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
-                renderBooks();
-            } catch (error) {
-                alert("Kitap silinemedi. Tarayıcı depolama alanı yazmaya kapalı olabilir.");
-                console.error("Kitap silme hatası:", error);
-            }
+            let activeUser = await getDBSetting('active_user', 'default');
+            await saveDBSetting(`lgs_books_data_${activeUser}`, booksData);
+            renderBooks();
         }
     }
 
-    function addStudyLog() {
-        let date = document.getElementById('log-date').value;
-        let subject = document.getElementById('log-subject').value;
-        let minutes = parseInt(document.getElementById('log-minutes').value) || 0;
-        let questions = parseInt(document.getElementById('log-questions').value) || 0;
+    async function addStudyLog() {
+        const date = document.getElementById('log-date').value;
+        const subject = document.getElementById('log-subject').value;
+        const minutes = Math.max(0, parseInt(document.getElementById('log-minutes').value, 10) || 0);
+        const questions = Math.max(0, parseInt(document.getElementById('log-questions').value, 10) || 0);
+        if (!currentUsername) { alert("Önce öğrenci hesabıyla giriş yapın."); return; }
+        if (!date) { alert("Tarih seçin!"); return; }
+        if (minutes === 0 && questions === 0) { alert("Süre veya soru sayısından en az birini girin!"); return; }
 
-        if(!date) {
-            alert("Lütfen bir tarih seçin!");
-            return;
+        const record = { id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()), date, subject, minutes, questions };
+        const updated = [...studyLogs, record].sort((a,b) => b.date.localeCompare(a.date));
+        try {
+            await saveDBSetting(`lgs_study_logs_${currentUsername}`, updated);
+            studyLogs = updated;
+            document.getElementById('log-minutes').value = '';
+            document.getElementById('log-questions').value = '';
+            renderStudyTracking();
+            const alertBox = document.getElementById('save-alert');
+            if (alertBox) { alertBox.textContent = "✔ Çalışma kaydı IndexedDB'ye kaydedildi!"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 2200); }
+        } catch (err) {
+            console.error(err);
+            alert("Kayıt yapılamadı. Tarayıcı depolama alanını kontrol edip tekrar deneyin.");
         }
-        if(minutes === 0 && questions === 0) {
-            alert("Lütfen en az çalışma süresi veya soru sayısı girin!");
-            return;
-        }
-
-        studyLogs.push({ date, subject, minutes, questions });
-        studyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
-        
-        document.getElementById('log-minutes').value = '';
-        document.getElementById('log-questions').value = '';
-        
-        renderStudyTracking();
     }
 
     async function deleteStudyLog(index) {
-        if (!studyLogs[index]) return;
-        if (await askDeleteConfirmation("Bu çalışma kaydını silmek istiyor musunuz?")) {
+        if (await askDeleteConfirmation("Kaydı silmek istiyor musunuz?")) {
             studyLogs.splice(index, 1);
-            localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
+            await saveDBSetting(`lgs_study_logs_${currentUsername}`, studyLogs);
             renderStudyTracking();
         }
     }
 
+    function formatMinutes(totalMinutes) {
+        if (!totalMinutes || totalMinutes <= 0) return "0 dk";
+        let hours = Math.floor(totalMinutes / 60);
+        let mins = totalMinutes % 60;
+        if (hours > 0 && mins > 0) return `${hours} sa ${mins} dk (${totalMinutes} dk)`;
+        else if (hours > 0) return `${hours} sa (${totalMinutes} dk)`;
+        else return `${totalMinutes} dk`;
+    }
+
     function renderStudyTracking() {
         let logsBody = document.getElementById('study-logs-body');
-        if(!logsBody) return;
-        logsBody.innerHTML = '';
+        if(!logsBody) return; logsBody.innerHTML = '';
         
         if(studyLogs.length === 0) {
-            logsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">Henüz çalışma kaydı eklenmemiş.</td></tr>`;
+            logsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">Henüz çalışma kaydı yok.</td></tr>`;
         } else {
             studyLogs.forEach((log, idx) => {
                 let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${log.date}</td>
-                    <td>${log.subject}</td>
-                    <td>${log.minutes} dk</td>
-                    <td>${log.questions} soru</td>
-                    <td class="no-print" style="text-align:center;"><button type="button" class="icon-btn" onclick="deleteStudyLog(${idx})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1rem;" title="Kaydı Sil">✕</button></td>
-                `;
+                tr.innerHTML = `<td>${log.date}</td><td>${log.subject}</td><td>${log.minutes} dk</td><td>${log.questions} soru</td>
+                <td class="no-print" style="text-align:center;"><button type="button" class="icon-btn" onclick="deleteStudyLog(${idx})" style="color:var(--danger); font-size:1rem;">✕</button></td>`;
                 logsBody.appendChild(tr);
             });
         }
 
-        let now = new Date();
-        let oneDay = 24 * 60 * 60 * 1000;
+        let now = new Date(), oneDay = 24*60*60*1000, summary = {};
+        const orderedSubjects = getOrderedSubjectKeys();
+        orderedSubjects.forEach(sub => { summary[sub] = { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 }; });
 
-        let summary = {};
-        Object.keys(lgsData).forEach(sub => {
-            summary[sub] = {
-                weeklyMins: 0, weeklyQ: 0,
-                monthlyMins: 0, monthlyQ: 0,
-                totalMins: 0, totalQ: 0
-            };
-        });
+        let currentMonth = now.getMonth();
+        let currentYear = now.getFullYear();
 
         studyLogs.forEach(log => {
-            let logDate = new Date(log.date);
-            let diffDays = Math.round((now - logDate) / oneDay);
+            let parts = String(log.date).split('-').map(Number);
+            let logDate = parts.length === 3 ? new Date(parts[0], parts[1]-1, parts[2]) : new Date(log.date);
+            let diffDays = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - logDate) / oneDay);
+            if(!summary[log.subject]) {
+                summary[log.subject] = { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 };
+            }
+            summary[log.subject].totalMins += log.minutes; 
+            summary[log.subject].totalQ += log.questions;
 
-            if(summary[log.subject]) {
-                summary[log.subject].totalMins += log.minutes;
-                summary[log.subject].totalQ += log.questions;
-
-                if(diffDays >= 0 && diffDays <= 30) {
-                    summary[log.subject].monthlyMins += log.minutes;
-                    summary[log.subject].monthlyQ += log.questions;
-                }
-
-                if(diffDays >= 0 && diffDays <= 7) {
-                    summary[log.subject].weeklyMins += log.minutes;
-                    summary[log.subject].weeklyQ += log.questions;
-                }
+            if(logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
+                summary[log.subject].monthlyMins += log.minutes; 
+                summary[log.subject].monthlyQ += log.questions;
+            }
+            if(diffDays >= 0 && diffDays <= 7) { 
+                summary[log.subject].weeklyMins += log.minutes; 
+                summary[log.subject].weeklyQ += log.questions; 
             }
         });
 
         let summaryBody = document.getElementById('study-summary-body');
-        if(!summaryBody) return;
-        summaryBody.innerHTML = '';
+        if(!summaryBody) return; summaryBody.innerHTML = '';
+        let gWM=0, gWQ=0, gMM=0, gMQ=0, gTM=0, gTQ=0;
 
-        let grandWeeklyM = 0, grandWeeklyQ = 0;
-        let grandMonthlyM = 0, grandMonthlyQ = 0;
-        let grandTotalM = 0, grandTotalQ = 0;
-
-        Object.keys(lgsData).forEach(sub => {
-            let data = summary[sub];
-            grandWeeklyM += data.weeklyMins;
-            grandWeeklyQ += data.weeklyQ;
-            grandMonthlyM += data.monthlyMins;
-            grandMonthlyQ += data.monthlyQ;
-            grandTotalM += data.totalMins;
-            grandTotalQ += data.totalQ;
-
+        orderedSubjects.forEach(sub => {
+            let data = summary[sub] || { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 };
+            gWM += data.weeklyMins; gWQ += data.weeklyQ; gMM += data.monthlyMins; gMQ += data.monthlyQ; gTM += data.totalMins; gTQ += data.totalQ;
             let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:600; color:var(--primary);">${sub}</td>
-                <td>${formatMinutes(data.weeklyMins)}</td>
-                <td>${data.weeklyQ} soru</td>
-                <td>${formatMinutes(data.monthlyMins)}</td>
-                <td>${data.monthlyQ} soru</td>
-                <td>${formatMinutes(data.totalMins)}</td>
-                <td>${data.totalQ} soru</td>
-            `;
+            tr.innerHTML = `<td style="font-weight:600; color:var(--primary);">${sub}</td><td>${formatMinutes(data.weeklyMins)}</td><td>${data.weeklyQ} soru</td><td>${formatMinutes(data.monthlyMins)}</td><td>${data.monthlyQ} soru</td><td>${formatMinutes(data.totalMins)}</td><td>${data.totalQ} soru</td>`;
             summaryBody.appendChild(tr);
         });
 
         let totalTr = document.createElement('tr');
-        totalTr.style.background = "#eef2ff";
-        totalTr.style.fontWeight = "bold";
-        totalTr.innerHTML = `
-            <td style="color:var(--primary);">GENEL TOPLAM</td>
-            <td>${formatMinutes(grandWeeklyM)}</td>
-            <td>${grandWeeklyQ} soru</td>
-            <td>${formatMinutes(grandMonthlyM)}</td>
-            <td>${grandMonthlyQ} soru</td>
-            <td>${formatMinutes(grandTotalM)}</td>
-            <td>${grandTotalQ} soru</td>
-        `;
+        totalTr.style.background = "#eef2ff"; totalTr.style.fontWeight = "bold";
+        totalTr.innerHTML = `<td style="color:var(--primary);">GENEL TOPLAM</td><td>${formatMinutes(gWM)}</td><td>${gWQ} soru</td><td>${formatMinutes(gMM)}</td><td>${gMQ} soru</td><td>${formatMinutes(gTM)}</td><td>${gTQ} soru</td>`;
         summaryBody.appendChild(totalTr);
     }
 
-    function addQuestions() {
-        let subject = document.getElementById('question-subject').value;
-        let note = document.getElementById('question-note').value.trim();
-        let fileInput = document.getElementById('question-image');
-
-        if (fileInput.files.length === 0) {
-            alert("Lütfen en az bir soru fotoğrafı seçin!");
-            return;
-        }
-
-        let files = Array.from(fileInput.files);
-        let processedCount = 0;
-
-        files.forEach((file, index) => {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let img = new Image();
-                img.onload = async function() {
-                    let canvas = document.createElement('canvas');
-                    let ctx = canvas.getContext('2d');
-                    
-                    let maxWidth = 800;
-                    let maxHeight = 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height *= maxWidth / width;
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width *= maxHeight / height;
-                            height = maxHeight;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                    let newQuestion = {
-                        id: Date.now() + index,
-                        subject: subject,
-                        note: note,
-                        image: compressedDataUrl,
-                        date: new Date().toLocaleDateString('tr-TR')
-                    };
-
-                    await saveDBQuestion(newQuestion);
-                    questionsData.unshift(newQuestion);
-
-                    processedCount++;
-
-                    if (processedCount === files.length) {
-                        fileInput.value = '';
-                        document.getElementById('question-note').value = '';
-                        renderQuestions();
-                        alert(`${files.length} adet soru başarıyla eklendi!`);
-                    }
-                };
-                img.src = e.target.result;
-            };
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error || new Error("Dosya okunamadı."));
             reader.readAsDataURL(file);
         });
+    }
+
+    function resizeQuestionImage(dataUrl, maxWidth = 1400, maxHeight = 1800) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(img.width * scale));
+                canvas.height = Math.max(1, Math.round(img.height * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', 0.82));
+            };
+            img.onerror = () => reject(new Error("Soru görseli açılamadı."));
+            img.src = dataUrl;
+        });
+    }
+
+    async function addQuestions() {
+        const subject = document.getElementById('question-subject').value;
+        const note = document.getElementById('question-note').value.trim();
+        const fileInput = document.getElementById('question-image');
+        const files = Array.from(fileInput.files || []);
+        if (!currentUsername) { alert("Önce öğrenci hesabıyla giriş yapın."); return; }
+        if (!files.length) { alert("Lütfen soru fotoğrafı seçin!"); return; }
+        const button = document.querySelector('#tab-sorular button[onclick="addQuestions()"]');
+        if (button) { button.disabled = true; button.textContent = "Kaydediliyor..."; }
+        try {
+            const created = [];
+            for (const file of files) {
+                const raw = await readFileAsDataURL(file);
+                const image = await resizeQuestionImage(raw);
+                const q = { id: Date.now() + Math.floor(Math.random()*100000), user: currentUsername, subject, note, image, date: new Date().toLocaleDateString('tr-TR') };
+                await saveDBQuestion(q);
+                created.push(q);
+            }
+            questionsData = [...created.reverse(), ...questionsData];
+            fileInput.value = '';
+            document.getElementById('question-note').value = '';
+            renderQuestions();
+            alert(`${created.length} soru IndexedDB'ye kaydedildi.`);
+        } catch (err) {
+            console.error(err);
+            alert("Sorular kaydedilemedi. Görsel boyutu veya tarayıcı depolama alanı yetersiz olabilir.");
+        } finally {
+            if (button) { button.disabled = false; button.textContent = "Seçilen Soruları Kaydet"; }
+        }
     }
 
     async function editQuestionNote(id) {
         let q = questionsData.find(item => item.id === id);
         if(!q) return;
-
-        let newNote = prompt("Soru notunu / açıklamasını düzenleyin:", q.note || "");
+        let newNote = prompt("Soru notunu düzenleyin:", q.note || "");
         if (newNote !== null) {
             q.note = newNote.trim();
             await saveDBQuestion(q);
@@ -1370,73 +1854,58 @@
         container.innerHTML = '';
 
         questionsData.sort((a, b) => b.id - a.id);
-
         let filtered = questionsData.filter(q => filterSubject === 'ALL' || q.subject === filterSubject);
 
         let countBadge = document.getElementById('question-count-badge');
-        if (countBadge) {
-            countBadge.innerText = `Toplam Soru: ${questionsData.length}`;
-        }
+        if (countBadge) countBadge.innerText = `Toplam Soru: ${questionsData.length} · Seçilen: ${selectedQuestionIds.size}`;
 
         if (filtered.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-size:0.85rem;">Bu filtreye uygun kayıtlı soru bulunmuyor.</div>`;
+            container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b;">Soru bulunmuyor.</div>`;
             return;
         }
 
         filtered.forEach((q, idx) => {
-            let card = document.createElement('div');
-            card.className = "question-card";
-            
+            let card = document.createElement('div'); card.className = "question-card";
             let hasNote = q.note && q.note.trim() !== "";
-            
-            let noteHtml = `
-                <div style="font-size:0.85rem; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>${hasNote ? `<b>Not:</b> ${q.note}` : ''}</span>
-                    <button type="button" class="btn btn-primary no-print" onclick="editQuestionNote(${q.id})" style="padding:2px 6px; font-size:0.7rem;">✏️ ${hasNote ? 'Düzenle' : 'Not Ekle'}</button>
-                </div>
-            `;
-
+            const safeSubject = escapeHtml(q.subject);
+            const safeNote = escapeHtml(q.note || '');
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
-                    <span><b>Soru ${idx + 1}</b> | <b>Ders:</b> <span style="color:var(--primary);">${q.subject}</span> | <b>Tarih:</b> ${q.date}</span>
-                    <button type="button" class="btn btn-danger no-print" onclick="deleteQuestion(${q.id})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
+                    <label class="no-print" style="display:flex;align-items:center;gap:5px;"><input type="checkbox" ${selectedQuestionIds.has(Number(q.id)) ? 'checked' : ''} onchange="toggleQuestionSelection(${Number(q.id)}, this.checked)"> Denemeye ekle</label>
+                    <span><b>Soru ${idx + 1}</b> | <b>Ders:</b> <span style="color:var(--primary);">${safeSubject}</span> | ${escapeHtml(q.date)}</span>
+                    <button type="button" class="btn btn-danger no-print" onclick="deleteQuestion(${Number(q.id)})" style="padding:4px 8px; font-size:0.7rem;">Sil</button>
                 </div>
-                ${noteHtml}
-                <div class="Onizle_imageContent">
-                    <img src="${q.image}" class="question-img" alt="Soru Fotoğrafı">
+                <div style="font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span>${hasNote ? `<b>Not:</b> ${safeNote}` : ''}</span>
+                    <button type="button" class="btn btn-primary no-print" onclick="editQuestionNote(${Number(q.id)})" style="padding:2px 6px; font-size:0.7rem;">✏️ ${hasNote ? 'Düzenle' : 'Not Ekle'}</button>
                 </div>
+                <div class="Onizle_imageContent"><img src="${q.image}" class="question-img" alt="Soru"></div>
             `;
             container.appendChild(card);
         });
     }
 
     async function deleteQuestion(id) {
-        const question = questionsData.find(q => q.id === id);
-        if (!question) return;
-        if (await askDeleteConfirmation("Bu soruyu silmek istiyor musunuz?")) {
-            try {
-                await deleteDBQuestion(id);
-                questionsData = questionsData.filter(q => q.id !== id);
-                renderQuestions();
-            } catch (error) {
-                console.error("Soru silme hatası:", error);
-                alert("Soru silinemedi. Sayfayı yenileyip tekrar deneyin.");
-            }
+        if (await askDeleteConfirmation("Soruyu silmek istiyor musunuz?")) {
+            await deleteDBQuestion(id);
+            questionsData = questionsData.filter(q => q.id !== id);
+            selectedQuestionIds.delete(Number(id));
+            renderQuestions();
         }
     }
 
     function generateReport() {
         let container = document.getElementById('report-container');
-        if(!container) return;
-        container.innerHTML = '';
-        let hasData = false;
+        if(!container) return; container.innerHTML = ''; let hasData = false;
+        const orderedSubjects = getOrderedSubjectKeys();
 
-        for (const [subject, topics] of Object.entries(lgsData)) {
+        orderedSubjects.forEach(subject => {
+            let topics = lgsData[subject] || [];
             let subIssues = [];
             topics.forEach((topic, tIdx) => {
                 let errs = [];
                 for(let d=1; d<=examCount; d++) {
-                    let val = localStorage.getItem(`exam_${subject}_${tIdx}_d${d}`);
+                    let val = examSelections[`exam_${subject}_${tIdx}_d${d}`];
                     let examLabel = examNames[d] || `Deneme ${d}`;
                     if(val && val !== "-") errs.push(`${examLabel}: ${val}`);
                 }
@@ -1445,44 +1914,135 @@
 
             if(subIssues.length > 0) {
                 hasData = true;
-                let box = document.createElement('div');
-                box.className = "section-box";
+                let box = document.createElement('div'); box.className = "section-box";
                 let html = `<h3 style="color:#b45309; margin-bottom:8px;">${subject} Deneme Analiz Özeti</h3>`;
                 subIssues.forEach(item => {
                     html += `<div class="report-item"><b>${item.topic}:</b><div>`;
-                    item.errs.forEach(e => {
-                        html += `<span class="tag tag-error">${e}</span>`;
-                    });
+                    item.errs.forEach(e => { html += `<span class="tag tag-error">${e}</span>`; });
                     html += `</div></div>`;
                 });
-                box.innerHTML = html;
-                container.appendChild(box);
+                box.innerHTML = html; container.appendChild(box);
             }
-        }
+        });
+        if(!hasData) container.innerHTML = `<div style="text-align:center; padding:20px; background:#f0fdf4; color:#166534; border-radius:8px;">🎉 İşaretlenmiş hata bulunmuyor!</div>`;
+    }
 
-        if(!hasData) {
-            container.innerHTML = `<div style="text-align:center; padding:20px; background:#f0fdf4; color:#166534; border-radius:8px;">🎉 Harika, denemelerde işaretlenmiş bir hata bulunmuyor!</div>`;
+    // Kullanıcıya ait tüm verileri (soru fotoğrafları dahil) tek JSON dosyasında yedekler.
+    async function exportUserBackup() {
+        if (!currentUsername) { alert("Önce kullanıcı hesabıyla giriş yapın."); return; }
+        try {
+            await saveData();
+            const username = currentUsername;
+            const allSettings = await new Promise((resolve, reject) => {
+                const tx = db.transaction("app_settings", "readonly");
+                const req = tx.objectStore("app_settings").getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => reject(req.error || new Error("Yedek verileri okunamadı."));
+            });
+            const suffix = "_" + username.toLowerCase();
+            const settings = allSettings.filter(item => String(item.key || "").toLowerCase().startsWith("lgs_") && String(item.key || "").toLowerCase().endsWith(suffix));
+            const user = await getDBUser(username);
+            const questions = await getDBQuestions(username);
+            if (!user) throw new Error("Kullanıcı hesabı bulunamadı.");
+            const backup = {
+                format: "LGS_TAKIP_BACKUP",
+                version: 1,
+                createdAt: new Date().toISOString(),
+                username,
+                user,
+                settings,
+                questions
+            };
+            const blob = new Blob([JSON.stringify(backup)], { type: "application/json;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `LGS_Yedek_${username}_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            alert("Yedek dosyası indirildi. Öğretmene HTML uygulamasıyla birlikte bu JSON dosyasını da gönderin.");
+        } catch (err) {
+            console.error(err);
+            alert("Yedek oluşturulamadı: " + (err.message || err));
         }
     }
 
-    function saveData() {
+    // Yedek yalnızca içindeki kullanıcı hesabını günceller; diğer kullanıcıların verilerine dokunmaz.
+    async function importUserBackup(input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        input.value = "";
+        if (!currentUsername) { alert("Yedek yüklemek için önce bir kullanıcı hesabıyla giriş yapın."); return; }
+        try {
+            const backup = JSON.parse(await file.text());
+            if (!backup || backup.format !== "LGS_TAKIP_BACKUP" || backup.version !== 1 || !backup.user || !backup.username || !Array.isArray(backup.settings) || !Array.isArray(backup.questions)) {
+                throw new Error("Bu dosya geçerli bir LGS Takip yedeği değil.");
+            }
+            const username = String(backup.username).trim().toLowerCase();
+            if (!username || String(backup.user.username || "").toLowerCase() !== username) throw new Error("Yedek kullanıcı bilgileri tutarsız.");
+            const suffix = "_" + username;
+            if (backup.settings.some(item => !item || typeof item.key !== "string" || !item.key.toLowerCase().startsWith("lgs_") || !item.key.toLowerCase().endsWith(suffix))) throw new Error("Yedekte geçersiz kullanıcı verisi var.");
+            if (backup.questions.some(q => !q || String(q.user || "").toLowerCase() !== username || q.id === undefined || typeof q.image !== "string")) throw new Error("Yedekte geçersiz soru kaydı var.");
+            const confirmText = `“${username}” hesabının yedeği yüklenecek. Bu hesaptaki mevcut kayıtlar yedekteki kayıtlarla değiştirilecek. Diğer kullanıcı hesapları etkilenmez. Devam edilsin mi?`;
+            if (!confirm(confirmText)) return;
+
+            // Önce mevcut hesap anahtarlarını ve sorularını temizle, ardından yedekteki verileri yaz.
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction(["app_settings", "users", "questions"], "readwrite");
+                const settingsStore = tx.objectStore("app_settings");
+                const allReq = settingsStore.getAll();
+                allReq.onsuccess = () => {
+                    const suffix = "_" + username;
+                    (allReq.result || []).forEach(item => {
+                        const key = String(item.key || "").toLowerCase();
+                        if (key.startsWith("lgs_") && key.endsWith(suffix)) settingsStore.delete(item.key);
+                    });
+                    backup.settings.forEach(item => settingsStore.put(item));
+                    tx.objectStore("users").put({ ...backup.user, username });
+                    const qStore = tx.objectStore("questions");
+                    const qReq = qStore.getAll();
+                    qReq.onsuccess = () => {
+                        (qReq.result || []).forEach(q => { if (String(q.user || "").toLowerCase() === username) qStore.delete(q.id); });
+                        backup.questions.forEach(q => qStore.put(q));
+                    };
+                    qReq.onerror = () => { try { tx.abort(); } catch (_) {} };
+                };
+                allReq.onerror = () => { try { tx.abort(); } catch (_) {} };
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error || new Error("Yedek veritabanına yazılamadı."));
+                tx.onabort = () => reject(tx.error || new Error("Yedek yükleme iptal edildi."));
+            });
+            await saveDBSetting("active_user", username);
+            await launchApp(username);
+            alert(`“${username}” hesabının yedeği başarıyla yüklendi. Bu kullanıcı adı ve yedekteki parola ile giriş yapılabilir.`);
+        } catch (err) {
+            console.error(err);
+            alert("Yedek yüklenemedi: " + (err.message || err));
+        }
+    }
+
+    async function saveData() {
         document.querySelectorAll('#subjects-container input[type="checkbox"]').forEach(cb => {
             let key = cb.getAttribute('data-key');
-            if(key) localStorage.setItem(key, cb.checked);
+            if(key) topicChecks[key] = cb.checked;
         });
 
         document.querySelectorAll('#exam-table-body select').forEach(sel => {
             let key = sel.getAttribute('data-exam-key');
-            if(key) localStorage.setItem(key, sel.value);
+            if(key) examSelections[key] = sel.value;
         });
 
-        localStorage.setItem('lgs_exam_count', examCount);
-        localStorage.setItem('lgs_books_data', JSON.stringify(booksData));
-        localStorage.setItem('lgs_study_logs', JSON.stringify(studyLogs));
-        try {
-            localStorage.setItem('lgs_custom_topics', JSON.stringify(lgsData));
-        } catch (e) {}
-        localStorage.setItem('lgs_exam_names', JSON.stringify(examNames));
+        let activeUser = currentUsername || await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
+        await saveDBSetting(`lgs_exam_selections_${activeUser}`, examSelections);
+        await saveDBSetting(`lgs_exam_count_${activeUser}`, examCount);
+        await saveDBSetting(`lgs_books_data_${activeUser}`, booksData);
+        await saveDBSetting(`lgs_study_logs_${activeUser}`, studyLogs);
+        await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
+        await saveDBSetting(`lgs_exam_names_${activeUser}`, examNames);
+        await saveDBSetting(`lgs_custom_exam_options_${activeUser}`, customExamOptions);
+        await saveDBSetting(`lgs_schedule_${activeUser}`, scheduleData);
+        await saveDBSetting(`lgs_day_hours_${activeUser}`, dayHoursData);
 
         let alertBox = document.getElementById('save-alert');
         alertBox.style.display = 'block';
