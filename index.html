@@ -22,20 +22,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 10px; min-height: 100vh; }
         
-        #auth-overlay {
-            position: fixed; inset: 0; z-index: 100000; background: rgba(15, 23, 42, 0.85);
-            display: flex; align-items: center; justify-content: center; padding: 15px;
-        }
-        .auth-card {
-            background: #fff; width: 100%; max-width: 380px; border-radius: 16px; padding: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .auth-card h2 { color: var(--primary); font-size: 1.3rem; margin-bottom: 8px; text-align: center; }
-        .auth-card p { font-size: 0.82rem; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
-        .auth-tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
-        .auth-tab { flex: 1; padding: 8px; background: none; border: none; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; text-align: center; }
-        .auth-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
-
         .container { max-width: 1200px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; display: none; }
         
         .header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
@@ -152,7 +138,7 @@
             @page { size: A4 portrait; margin: 8mm; }
             body { background: white !important; padding: 0 !important; color: black !important; font-size: 8pt !important; }
             .container { box-shadow: none !important; border: none !important; max-width: 100% !important; width: 100% !important; display: block !important; margin: 0 !important; padding: 0 !important; }
-            .no-print, .tabs, .header, .actions-bar, #auth-overlay { display: none !important; }
+            .no-print, .tabs, .header, .actions-bar { display: none !important; }
             .tab-pane { display: none !important; }
             .tab-pane.active { display: block !important; margin: 0 !important; padding: 0 !important; }
             
@@ -197,67 +183,14 @@
 </head>
 <body>
 
-<div id="auth-overlay">
-    <div class="auth-card">
-        <h2 id="auth-title">Giriş Yap</h2>
-        <p id="auth-subtitle">LGS Takip & Program Sistemine Hoş Geldiniz</p>
-        
-        <div class="auth-tabs no-print">
-            <button type="button" class="auth-tab active" id="tab-login-btn" onclick="switchAuthMode('login')">Giriş Yap</button>
-            <button type="button" class="auth-tab" id="tab-register-btn" onclick="switchAuthMode('register')">Kayıt Ol</button>
+<div id="role-entry-overlay" style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div class="section-box" role="dialog" aria-modal="true" aria-labelledby="role-entry-title" style="width:100%;max-width:440px;padding:26px;text-align:center;">
+        <h2 id="role-entry-title" style="margin-bottom:8px;color:var(--primary);">LGS Takip Sistemine Giriş</h2>
+        <p style="margin-bottom:18px;color:var(--text-muted);">Devam etmek için kullanım türünü seçin.</p>
+        <div style="display:grid;gap:10px;">
+            <button type="button" class="btn btn-primary" onclick="enterStudentMode()" style="padding:13px;">🎓 Öğrenci Girişi</button>
+            <button type="button" class="btn btn-success" onclick="enterTeacherMode()" style="padding:13px;">👩‍🏫 Öğretmen Girişi</button>
         </div>
-
-        <div id="form-login">
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adı</label>
-                <input type="text" id="login-username" placeholder="Kullanıcı adınızı girin">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Parola</label>
-                <input type="password" id="login-password" placeholder="Parolanızı girin">
-            </div>
-            <button type="button" class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="handleLogin()">Giriş Yap</button>
-            <div style="text-align: center;">
-                <a href="#" onclick="switchAuthMode('forgot'); return false;" style="font-size: 0.78rem; color: var(--primary); text-decoration: none;">Şifremi Unuttum?</a>
-            </div>
-        </div>
-
-        <div id="form-register" style="display: none;">
-            <div style="margin-bottom: 10px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adı Belirle</label>
-                <input type="text" id="reg-username" placeholder="Kullanıcı adı">
-            </div>
-            <div style="margin-bottom: 10px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Parola Belirle</label>
-                <input type="password" id="reg-password" placeholder="Güçlü bir parola">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Güvenlik Sorusu: En sevdiğiniz hayvan?</label>
-                <input type="text" id="reg-animal" placeholder="Örn: Kedi, At, Kartal...">
-            </div>
-            <button type="button" class="btn btn-success" style="width:100%;" onclick="handleRegister()">Hesap Oluştur ve Başla</button>
-        </div>
-
-        <div id="form-forgot" style="display: none;">
-            <div style="margin-bottom: 10px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Kullanıcı Adınız</label>
-                <input type="text" id="forgot-username" placeholder="Kayıtlı kullanıcı adınız">
-            </div>
-            <div style="margin-bottom: 10px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Güvenlik Sorusunun Cevabı (En sevdiğiniz hayvan)</label>
-                <input type="text" id="forgot-animal" placeholder="Kayıttaki cevap">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Yeni Parola Belirle</label>
-                <input type="password" id="forgot-newpass" placeholder="Yeni parolanız">
-            </div>
-            <button type="button" class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="handleForgotReset()">Parolayı Sıfırla</button>
-            <div style="text-align: center;">
-                <a href="#" onclick="switchAuthMode('login'); return false;" style="font-size: 0.78rem; color: var(--primary); text-decoration: none;">← Giriş Ekranına Dön</a>
-            </div>
-        </div>
-
-        <div id="auth-error" style="color: var(--danger); font-size: 0.78rem; text-align: center; margin-top: 10px; font-weight: 600;"></div>
     </div>
 </div>
 
@@ -265,17 +198,32 @@
     <div class="header no-print">
         <div>
             <h1>🎯 8. Sınıf LGS Öğrenci Takip & Program</h1>
-            <p>IndexedDB ile cihazınızda öğrenci bazlı veri saklama</p>
-            <p class="no-print" style="font-size:0.8rem;margin-top:4px;">Öğrenci kodu: <strong id="current-student-code">—</strong></p>
+            <p><span id="current-role-label">Öğrenci</span> görünümü · Veriler bu tarayıcıda IndexedDB ile saklanır</p>
+            <p class="no-print" style="font-size:0.8rem;margin-top:4px;">Öğrenci: <strong id="current-student-name">Öğrenci</strong> · Kod: <strong id="current-student-code">—</strong> <button type="button" class="btn" onclick="renameCurrentStudent()" style="padding:3px 7px;font-size:0.72rem;">Adı Düzenle</button></p>
         </div>
         <div class="author-info">
             <span>Yazar: <strong>Ali Tambuğa</strong> | <a href="mailto:alifen60dnm@gmail.com">alifen60dnm@gmail.com</a></span>
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <button type="button" class="btn btn-success" onclick="exportUserBackup()" style="padding: 6px 10px; font-size: 0.75rem;">⬇️ Öğrenci Yedeği İndir</button>
-                <button type="button" class="btn btn-dark" onclick="document.getElementById('backup-import-file').click()" style="padding: 6px 10px; font-size: 0.75rem;">⬆️ Kendi Yedeğimi Yükle</button>
-                <input type="file" id="backup-import-file" accept=".json,application/json" style="display:none" onchange="importUserBackup(this)">
-                <button type="button" class="btn btn-dark" onclick="handleLogout()" style="padding: 6px 12px; font-size: 0.75rem;">Çıkış Yap</button>
+                <button type="button" id="export-backup-btn" class="btn btn-success" onclick="exportUserBackup()" style="padding: 6px 10px; font-size: 0.75rem;">⬇️ Öğrenci Yedeği İndir</button>
+                <button type="button" id="student-backup-open-btn" class="btn btn-dark" onclick="document.getElementById('student-backup-file').click()" style="padding: 6px 10px; font-size: 0.75rem;">⬆️ Öğrenci Yedeği Aç</button>
+
+                <input type="file" id="student-backup-file" accept=".json,application/json" style="display:none" onchange="importStudentBackup(this)">
+                <button type="button" class="btn" onclick="returnToRolePicker()" style="padding: 6px 10px; font-size: 0.75rem;">⇄ Rol Değiştir</button>
             </div>
+
+        </div>
+    </div>
+
+    <div id="teacher-workspace" class="section-box no-print" style="display:none;margin:14px 20px 0;">
+        <div class="flex-between" style="gap:10px;align-items:center;">
+            <div><h2>👩‍🏫 Öğrenci Yönetimi</h2><p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">Öğrenci yedeği ekleyin; öğrenciyi seçince tüm takip ekranları açılır.</p></div>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('teacher-backup-file').click()">⬆️ Öğrenci Yedeği Ekle</button>
+            <input type="file" id="teacher-backup-file" accept=".json,application/json" style="display:none" onchange="importStudentBackup(this)">
+        </div>
+        <div id="teacher-students-list" style="margin-top:12px;"></div>
+        <div id="teacher-profile-picker-wrap" style="display:none;margin-top:12px;max-width:460px;">
+            <label for="student-profile-select" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:5px;">Görüntülenecek öğrenci</label>
+            <select id="student-profile-select" onchange="switchStudentProfile(this.value)" aria-label="Görüntülenecek öğrenci"></select>
         </div>
     </div>
 
@@ -286,7 +234,6 @@
         <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
         <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma</button>
         <button class="tab-btn" onclick="switchTab('sorular', this)">📸 Sorularım</button>
-        <button class="tab-btn" onclick="switchTab('ogretmen', this)">👩‍🏫 Öğretmen</button>
         <button class="tab-btn" onclick="switchTab('eksik', this)">⚠️ Eksik</button>
     </div>
 
@@ -481,18 +428,6 @@
             </div>
         </div>
 
-        <!-- ÖĞRETMEN GÖRÜNÜMÜ -->
-        <div id="tab-ogretmen" class="tab-pane">
-            <div class="flex-between"><div><h2>👩‍🏫 Öğretmen Paneli</h2><p style="font-size:0.82rem;color:var(--text-muted);">Öğrenciler uygulamadan öğrenci kodlu yedeği indirip size gönderebilir. Her kod ayrı öğrenci olarak saklanır.</p></div></div>
-            <div class="section-box no-print">
-                <div class="grid-2" style="align-items:end;">
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Rapor ayı</label><input type="month" id="teacher-report-month" onchange="renderTeacherDashboard()"></div>
-                    <div><button class="btn btn-primary" onclick="document.getElementById('teacher-backup-file').click()" style="width:100%;">⬆️ Öğrenci Yedeği Ekle</button><input type="file" id="teacher-backup-file" accept=".json,application/json" style="display:none" onchange="importTeacherBackup(this)"></div>
-                </div>
-                <p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;">Paylaşılan yedek öğrenci adı ve hesap parolası içermez; öğrenci kodu ile eşleştirilir. Aynı kodla gelen yeni yedek o öğrencinin önceki kaydını günceller.</p>
-            </div>
-            <div id="teacher-students-container"></div>
-        </div>
         <!-- 7. EKSİK RAPORU -->
         <div id="tab-eksik" class="tab-pane">
             <div class="flex-between">
@@ -617,7 +552,8 @@
 
 <script>
     let db;
-    let currentUsername = null;
+    let currentUsername = null, currentStudentName = "", currentRole = null, studentOwnerUsername = null;
+    let appLoading = false;
     let selectedQuestionIds = new Set();
     const DB_NAME = "LGS_Takip_And_Program_DB_V5";
     const DB_VERSION = 1;
@@ -690,6 +626,16 @@
             const req = store.get(username.trim().toLowerCase());
             req.onsuccess = () => resolve(req.result || null);
             req.onerror = () => resolve(null);
+        });
+    }
+
+    function getDBUsers() {
+        return new Promise((resolve) => {
+            if (!db) { resolve([]); return; }
+            const tx = db.transaction("users", "readonly");
+            const req = tx.objectStore("users").getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
         });
     }
 
@@ -776,7 +722,7 @@
     const defaultExamOptions = ["-", "İşlem Hatası", "Soru Kökünü Yanlış Okuma", "Yorum / Mantık Yürütme Hatası", "Bilgi Eksikliği"];
     let customExamOptions = [], examCount = 5, booksData = {}, studyLogs = [], questionsData = [], examSelections = {}, topicChecks = {};
     let scheduleData = {}, dayHoursData = {};
-    let topicStudyData = {}, teacherRecords = [], currentStudentCode = "";
+    let topicStudyData = {}, currentStudentCode = "";
     let activeSlot = null, tempDayHours = {};
 
     function getAllExamOptions() { return [...defaultExamOptions, ...customExamOptions]; }
@@ -848,132 +794,174 @@
         if ([...topicSelect.options].some(option => option.value === previous)) topicSelect.value = previous;
     }
     window.onload = async function() {
-        await initDB();
-        let activeUser = await getDBSetting('active_user', null);
-        if (activeUser) {
-            await launchApp(activeUser);
-        } else {
-            let tx = db.transaction("users", "readonly");
-            let req = tx.objectStore("users").count();
-            req.onsuccess = () => {
-                if (req.result === 0) {
-                    switchAuthMode('register');
-                    document.getElementById('auth-subtitle').textContent = "İlk kullanıcı hesabınızı oluşturun.";
-                }
-            };
+        try {
+            await initDB();
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction("app_settings", "readwrite");
+                tx.objectStore("app_settings").delete("lgs_backup_directory_handle");
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error || new Error("Eski klasör yedeği ayarı silinemedi."));
+            });
+
+            let activeUser = await getDBSetting('active_user', null);
+            let users = await getDBUsers();
+            let profile = activeUser ? users.find(user => user.username === String(activeUser).toLowerCase()) : null;
+            for (const user of users) await migrateLegacyTeacherRecords(user.username);
+            users = await getDBUsers();
+            const rememberedStudent = await getDBSetting("lgs_student_user", null);
+            profile = rememberedStudent ? users.find(user => user.username === String(rememberedStudent).toLowerCase() && !user.importedStudent) : null;
+            if (!profile && activeUser) profile = users.find(user => user.username === String(activeUser).toLowerCase() && !user.importedStudent) || null;
+            if (!profile) profile = users.find(user => !user.importedStudent) || null;
+            if (!profile) {
+                const username = "yerel_ogrenci_" + Date.now();
+                profile = { username: username, studentCode: generateStudentCode(), studentName: "Öğrenci", localOnly: true };
+                await saveDBUser(profile);
+            }
+            studentOwnerUsername = profile.username;
+            await saveDBSetting("lgs_student_user", studentOwnerUsername);
+            document.getElementById("role-entry-overlay").style.display = "flex";
+            document.getElementById("main-container").style.display = "none";
+        } catch (err) {
+            console.error(err);
+            alert("Uygulama verileri açılamadı: " + (err.message || err));
         }
     };
 
-    function switchAuthMode(mode) {
-        document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
-        document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
-        document.getElementById('form-forgot').style.display = mode === 'forgot' ? 'block' : 'none';
-        document.getElementById('tab-login-btn').classList.toggle('active', mode === 'login');
-        document.getElementById('tab-register-btn').classList.toggle('active', mode === 'register');
-        document.getElementById('auth-error').textContent = '';
+    function applyRoleVisibility(hasStudent = Boolean(currentUsername)) {
+        const teacherMode = currentRole === "teacher";
+        const teacherPanel = document.getElementById("teacher-workspace");
+        const studentImport = document.getElementById("student-backup-open-btn");
+        const exportButton = document.getElementById("export-backup-btn");
+
+        const tabs = document.querySelector(".tabs");
+        const content = document.querySelector(".content");
+        if (teacherPanel) teacherPanel.style.display = teacherMode ? "block" : "none";
+        if (studentImport) studentImport.style.display = teacherMode ? "none" : "inline-block";
+        if (exportButton) exportButton.style.display = hasStudent ? "inline-block" : "none";
+
+        if (tabs) tabs.style.display = teacherMode && !hasStudent ? "none" : "flex";
+        if (content) content.style.display = teacherMode && !hasStudent ? "none" : "block";
+    }
+
+    async function enterStudentMode() {
+        try {
+            if (!studentOwnerUsername) throw new Error("Öğrenci profili bulunamadı.");
+            if (currentUsername && currentRole) { await saveData(); }
+            currentRole = "student";
+            document.getElementById("role-entry-overlay").style.display = "none";
+            document.getElementById("main-container").style.display = "block";
+            document.getElementById("current-role-label").textContent = "Öğrenci";
+            applyRoleVisibility(true);
+            await saveDBSetting("active_user", studentOwnerUsername);
+            await launchApp(studentOwnerUsername);
+        } catch (err) {
+            alert("Öğrenci ekranı açılamadı: " + (err.message || err));
+        }
+    }
+
+    async function enterTeacherMode() {
+        try {
+            if (currentUsername && currentRole) { await saveData(); }
+            currentRole = "teacher";
+            document.getElementById("role-entry-overlay").style.display = "none";
+            document.getElementById("main-container").style.display = "block";
+            document.getElementById("current-role-label").textContent = "Öğretmen";
+            const profiles = (await getDBUsers()).filter(user => user && user.importedStudent && user.studentCode);
+            const activeProfile = profiles.find(user => user.username === currentUsername);
+            if (activeProfile) {
+                await openTeacherStudent(activeProfile.username);
+            } else if (profiles.length) {
+                await openTeacherStudent(profiles[0].username);
+            } else {
+                currentUsername = null;
+                currentStudentName = "";
+                currentStudentCode = "";
+                document.getElementById("current-student-name").textContent = "Öğrenci seçilmedi";
+                document.getElementById("current-student-code").textContent = "—";
+                applyRoleVisibility(false);
+                await renderTeacherWorkspace();
         
-        if(mode === 'forgot') {
-            document.getElementById('auth-title').textContent = "Şifremi Unuttum";
-            document.getElementById('auth-subtitle').textContent = "Güvenlik sorusuyla parolanızı yenileyin.";
-        } else if(mode === 'register') {
-            document.getElementById('auth-title').textContent = "Kayıt Ol";
-            document.getElementById('auth-subtitle').textContent = "Yeni bir kullanıcı hesabı oluşturun.";
+            }
+        } catch (err) {
+            alert("Öğretmen ekranı açılamadı: " + (err.message || err));
+        }
+    }
+
+    async function returnToRolePicker() {
+        try { if (currentUsername) { await saveData(); } } catch (err) { console.warn(err); }
+        currentRole = null;
+        currentUsername = null;
+        document.getElementById("main-container").style.display = "none";
+        document.getElementById("role-entry-overlay").style.display = "flex";
+    }
+
+    async function openTeacherStudent(username) {
+        if (currentRole !== "teacher") return;
+        const target = String(username || "").trim().toLowerCase();
+        const profile = await getDBUser(target);
+        if (!profile || !profile.importedStudent) return;
+        if (currentUsername && currentUsername !== target) { await saveData(); }
+        await saveDBSetting("active_user", target);
+        await launchApp(target);
+    }
+
+    async function renderTeacherWorkspace() {
+        const list = document.getElementById("teacher-students-list");
+        if (!list) return;
+        list.replaceChildren();
+        const profiles = (await getDBUsers()).filter(user => user && user.importedStudent && user.studentCode)
+            .sort((a, b) => String(a.studentName || a.username).localeCompare(String(b.studentName || b.username), "tr"));
+        if (!profiles.length) {
+            const empty = document.createElement("p");
+            empty.className = "section-box";
+            empty.textContent = "Henüz öğrenci eklenmedi. Öğrencinin gönderdiği JSON yedeğini yükleyin.";
+            list.appendChild(empty);
         } else {
-            document.getElementById('auth-title').textContent = "Giriş Yap";
-            document.getElementById('auth-subtitle').textContent = "LGS Takip & Program Sistemine Hoş Geldiniz";
+            profiles.forEach(profile => {
+                const card = document.createElement("div");
+                card.className = "section-box";
+                card.style.margin = "8px 0";
+                card.style.display = "flex";
+                card.style.justifyContent = "space-between";
+                card.style.alignItems = "center";
+                card.style.gap = "10px";
+                const info = document.createElement("div");
+                const title = document.createElement("strong");
+                title.textContent = profile.studentName || "İsimsiz öğrenci";
+                const code = document.createElement("div");
+                code.style.cssText = "font-size:.78rem;color:var(--text-muted);margin-top:3px;";
+                code.textContent = "Öğrenci kodu: " + profile.studentCode;
+                info.append(title, code);
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-primary";
+                button.textContent = "Tüm ekranlarını aç";
+                button.addEventListener("click", () => openTeacherStudent(profile.username));
+                card.append(info, button);
+                list.appendChild(card);
+            });
         }
-    }
-
-    async function hashCredential(value, caseInsensitive = false) {
-        let normalized = String(value || "").trim();
-        if (caseInsensitive) normalized = normalized.toLocaleLowerCase("tr-TR");
-        if (window.crypto && crypto.subtle) {
-            const bytes = new TextEncoder().encode(normalized);
-            const digest = await crypto.subtle.digest("SHA-256", bytes);
-            return "sha256:" + Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-        }
-        return "plain:" + normalized;
-    }
-
-    async function verifyCredential(input, storedHash, legacyValue, caseInsensitive = false) {
-        if (storedHash) return (await hashCredential(input, caseInsensitive)) === storedHash;
-        const entered = String(input || "").trim();
-        const saved = String(legacyValue || "").trim();
-        return caseInsensitive ? entered.toLocaleLowerCase("tr-TR") === saved.toLocaleLowerCase("tr-TR") : entered === saved;
-    }
-
-    async function handleRegister() {
-        let username = document.getElementById('reg-username').value.trim().toLowerCase();
-        let password = document.getElementById('reg-password').value.trim();
-        let animal = document.getElementById('reg-animal').value.trim();
-        let errEl = document.getElementById('auth-error');
-
-        if (!username || !password || !animal) { errEl.textContent = "Lütfen tüm alanları doldurun!"; return; }
-        if (password.length < 6) { errEl.textContent = "Parola en az 6 karakter olmalıdır."; return; }
-        let existing = await getDBUser(username);
-        if (existing) { errEl.textContent = "Bu kullanıcı adı zaten alınmış!"; return; }
-
-        let newUser = { username, studentCode: generateStudentCode(), passwordHash: await hashCredential(password), animalHash: await hashCredential(animal, true) };
-        await saveDBUser(newUser);
-        await saveDBSetting('active_user', username);
-        await launchApp(username);
-    }
-
-    async function handleLogin() {
-        let username = document.getElementById('login-username').value.trim().toLowerCase();
-        let password = document.getElementById('login-password').value.trim();
-        let errEl = document.getElementById('auth-error');
-
-        if (!username || !password) { errEl.textContent = "Kullanıcı adı ve parola girilmelidir!"; return; }
-        let user = await getDBUser(username);
-        if (!user || !(await verifyCredential(password, user.passwordHash, user.password))) { errEl.textContent = "Kullanıcı adı veya parola hatalı!"; return; }
-        if (!user.passwordHash) { user.passwordHash = await hashCredential(password); delete user.password; }
-        if (!user.studentCode) user.studentCode = generateStudentCode();
-        await saveDBUser(user);
-        await saveDBSetting('active_user', user.username);
-        await launchApp(user.username);
-    }
-
-    async function handleForgotReset() {
-        let username = document.getElementById('forgot-username').value.trim().toLowerCase();
-        let animal = document.getElementById('forgot-animal').value.trim();
-        let newPass = document.getElementById('forgot-newpass').value.trim();
-        let errEl = document.getElementById('auth-error');
-
-        if (!username || !animal || !newPass) { errEl.textContent = "Tüm alanları doldurun!"; return; }
-        if (newPass.length < 6) { errEl.textContent = "Yeni parola en az 6 karakter olmalıdır."; return; }
-        let user = await getDBUser(username);
-        let answerOk = user && (user.animalHash ? await verifyCredential(animal, user.animalHash, null, true) : await verifyCredential(animal, null, user.animal, true));
-        if (!user || !answerOk) { errEl.textContent = "Kullanıcı adı veya güvenlik sorusunun cevabı hatalı!"; return; }
-
-        user.passwordHash = await hashCredential(newPass);
-        delete user.password;
-        if (!user.animalHash && user.animal) user.animalHash = await hashCredential(user.animal, true);
-        delete user.animal;
-        await saveDBUser(user);
-        alert("Parola güncellendi! Şimdi giriş yapabilirsiniz.");
-        switchAuthMode('login');
-    }
-
-    async function handleLogout() {
-        await saveDBSetting('active_user', null);
-        currentUsername = null; questionsData = []; selectedQuestionIds.clear();
-        document.getElementById('auth-overlay').style.display = 'flex';
-        document.getElementById('main-container').style.display = 'none';
-        document.getElementById('login-password').value = '';
+        await refreshStudentProfileSelector();
     }
 
     async function launchApp(username) {
+
+
+        appLoading = true;
         username = String(username || "").trim().toLowerCase();
         currentUsername = username;
         await migrateLegacyUserSettingKeys(username);
         let profile = await getDBUser(username);
         if (profile && !profile.studentCode) { profile.studentCode = generateStudentCode(); await saveDBUser(profile); }
+        if (profile && !profile.studentName) { profile.studentName = profile.username || username; await saveDBUser(profile); }
         currentStudentCode = profile ? profile.studentCode : "";
+        currentStudentName = profile ? String(profile.studentName || profile.username || "Öğrenci") : "Öğrenci";
+        const nameEl = document.getElementById("current-student-name");
+        if (nameEl) nameEl.textContent = currentStudentName;
         const codeEl = document.getElementById("current-student-code");
         if (codeEl) codeEl.textContent = currentStudentCode || "—";
-        document.getElementById('auth-overlay').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
+        applyRoleVisibility(true);
 
         lgsData = await getDBSetting(`lgs_custom_topics_${username}`, JSON.parse(JSON.stringify(defaultLgsData)));
         examNames = await getDBSetting(`lgs_exam_names_${username}`, {});
@@ -982,7 +970,6 @@
         booksData = await getDBSetting(`lgs_books_data_${username}`, {});
         studyLogs = await getDBSetting(`lgs_study_logs_${username}`, []);
         topicStudyData = await getDBSetting(`lgs_topic_study_${username}`, {});
-        teacherRecords = await getDBSetting(`lgs_teacher_students_${username}`, []);
         examSelections = await getDBSetting(`lgs_exam_selections_${username}`, {});
         topicChecks = await getDBSetting(`lgs_topic_checks_${username}`, {});
         scheduleData = await getDBSetting(`lgs_schedule_${username}`, {});
@@ -1004,7 +991,6 @@
         renderBooks();
         renderStudyTracking();
         renderTopicReviewTracking();
-        renderTeacherDashboard();
         renderQuestions();
         renderScheduleTable();
         updateProgramStats();
@@ -1012,12 +998,62 @@
         updateLogTopicOptions();
         const currentMonth = getCurrentMonthKey();
         const reportMonth = document.getElementById("report-month");
-        const teacherMonth = document.getElementById("teacher-report-month");
         if (reportMonth && !reportMonth.value) reportMonth.value = currentMonth;
-        if (teacherMonth && !teacherMonth.value) teacherMonth.value = currentMonth;
 
         let dateInp = document.getElementById('log-date');
         if(dateInp) dateInp.valueAsDate = new Date();
+        appLoading = false;
+        await refreshStudentProfileSelector();
+        if (currentRole === "teacher") await renderTeacherWorkspace();
+
+
+    }
+
+    async function refreshStudentProfileSelector() {
+        const select = document.getElementById("student-profile-select");
+        const wrap = document.getElementById("teacher-profile-picker-wrap");
+        if (!select || !wrap) return;
+        const users = await getDBUsers();
+        const profiles = currentRole === "teacher" ? users.filter(user => user && user.importedStudent && user.username && user.studentCode) : [];
+        select.replaceChildren();
+        profiles.sort((a, b) =>
+            String(a.studentName || a.username).localeCompare(String(b.studentName || b.username), "tr")
+        ).forEach(user => {
+            const option = document.createElement("option");
+            option.value = user.username;
+            option.textContent = (user.studentName || user.username) + " · " + user.studentCode;
+            select.appendChild(option);
+        });
+        select.value = currentUsername;
+        wrap.style.display = currentRole === "teacher" && profiles.length ? "block" : "none";
+    }
+
+    async function switchStudentProfile(username) {
+        if (currentRole !== "teacher") return;
+        const target = String(username || "").trim().toLowerCase();
+        if (!target || target === currentUsername) return;
+        const profile = await getDBUser(target);
+        if (!profile || !profile.importedStudent) { await refreshStudentProfileSelector(); return; }
+        await openTeacherStudent(target);
+    }
+
+    async function renameCurrentStudent() {
+        const profile = await getDBUser(currentUsername);
+        if (!profile) return;
+        const entered = prompt("Yedekte ve öğrenci seçiminde görünecek ad:", currentStudentName || profile.username || "");
+        if (entered === null) return;
+        const name = entered.trim();
+        if (!name || name.length > 100 || /[<>]/.test(name)) {
+            alert("Ad boş olamaz, 100 karakteri geçemez ve < > karakterlerini içeremez.");
+            return;
+        }
+        profile.studentName = name;
+        await saveDBUser(profile);
+        currentStudentName = name;
+        const nameEl = document.getElementById("current-student-name");
+        if (nameEl) nameEl.textContent = name;
+        await refreshStudentProfileSelector();
+        if (currentRole === "teacher") await renderTeacherWorkspace();
     }
 
     function switchTab(tabId, btn) {
@@ -1035,7 +1071,6 @@
             if(dateInp) dateInp.valueAsDate = new Date();
         }
         if(tabId === 'sorular') renderQuestions();
-        if(tabId === 'ogretmen') renderTeacherDashboard();
         if(tabId === 'program') {
             renderScheduleTable();
             updateProgramStats();
@@ -2061,120 +2096,6 @@
         });
     }
 
-    function renderTeacherDashboard() {
-        const container = document.getElementById("teacher-students-container");
-        if (!container) return;
-        container.replaceChildren();
-        const monthInput = document.getElementById("teacher-report-month");
-        if (monthInput && !monthInput.value) monthInput.value = getCurrentMonthKey();
-        const selectedMonth = monthInput && monthInput.value ? monthInput.value : getCurrentMonthKey();
-        if (!Array.isArray(teacherRecords) || !teacherRecords.length) {
-            const empty = document.createElement("div");
-            empty.className = "section-box";
-            empty.textContent = "Henüz öğrenci yedeği eklenmedi. Öğrenci kodlu JSON yedeğini yukarıdan yükleyin.";
-            container.appendChild(empty);
-            return;
-        }
-
-        const wrap = document.createElement("div");
-        wrap.className = "table-responsive";
-        const table = document.createElement("table");
-        table.style.minWidth = "1050px";
-        const head = document.createElement("thead");
-        const header = document.createElement("tr");
-        ["Öğrenci Kodu", "Ay", "Soru", "Doğru", "Yanlış", "Boş", "Net", "Deneme", "Tekrarı Gelen Konu"].forEach(label => {
-            const cell = document.createElement("th");
-            cell.textContent = label;
-            header.appendChild(cell);
-        });
-        head.appendChild(header);
-        table.appendChild(head);
-        const body = document.createElement("tbody");
-        const monthStart = selectedMonth + "-01";
-        const monthParts = selectedMonth.split("-").map(Number);
-        const monthEndDate = new Date(monthParts[0], monthParts[1], 0);
-        const monthEnd = monthEndDate.getFullYear() + "-" + String(monthEndDate.getMonth() + 1).padStart(2, "0") + "-" + String(monthEndDate.getDate()).padStart(2, "0");
-
-        teacherRecords.slice().sort((a, b) => String(a.studentCode).localeCompare(String(b.studentCode))).forEach(record => {
-            const data = record && record.data ? record.data : {};
-            const logs = Array.isArray(data.studyLogs) ? data.studyLogs : [];
-            const monthLogs = logs.filter(log => String(log.date || "").slice(0, 7) === selectedMonth);
-            const row = document.createElement("tr");
-            const addCell = function(value) {
-                const cell = document.createElement("td");
-                cell.textContent = String(value);
-                row.appendChild(cell);
-                return cell;
-            };
-            addCell(record.studentCode || "—");
-            addCell(formatMonthLabel(selectedMonth));
-            addCell(monthLogs.reduce((sum, log) => sum + (Number(log.questions) || 0), 0));
-            const trackedLogs = monthLogs.filter(log => log.accuracyTracked);
-            const correct = trackedLogs.reduce((sum, log) => sum + (Number(log.correct) || 0), 0);
-            const wrong = trackedLogs.reduce((sum, log) => sum + (Number(log.wrong) || 0), 0);
-            const blank = trackedLogs.reduce((sum, log) => sum + (Number(log.blank) || 0), 0);
-            const net = trackedLogs.reduce((sum, log) => {
-                const calculated = (Number(log.correct) || 0) - (Number(log.wrong) || 0) / 3;
-                return sum + (Number.isFinite(Number(log.net)) ? Number(log.net) : calculated);
-            }, 0);
-            addCell(trackedLogs.length ? correct : "—");
-            addCell(trackedLogs.length ? wrong : "—");
-            addCell(trackedLogs.length ? blank : "—");
-            addCell(trackedLogs.length ? net.toFixed(2) : "—");
-
-            const examCell = addCell("");
-            const examLogs = monthLogs.filter(log => log.examName || String(log.subject || "").toLocaleLowerCase("tr-TR").includes("deneme"));
-            const details = document.createElement("details");
-            const summary = document.createElement("summary");
-            summary.textContent = examLogs.length + " deneme";
-            details.appendChild(summary);
-            if (examLogs.length) {
-                const list = document.createElement("ul");
-                examLogs.forEach(log => {
-                    const item = document.createElement("li");
-                    const logNet = log.accuracyTracked ? Number(log.net) || 0 : null;
-                    item.textContent = formatDateLabel(log.date) + " — " + (log.examName || log.subject || "Deneme") + (logNet === null ? "" : " · Net " + logNet.toFixed(2));
-                    list.appendChild(item);
-                });
-                details.appendChild(list);
-            }
-            examCell.appendChild(details);
-
-            const reviewCell = addCell("");
-            const reviewItems = Object.values(data.topicStudyData || {}).filter(item => item && item.reviewDate && item.reviewDate <= monthEnd);
-            reviewCell.textContent = String(reviewItems.length);
-            body.appendChild(row);
-        });
-        table.appendChild(body);
-        wrap.appendChild(table);
-        container.appendChild(wrap);
-    }
-    function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(reader.error || new Error("Dosya okunamadı."));
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function resizeQuestionImage(dataUrl, maxWidth = 1400, maxHeight = 1800) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-                const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
-                const canvas = document.createElement('canvas');
-                canvas.width = Math.max(1, Math.round(img.width * scale));
-                canvas.height = Math.max(1, Math.round(img.height * scale));
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', 0.82));
-            };
-            img.onerror = () => reject(new Error("Soru görseli açılamadı."));
-            img.src = dataUrl;
-        });
-    }
-
     async function addQuestions() {
         const subject = document.getElementById('question-subject').value;
         const note = document.getElementById('question-note').value.trim();
@@ -2298,9 +2219,9 @@
     }
 
     // Kullanıcıya ait tüm verileri (soru fotoğrafları dahil) tek JSON dosyasında hazırlar.
-    async function createUserBackupFile() {
+    async function createUserBackupFile(options = {}) {
         if (!currentUsername) throw new Error("Önce kullanıcı hesabıyla giriş yapın.");
-        await saveData();
+        if (!options.skipSave) await saveData();
         const profile = await getDBUser(currentUsername);
         if (!profile) throw new Error("Kullanıcı hesabı bulunamadı.");
         if (!profile.studentCode) {
@@ -2314,6 +2235,7 @@
         const backup = {
             format: "LGS_STUDENT_SHARE", version: 2,
             createdAt: new Date().toISOString(), studentCode: currentStudentCode,
+            studentName: String(profile.studentName || profile.username || currentStudentName || currentStudentCode).trim(),
             data: {
                 customTopics: lgsData, examNames: examNames, customExamOptions: customExamOptions,
                 examCount: examCount, booksData: booksData, studyLogs: studyLogs,
@@ -2332,6 +2254,12 @@
 
     async function exportUserBackup() {
         try {
+            let profile = await getDBUser(currentUsername);
+            if (profile && (!profile.studentName || profile.studentName === "Öğrenci")) {
+                await renameCurrentStudent();
+                profile = await getDBUser(currentUsername);
+                if (!profile || !profile.studentName || profile.studentName === "Öğrenci") throw new Error("Öğretmenin göreceği öğrenci adını girin.");
+            }
             const backupFile = await createUserBackupFile();
             const url = URL.createObjectURL(backupFile.blob);
             const link = document.createElement("a");
@@ -2341,7 +2269,7 @@
             link.click();
             link.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1500);
-            alert("Öğrenci kodlu paylaşım yedeği indirildi. Dosyada hesap adı veya parola bilgisi bulunmaz.");
+            alert("Öğrenci adı ve tüm takip kayıtlarını içeren yedek indirildi. Bu dosyayı alan öğretmen, yedeği açınca öğrencinin tüm ekranlarını görebilir.");
         } catch (err) {
             console.error(err);
             alert("Yedek oluşturulamadı: " + (err.message || err));
@@ -2355,6 +2283,7 @@
         const datePattern = /^\d{4}-\d{2}-\d{2}$/;
         if (!isRecord(backup) || backup.format !== "LGS_STUDENT_SHARE" || backup.version !== 2) throw new Error("Bu dosya güncel öğrenci yedeği biçiminde değil.");
         if (typeof backup.studentCode !== "string" || !/^LGS-[A-HJ-NP-Z2-9]{10}$/.test(backup.studentCode)) throw new Error("Öğrenci kodu geçersiz.");
+        if (backup.studentName !== undefined && !safeText(backup.studentName, 100)) throw new Error("Yedekteki öğrenci adı geçersiz.");
         if (!isRecord(backup.data) || !Array.isArray(backup.questions) || backup.questions.length > 2000) throw new Error("Yedekte eksik veya geçersiz veri var.");
         const data = backup.data;
         const objects = ["customTopics", "examNames", "booksData", "examSelections", "topicChecks", "scheduleData", "dayHoursData", "topicStudyData"];
@@ -2396,10 +2325,11 @@
     }
 
     function convertLegacyBackup(legacy) {
-        if (!legacy || legacy.format !== "LGS_TAKIP_BACKUP" || legacy.version !== 1 || !Array.isArray(legacy.settings) || !Array.isArray(legacy.questions) || String(legacy.username || "").trim().toLowerCase() !== currentUsername.toLowerCase()) {
-            throw new Error("Eski yedek yalnızca aynı kullanıcı hesabına yüklenebilir.");
+        const legacyUsername = String(legacy && legacy.username || "").trim().toLowerCase();
+        if (!legacy || legacy.format !== "LGS_TAKIP_BACKUP" || legacy.version !== 1 || !Array.isArray(legacy.settings) || !Array.isArray(legacy.questions) || !legacyUsername) {
+            throw new Error("Eski yedek biçimi geçersiz.");
         }
-        const suffix = "_" + currentUsername.toLowerCase();
+        const suffix = "_" + legacyUsername;
         const data = {
             customTopics: JSON.parse(JSON.stringify(defaultLgsData)), examNames: {}, customExamOptions: [],
             examCount: 5, booksData: {}, studyLogs: [], examSelections: {}, topicChecks: {},
@@ -2417,13 +2347,15 @@
             const prefix = item.key.slice(0, -suffix.length).toLowerCase();
             if (Object.prototype.hasOwnProperty.call(prefixMap, prefix)) data[prefixMap[prefix]] = item.val;
         }
-        if (legacy.questions.some(question => !question || String(question.user || "").toLowerCase() !== currentUsername.toLowerCase())) throw new Error("Eski yedekte başka hesaba ait soru kaydı var.");
+        if (legacy.questions.some(question => !question || String(question.user || "").toLowerCase() !== legacyUsername)) throw new Error("Eski yedekte başka hesaba ait soru kaydı var.");
         const questions = legacy.questions.map(question => ({
             id: question.id, subject: question.subject, note: question.note || "",
             image: question.image, date: question.date || ""
         }));
         return {
-            format: "LGS_STUDENT_SHARE", version: 2, studentCode: currentStudentCode,
+            format: "LGS_STUDENT_SHARE", version: 2,
+            studentCode: /^LGS-[A-HJ-NP-Z2-9]{10}$/.test(String(legacy.studentCode || "")) ? legacy.studentCode : generateStudentCode(),
+            studentName: String(legacy.studentName || legacy.username || currentStudentName || "Öğrenci"),
             createdAt: legacy.createdAt || "", data: data, questions: questions
         };
     }
@@ -2466,56 +2398,101 @@
                 questionRequest.onerror = () => { try { tx.abort(); } catch (_) {} };
             };
             settingsRequest.onerror = () => { try { tx.abort(); } catch (_) {} };
-            tx.oncomplete = resolve;
+            tx.oncomplete = () => resolve();
             tx.onerror = () => reject(tx.error || new Error("Yedek veritabanına yazılamadı."));
             tx.onabort = () => reject(tx.error || new Error("Yedek yükleme iptal edildi."));
         });
     }
 
-    async function importUserBackup(input) {
-        const file = input.files && input.files[0];
-        if (!file) return;
-        input.value = "";
-        if (!currentUsername) { alert("Yedek yüklemek için önce kendi hesabınızla giriş yapın."); return; }
-        try {
-            if (file.size > 75000000) throw new Error("Yedek dosyası 75 MB sınırını aşıyor.");
-            const raw = JSON.parse(await file.text());
-            const profile = await getDBUser(currentUsername);
-            if (!profile) throw new Error("Kullanıcı hesabı bulunamadı.");
-            if (!profile.studentCode) profile.studentCode = currentStudentCode || generateStudentCode();
-            const backup = raw && raw.format === "LGS_TAKIP_BACKUP" ? convertLegacyBackup(raw) : validateStudentShare(raw);
-            if (backup.studentCode !== profile.studentCode && !confirm("Yedekteki öğrenci kodu " + backup.studentCode + ", bu hesabın kodu " + profile.studentCode + ". Yükleme sonrası hesap kodu değişecek. Devam edilsin mi?")) return;
-            if (!confirm(backup.studentCode + " kodlu yedek bu hesaptaki ders, çalışma ve soru kayıtlarını değiştirecek. Devam edilsin mi?")) return;
-            validateStudentShare(backup);
-            await restoreStudentShare(backup, currentUsername);
-            profile.studentCode = backup.studentCode;
-            await saveDBUser(profile);
-            await launchApp(currentUsername);
-            alert("Öğrenci yedeği yüklendi. Hesap parolanız değiştirilmedi.");
-        } catch (err) {
-            console.error(err);
-            alert("Yedek yüklenemedi: " + (err.message || err));
+    async function migrateLegacyTeacherRecords(ownerUsername) {
+        const flagKey = "lgs_teacher_profiles_migrated_" + String(ownerUsername || "").toLowerCase();
+        if (await getDBSetting(flagKey, false)) return;
+        const records = await getDBSetting("lgs_teacher_students_" + ownerUsername, []);
+        const users = await getDBUsers();
+        if (Array.isArray(records)) {
+            for (const raw of records) {
+                try {
+                    const backup = validateStudentShare(raw);
+                    if (users.some(user => user && user.studentCode === backup.studentCode)) continue;
+                    const base = "ogrenci_" + backup.studentCode.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                    let username = base, suffix = 2;
+                    while (users.some(user => user && user.username === username)) username = base + "_" + suffix++;
+                    await restoreStudentShare(backup, username);
+                    const profile = {
+                        username: username, studentCode: backup.studentCode,
+                        studentName: String(backup.studentName || backup.studentCode), importedStudent: true
+                    };
+                    await saveDBUser(profile);
+                    users.push(profile);
+                } catch (err) {
+                    console.warn("Önceki öğretmen yedeği taşınamadı:", err);
+                }
+            }
         }
+        await saveDBSetting(flagKey, true);
     }
 
-    async function importTeacherBackup(input) {
+    function hasCurrentStudentRecords() {
+        const hasBooks = Object.values(booksData || {}).some(list => Array.isArray(list) && list.some(book => book && book.name));
+        const hasExamSelections = Object.values(examSelections || {}).some(value => value && value !== "-");
+        const hasCompletedTopic = Object.values(topicChecks || {}).some(Boolean);
+        const hasCustomTopics = JSON.stringify(lgsData || {}) !== JSON.stringify(defaultLgsData);
+        return Boolean((questionsData || []).length || (studyLogs || []).length || Object.keys(topicStudyData || {}).length ||
+            Object.keys(scheduleData || {}).length || Object.keys(examNames || {}).length || hasBooks || hasExamSelections || hasCompletedTopic || hasCustomTopics);
+    }
+
+    async function importStudentBackup(input) {
         const file = input.files && input.files[0];
         if (!file) return;
         input.value = "";
         try {
+            if (currentRole !== "student" && currentRole !== "teacher") throw new Error("Önce Öğrenci veya Öğretmen Girişi seçin.");
             if (file.size > 75000000) throw new Error("Yedek dosyası 75 MB sınırını aşıyor.");
-            const backup = validateStudentShare(JSON.parse(await file.text()));
-            if (!Array.isArray(teacherRecords)) teacherRecords = [];
-            const existing = teacherRecords.some(record => record.studentCode === backup.studentCode);
-            if (existing && !confirm(backup.studentCode + " kodlu öğrencinin eski kaydı yeni yedekle değiştirilecek. Devam edilsin mi?")) return;
-            teacherRecords = teacherRecords.filter(record => record.studentCode !== backup.studentCode);
-            teacherRecords.push({ ...backup, importedAt: new Date().toISOString() });
-            await saveDBSetting("lgs_teacher_students_" + currentUsername, teacherRecords);
-            renderTeacherDashboard();
-            alert(backup.studentCode + " kodlu öğrenci öğretmen listesine eklendi.");
+            const raw = JSON.parse(await file.text());
+            const backup = raw && raw.format === "LGS_TAKIP_BACKUP" ? convertLegacyBackup(raw) : validateStudentShare(raw);
+            validateStudentShare(backup);
+            const users = await getDBUsers();
+            const teacherMode = currentRole === "teacher";
+            let profile = null;
+            if (teacherMode) {
+                profile = users.find(user => user && user.importedStudent && user.studentCode === backup.studentCode) || null;
+            } else {
+                profile = await getDBUser(studentOwnerUsername);
+                if (!profile || profile.importedStudent) throw new Error("Öğrenci profili bulunamadı.");
+                if (profile.studentCode !== backup.studentCode && !(profile.localOnly && !hasCurrentStudentRecords())) {
+                    throw new Error("Bu yedek bu öğrenci profiline ait değil. Öğrenci yalnızca kendi kodlu yedeğini açabilir.");
+                }
+            }
+            if (profile && !confirm((profile.studentName || backup.studentName || backup.studentCode) + " adlı öğrencinin kayıtları bu yedekle güncellenecek. Devam edilsin mi?")) return;
+
+            let studentName = String(backup.studentName || (profile && profile.studentName) || "").trim();
+            if (!studentName) studentName = String(prompt("Bu eski yedekte öğrenci adı bulunmuyor. Öğrenci adını girin:", "") || "").trim();
+            if (!studentName) studentName = backup.studentCode;
+            backup.studentName = studentName;
+
+            if (!profile) {
+                const base = "ogretmen_" + backup.studentCode.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                let username = base, suffix = 2;
+                while (users.some(user => user && user.username === username)) username = base + "_" + suffix++;
+                profile = { username: username, studentCode: backup.studentCode, studentName: studentName, importedStudent: true };
+            } else {
+                profile.studentName = studentName;
+            }
+
+            if (currentUsername) { await saveData(); }
+            await restoreStudentShare(backup, profile.username);
+            profile.studentCode = backup.studentCode;
+            profile.studentName = studentName;
+            profile.importedStudent = teacherMode;
+            if (!teacherMode) profile.localOnly = false;
+            await saveDBUser(profile);
+            await saveDBSetting("active_user", profile.username);
+            await launchApp(profile.username);
+            if (teacherMode) await renderTeacherWorkspace();
+            alert(studentName + " adlı öğrencinin yedeği açıldı. Konular, program, denemeler, kitaplar, çalışmalar ve çözülemeyen soruların bulunduğu tüm ekranlar bu öğrenciye göre gösteriliyor.");
         } catch (err) {
             console.error(err);
-            alert("Öğrenci yedeği eklenemedi: " + (err.message || err));
+            alert("Öğrenci yedeği açılamadı: " + (err.message || err));
         }
     }
     async function saveData() {
