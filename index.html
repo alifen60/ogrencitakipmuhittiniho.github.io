@@ -156,24 +156,28 @@
             .tab-pane { display: none !important; }
             .tab-pane.active { display: block !important; margin: 0 !important; padding: 0 !important; }
             
-            /* Çalışma raporunda yalnızca aylık ders toplamları kalır. */
+            /* Aylık soru özeti yatay A4'e okunaklı biçimde yazdırılır. */
             #tab-calisma .study-entry-box,
-            #tab-calisma .study-history-box { display: none !important; }
-            #tab-calisma .study-summary-box { display: block !important; border: 0 !important; padding: 0 !important; margin: 0 !important; }
-            #tab-calisma .study-summary-box h3 { font-size: 16pt !important; margin: 0 0 10mm !important; color: #000 !important; }
-            #tab-calisma #study-summary-body tr > *:nth-child(2),
-            #tab-calisma #study-summary-body tr > *:nth-child(3),
-            #tab-calisma #study-summary-body tr > *:nth-child(6),
-            #tab-calisma #study-summary-body tr > *:nth-child(7),
-            #tab-calisma .study-summary-box thead tr > *:nth-child(2),
-            #tab-calisma .study-summary-box thead tr > *:nth-child(3),
-            #tab-calisma .study-summary-box thead tr > *:nth-child(6),
-            #tab-calisma .study-summary-box thead tr > *:nth-child(7) { display: none !important; }
+            #tab-calisma .study-history-box, #tab-calisma .topic-review-box { display: none !important; }
+            #tab-calisma .study-summary-box { display: block !important; border: 0 !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+            #tab-calisma .study-summary-box h3 { font-size: 10pt !important; margin: 0 0 3mm !important; color: #000 !important; }
             #tab-calisma .table-responsive { overflow: visible !important; border: 0 !important; }
-            #tab-calisma table { min-width: 0 !important; width: 100% !important; font-size: 10pt !important; }
-            #tab-calisma th, #tab-calisma td { padding: 7px !important; }
-            #tab-calisma #study-summary-body tr { break-inside: avoid !important; }
-
+                        #tab-calisma .study-summary-box,
+            #tab-calisma .study-summary-box table { break-inside: avoid !important; page-break-inside: avoid !important; }
+            #tab-calisma .study-summary-box table { min-width:0 !important;width:100% !important;table-layout:fixed !important;border-collapse:collapse !important;font-size:var(--report-print-font,10.5pt) !important; }
+            #tab-calisma .study-summary-box th,
+            #tab-calisma .study-summary-box td { display:table-cell !important;padding:var(--report-print-cell-pad,4px 6px) !important;line-height:1.2 !important;vertical-align:middle !important;white-space:normal !important;overflow-wrap:anywhere !important; }
+            #tab-calisma .study-summary-box th:nth-child(2),#tab-calisma .study-summary-box td:nth-child(2),
+            #tab-calisma .study-summary-box th:nth-child(3),#tab-calisma .study-summary-box td:nth-child(3),
+            #tab-calisma .study-summary-box th:nth-child(4),#tab-calisma .study-summary-box td:nth-child(4),
+            #tab-calisma .study-summary-box th:nth-child(10),#tab-calisma .study-summary-box td:nth-child(10),
+            #tab-calisma .study-summary-box th:nth-child(11),#tab-calisma .study-summary-box td:nth-child(11) { display:none !important; }
+            #tab-calisma .study-summary-box th:first-child,#tab-calisma .study-summary-box td:first-child { width:40% !important;text-align:left !important; }
+            #tab-calisma .study-summary-box th:nth-child(n+5):nth-child(-n+9),
+            #tab-calisma .study-summary-box td:nth-child(n+5):nth-child(-n+9) { width:12% !important;text-align:center !important; }
+            #tab-calisma .study-summary-box tr { break-inside:avoid !important;page-break-inside:avoid !important; }
+            #tab-calisma .study-summary-box thead { display:table-header-group !important; }
+            #tab-calisma .study-summary-box th { font-weight:700 !important; }
             .schedule-container { box-shadow: none !important; border: none !important; overflow: visible !important; margin-top: 0 !important; }
             table { width: 100% !important; border-collapse: collapse !important; font-size: 7.5pt !important; }
             th, td { padding: 3px !important; border: 1px solid #333 !important; }
@@ -262,12 +266,13 @@
         <div>
             <h1>🎯 8. Sınıf LGS Öğrenci Takip & Program</h1>
             <p>IndexedDB ile cihazınızda öğrenci bazlı veri saklama</p>
+            <p class="no-print" style="font-size:0.8rem;margin-top:4px;">Öğrenci kodu: <strong id="current-student-code">—</strong></p>
         </div>
         <div class="author-info">
             <span>Yazar: <strong>Ali Tambuğa</strong> | <a href="mailto:alifen60dnm@gmail.com">alifen60dnm@gmail.com</a></span>
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <button type="button" class="btn btn-success" onclick="exportUserBackup()" style="padding: 6px 10px; font-size: 0.75rem;">⬇️ Yedek İndir</button>
-                <button type="button" class="btn btn-dark" onclick="document.getElementById('backup-import-file').click()" style="padding: 6px 10px; font-size: 0.75rem;">⬆️ Yedek Yükle</button>
+                <button type="button" class="btn btn-success" onclick="exportUserBackup()" style="padding: 6px 10px; font-size: 0.75rem;">⬇️ Öğrenci Yedeği İndir</button>
+                <button type="button" class="btn btn-dark" onclick="document.getElementById('backup-import-file').click()" style="padding: 6px 10px; font-size: 0.75rem;">⬆️ Kendi Yedeğimi Yükle</button>
                 <input type="file" id="backup-import-file" accept=".json,application/json" style="display:none" onchange="importUserBackup(this)">
                 <button type="button" class="btn btn-dark" onclick="handleLogout()" style="padding: 6px 12px; font-size: 0.75rem;">Çıkış Yap</button>
             </div>
@@ -281,6 +286,7 @@
         <button class="tab-btn" onclick="switchTab('kitap', this)">📖 Kitaplar</button>
         <button class="tab-btn" onclick="switchTab('calisma', this)">⏱️ Çalışma</button>
         <button class="tab-btn" onclick="switchTab('sorular', this)">📸 Sorularım</button>
+        <button class="tab-btn" onclick="switchTab('ogretmen', this)">👩‍🏫 Öğretmen</button>
         <button class="tab-btn" onclick="switchTab('eksik', this)">⚠️ Eksik</button>
     </div>
 
@@ -379,69 +385,56 @@
                 <h2>⏱️ Çalışma Süresi ve Soru Takibi</h2>
                 <button class="btn btn-primary no-print" onclick="triggerPrint()">🖨️ Raporu Yazdır</button>
             </div>
-            
+
             <div class="section-box no-print study-entry-box">
-                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
-                <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
-                    <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Tarih</label>
-                        <input type="date" id="log-date">
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Ders / Kategori</label>
-                        <select id="log-subject"></select>
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çalışma Süresi (Dakika)</label>
-                        <input type="number" id="log-minutes" min="0" placeholder="Örn: 45">
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Çözülen Soru Sayısı</label>
-                        <input type="number" id="log-questions" min="0" placeholder="Örn: 50">
-                    </div>
+                <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
+                <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Tarih</label><input type="date" id="log-date"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Ders / Kategori</label><select id="log-subject" onchange="updateLogTopicOptions()"></select></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Konu (isteğe bağlı)</label><select id="log-topic"></select></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Tekrar Tarihi (isteğe bağlı)</label><input type="date" id="log-review-date"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Çalışma Süresi (Dakika)</label><input type="number" id="log-minutes" min="0" placeholder="Örn: 45"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Soru Sayısı</label><input type="number" id="log-questions" min="0" placeholder="Örn: 50"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Doğru</label><input type="number" id="log-correct" min="0" placeholder="Boş bırakılabilir"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Yanlış</label><input type="number" id="log-wrong" min="0" placeholder="Boş bırakılabilir"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Boş</label><input type="number" id="log-blank" min="0" placeholder="Boş bırakılabilir"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Deneme Adı (isteğe bağlı)</label><input type="text" id="log-exam-name" placeholder="Örn: Kasım genel denemesi"></div>
                 </div>
+                <small style="display:block;margin:0 0 10px;color:var(--text-muted);">Doğru/yanlış/boş girildiğinde soru toplamı bunlardan hesaplanır. Net = doğru − yanlış ÷ 3.</small>
                 <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
             </div>
 
             <div class="section-box study-summary-box">
-                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Aylık Çözülen Soru Raporu</h3>
+                <div class="flex-between" style="margin-bottom:10px;">
+                    <h3 id="study-summary-title" style="font-size:0.95rem;color:var(--primary);">Aylık Çözülen Soru Raporu</h3>
+                    <label class="no-print" style="font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:8px;">Rapor ayı <input type="month" id="report-month" onchange="renderStudyTracking()" style="width:auto;"></label>
+                </div>
                 <div class="table-responsive">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Ders / Kategori</th>
-                                <th>Haftalık Süre</th>
-                                <th>Haftalık Soru</th>
-                                <th>Bu Ay Süre</th>
-                                <th>Bu Ay Soru</th>
-                                <th>Toplam Süre</th>
-                                <th>Toplam Soru</th>
-                            </tr>
-                        </thead>
+                        <thead><tr>
+                            <th>Ders / Kategori</th><th>Haftalık Süre</th><th>Haftalık Soru</th><th>Seçilen Ay Süre</th><th>Ay Sorusu</th><th>Doğru</th><th>Yanlış</th><th>Boş</th><th>Net</th><th>Toplam Süre</th><th>Toplam Soru</th>
+                        </tr></thead>
                         <tbody id="study-summary-body"></tbody>
                     </table>
                 </div>
             </div>
 
+            <div class="section-box topic-review-box">
+                <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Konu Bazlı Son Çalışma ve Tekrar Planı</h3>
+                <div class="table-responsive"><table>
+                    <thead><tr><th>Ders</th><th>Konu</th><th>Son Çalışma</th><th>Tekrar Tarihi</th><th>Durum</th></tr></thead>
+                    <tbody id="topic-review-body"></tbody>
+                </table></div>
+            </div>
+
             <div class="section-box study-history-box">
-                <h3 style="margin-bottom: 10px; font-size:0.95rem; color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tarih</th>
-                                <th>Ders / Kategori</th>
-                                <th>Süre</th>
-                                <th>Soru Sayısı</th>
-                                <th class="no-print" style="width: 50px; text-align: center;">Sil</th>
-                            </tr>
-                        </thead>
-                        <tbody id="study-logs-body"></tbody>
-                    </table>
-                </div>
+                <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
+                <div class="table-responsive"><table>
+                    <thead><tr><th>Tarih</th><th>Ders / Konu</th><th>Süre</th><th>Soru</th><th>Doğru</th><th>Yanlış</th><th>Boş</th><th>Net</th><th>Deneme</th><th class="no-print" style="width:50px;text-align:center;">Sil</th></tr></thead>
+                    <tbody id="study-logs-body"></tbody>
+                </table></div>
             </div>
         </div>
-
         <!-- 6. YAPAMADIĞIM SORULAR -->
         <div id="tab-sorular" class="tab-pane">
             <div class="flex-between">
@@ -488,6 +481,18 @@
             </div>
         </div>
 
+        <!-- ÖĞRETMEN GÖRÜNÜMÜ -->
+        <div id="tab-ogretmen" class="tab-pane">
+            <div class="flex-between"><div><h2>👩‍🏫 Öğretmen Paneli</h2><p style="font-size:0.82rem;color:var(--text-muted);">Öğrenciler uygulamadan öğrenci kodlu yedeği indirip size gönderebilir. Her kod ayrı öğrenci olarak saklanır.</p></div></div>
+            <div class="section-box no-print">
+                <div class="grid-2" style="align-items:end;">
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Rapor ayı</label><input type="month" id="teacher-report-month" onchange="renderTeacherDashboard()"></div>
+                    <div><button class="btn btn-primary" onclick="document.getElementById('teacher-backup-file').click()" style="width:100%;">⬆️ Öğrenci Yedeği Ekle</button><input type="file" id="teacher-backup-file" accept=".json,application/json" style="display:none" onchange="importTeacherBackup(this)"></div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;">Paylaşılan yedek öğrenci adı ve hesap parolası içermez; öğrenci kodu ile eşleştirilir. Aynı kodla gelen yeni yedek o öğrencinin önceki kaydını günceller.</p>
+            </div>
+            <div id="teacher-students-container"></div>
+        </div>
         <!-- 7. EKSİK RAPORU -->
         <div id="tab-eksik" class="tab-pane">
             <div class="flex-between">
@@ -771,6 +776,7 @@
     const defaultExamOptions = ["-", "İşlem Hatası", "Soru Kökünü Yanlış Okuma", "Yorum / Mantık Yürütme Hatası", "Bilgi Eksikliği"];
     let customExamOptions = [], examCount = 5, booksData = {}, studyLogs = [], questionsData = [], examSelections = {}, topicChecks = {};
     let scheduleData = {}, dayHoursData = {};
+    let topicStudyData = {}, teacherRecords = [], currentStudentCode = "";
     let activeSlot = null, tempDayHours = {};
 
     function getAllExamOptions() { return [...defaultExamOptions, ...customExamOptions]; }
@@ -790,6 +796,57 @@
         return ordered;
     }
 
+
+    function generateStudentCode() {
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const bytes = new Uint8Array(10);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+        let code = "LGS-";
+        for (const byte of bytes) code += alphabet[byte % alphabet.length];
+        return code;
+    }
+
+    function topicTrackingKey(subject, topic) {
+        return JSON.stringify([String(subject || ""), String(topic || "")]);
+    }
+
+    function getCurrentMonthKey() {
+        const now = new Date();
+        return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+    }
+
+    function formatMonthLabel(monthKey) {
+        const parts = String(monthKey || "").split("-").map(Number);
+        if (parts.length !== 2 || !parts[0] || !parts[1]) return "Seçilen Ay";
+        return new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(new Date(parts[0], parts[1] - 1, 1));
+    }
+
+    function formatDateLabel(dateValue) {
+        const value = String(dateValue || "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "—";
+        const parts = value.split("-").map(Number);
+        return new Intl.DateTimeFormat("tr-TR").format(new Date(parts[0], parts[1] - 1, parts[2]));
+    }
+
+    function updateLogTopicOptions() {
+        const subjectSelect = document.getElementById("log-subject");
+        const topicSelect = document.getElementById("log-topic");
+        if (!subjectSelect || !topicSelect) return;
+        const previous = topicSelect.value;
+        topicSelect.replaceChildren();
+        const empty = document.createElement("option");
+        empty.value = "";
+        empty.textContent = "Konu seçin (isteğe bağlı)";
+        topicSelect.appendChild(empty);
+        (lgsData[subjectSelect.value] || []).forEach(topic => {
+            const option = document.createElement("option");
+            option.value = topic;
+            option.textContent = topic;
+            topicSelect.appendChild(option);
+        });
+        if ([...topicSelect.options].some(option => option.value === previous)) topicSelect.value = previous;
+    }
     window.onload = async function() {
         await initDB();
         let activeUser = await getDBSetting('active_user', null);
@@ -856,7 +913,7 @@
         let existing = await getDBUser(username);
         if (existing) { errEl.textContent = "Bu kullanıcı adı zaten alınmış!"; return; }
 
-        let newUser = { username, passwordHash: await hashCredential(password), animalHash: await hashCredential(animal, true) };
+        let newUser = { username, studentCode: generateStudentCode(), passwordHash: await hashCredential(password), animalHash: await hashCredential(animal, true) };
         await saveDBUser(newUser);
         await saveDBSetting('active_user', username);
         await launchApp(username);
@@ -871,6 +928,7 @@
         let user = await getDBUser(username);
         if (!user || !(await verifyCredential(password, user.passwordHash, user.password))) { errEl.textContent = "Kullanıcı adı veya parola hatalı!"; return; }
         if (!user.passwordHash) { user.passwordHash = await hashCredential(password); delete user.password; }
+        if (!user.studentCode) user.studentCode = generateStudentCode();
         await saveDBUser(user);
         await saveDBSetting('active_user', user.username);
         await launchApp(user.username);
@@ -909,6 +967,11 @@
         username = String(username || "").trim().toLowerCase();
         currentUsername = username;
         await migrateLegacyUserSettingKeys(username);
+        let profile = await getDBUser(username);
+        if (profile && !profile.studentCode) { profile.studentCode = generateStudentCode(); await saveDBUser(profile); }
+        currentStudentCode = profile ? profile.studentCode : "";
+        const codeEl = document.getElementById("current-student-code");
+        if (codeEl) codeEl.textContent = currentStudentCode || "—";
         document.getElementById('auth-overlay').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
 
@@ -918,6 +981,8 @@
         examCount = await getDBSetting(`lgs_exam_count_${username}`, 5);
         booksData = await getDBSetting(`lgs_books_data_${username}`, {});
         studyLogs = await getDBSetting(`lgs_study_logs_${username}`, []);
+        topicStudyData = await getDBSetting(`lgs_topic_study_${username}`, {});
+        teacherRecords = await getDBSetting(`lgs_teacher_students_${username}`, []);
         examSelections = await getDBSetting(`lgs_exam_selections_${username}`, {});
         topicChecks = await getDBSetting(`lgs_topic_checks_${username}`, {});
         scheduleData = await getDBSetting(`lgs_schedule_${username}`, {});
@@ -938,10 +1003,18 @@
         renderExamTable();
         renderBooks();
         renderStudyTracking();
+        renderTopicReviewTracking();
+        renderTeacherDashboard();
         renderQuestions();
         renderScheduleTable();
         updateProgramStats();
         updateSubjectDropdowns();
+        updateLogTopicOptions();
+        const currentMonth = getCurrentMonthKey();
+        const reportMonth = document.getElementById("report-month");
+        const teacherMonth = document.getElementById("teacher-report-month");
+        if (reportMonth && !reportMonth.value) reportMonth.value = currentMonth;
+        if (teacherMonth && !teacherMonth.value) teacherMonth.value = currentMonth;
 
         let dateInp = document.getElementById('log-date');
         if(dateInp) dateInp.valueAsDate = new Date();
@@ -957,10 +1030,12 @@
         if(tabId === 'eksik') generateReport();
         if(tabId === 'calisma') {
             renderStudyTracking();
+            renderTopicReviewTracking();
             let dateInp = document.getElementById('log-date');
             if(dateInp) dateInp.valueAsDate = new Date();
         }
         if(tabId === 'sorular') renderQuestions();
+        if(tabId === 'ogretmen') renderTeacherDashboard();
         if(tabId === 'program') {
             renderScheduleTable();
             updateProgramStats();
@@ -970,10 +1045,41 @@
 
     function triggerPrint() {
         const active = document.querySelector('.tab-pane.active');
-        document.body.dataset.printTarget = active ? active.id : '';
+        const target = active ? active.id : '';
+        document.body.dataset.printTarget = target;
+        // Aylık rapor yatay A4'e basılır. Satır sayısına göre yazı boyutu,
+        // okunabilirliği koruyarak tek sayfaya sığacak şekilde ayarlanır.
+        let printPageStyle = document.getElementById('dynamic-print-page-style');
+        if (target === 'tab-calisma') {
+            if (!printPageStyle) {
+                printPageStyle = document.createElement('style');
+                printPageStyle.id = 'dynamic-print-page-style';
+                document.head.appendChild(printPageStyle);
+            }
+            printPageStyle.textContent = '@media print { @page { size: A4 landscape; margin: 8mm; } }';
+            const report = document.querySelector('#tab-calisma .study-summary-box');
+            const rowCount = report ? report.querySelectorAll('tbody tr').length : 0;
+            const fontSize = rowCount > 34 ? '8.5pt' : rowCount > 24 ? '9pt' : rowCount > 14 ? '10pt' : '10.5pt';
+            const cellPad = rowCount > 34 ? '1px 4px' : rowCount > 24 ? '2px 4px' : rowCount > 14 ? '3px 5px' : '4px 6px';
+            if (report) {
+                report.style.setProperty('--report-print-font', fontSize);
+                report.style.setProperty('--report-print-cell-pad', cellPad);
+            }
+        } else if (printPageStyle) {
+            printPageStyle.remove();
+        }
         window.print();
     }
-    window.addEventListener('afterprint', () => { delete document.body.dataset.printTarget; });
+    window.addEventListener('afterprint', () => {
+        delete document.body.dataset.printTarget;
+        const printPageStyle = document.getElementById('dynamic-print-page-style');
+        if (printPageStyle) printPageStyle.remove();
+        const report = document.querySelector('#tab-calisma .study-summary-box');
+        if (report) {
+            report.style.removeProperty('--report-print-font');
+            report.style.removeProperty('--report-print-cell-pad');
+        }
+    });
 
     async function openAddCustomSubjectModal() {
         let subName = prompt("Eklemek istediğiniz yeni ders, deneme veya kategori adını girin (Örn: Paragraf Kampı, Rehberlik):");
@@ -991,16 +1097,15 @@
     }
 
     async function deleteSubjectCategory(subject) {
-        let core = ["Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi", "Din Kültürü", "İngilizce", "LGS Denemesi"];
-        if (core.includes(subject)) {
-            alert("Bu ana ders/kategori silinemez!");
-            return;
-        }
-        if (await askDeleteConfirmation(`"${subject}" özel kategorisini ve tüm konularını silmek istiyor musunuz?`)) {
+        if (!Object.prototype.hasOwnProperty.call(lgsData, subject)) return;
+        if (await askDeleteConfirmation(`"${subject}" kategorisini ve içindeki tüm konuları silmek istiyor musunuz? Bu işlem konu listesinden kaldırır; geçmiş çalışma kayıtları ve bu kategoriyle kaydedilmiş soru fotoğrafları korunur.`)) {
             delete lgsData[subject];
+            // Silinen kategoriye ait konu işaretlerini de temizle.
+            Object.keys(topicChecks || {}).forEach(key => {
+                if (key.startsWith(`topic_${subject}_`)) delete topicChecks[key];
+            });
             await saveTopicsState();
-            updateSubjectDropdowns();
-            alert("Kategori silindi.");
+            alert(`"${subject}" kategorisi silindi. İsterseniz aynı adı yeniden ekleyebilirsiniz.`);
         }
     }
 
@@ -1072,6 +1177,7 @@
                 genExamSub.appendChild(opt);
             });
         }
+        updateLogTopicOptions();
     }
 
     // --- SORU HAVUZUNDAN / ELLE DENEME SINAVI OLUŞTURMA ---
@@ -1383,16 +1489,13 @@
         container.innerHTML = '';
         let grandTotal = 0, grandChecked = 0;
         const orderedSubjects = getOrderedSubjectKeys();
-        let core = ["Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi", "Din Kültürü", "İngilizce", "LGS Denemesi"];
-
         orderedSubjects.forEach(subject => {
             let topics = lgsData[subject] || [];
             let div = document.createElement('div');
             div.className = "section-box";
             let subjectChecked = 0, subjectTotal = topics.length;
 
-            let isCustom = !core.includes(subject);
-            let deleteCategoryBtn = isCustom ? `<button type="button" class="btn btn-danger no-print" onclick="deleteSubjectCategory('${subject}')" style="font-size:0.7rem; padding:3px 8px;">🗑️ Kategoriyi Sil</button>` : '';
+            let deleteCategoryBtn = `<button type="button" class="btn btn-danger no-print" onclick="deleteSubjectCategory('${subject}')" style="font-size:0.7rem; padding:3px 8px;">🗑️ Kategoriyi Sil</button>`;
 
             let htmlHeader = `
                 <div class="subject-header">
@@ -1467,8 +1570,9 @@
     }
 
     async function saveTopicsState() {
-        let activeUser = await getDBSetting('active_user', 'default');
+        let activeUser = currentUsername || await getDBSetting('active_user', 'default');
         await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
+        await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
         renderTopics(); renderExamTable(); renderBooks(); updateSubjectDropdowns();
     }
 
@@ -1678,24 +1782,69 @@
     }
 
     async function addStudyLog() {
-        const date = document.getElementById('log-date').value;
-        const subject = document.getElementById('log-subject').value;
-        const minutes = Math.max(0, parseInt(document.getElementById('log-minutes').value, 10) || 0);
-        const questions = Math.max(0, parseInt(document.getElementById('log-questions').value, 10) || 0);
+        const date = document.getElementById("log-date").value;
+        const subject = document.getElementById("log-subject").value;
+        const topic = document.getElementById("log-topic").value;
+        const reviewDate = document.getElementById("log-review-date").value;
+        const examName = document.getElementById("log-exam-name").value.trim();
         if (!currentUsername) { alert("Önce öğrenci hesabıyla giriş yapın."); return; }
         if (!date) { alert("Tarih seçin!"); return; }
+
+        const readCount = function(id) {
+            const raw = document.getElementById(id).value.trim();
+            if (raw === "") return { value: 0, entered: false, valid: true };
+            const value = Number(raw);
+            return { value: value, entered: true, valid: Number.isSafeInteger(value) && value >= 0 };
+        };
+        const minutesInput = readCount("log-minutes");
+        const questionsInput = readCount("log-questions");
+        const correctInput = readCount("log-correct");
+        const wrongInput = readCount("log-wrong");
+        const blankInput = readCount("log-blank");
+        if (![minutesInput, questionsInput, correctInput, wrongInput, blankInput].every(item => item.valid)) {
+            alert("Süre ve soru adetleri sıfır veya daha büyük tam sayı olmalıdır."); return;
+        }
+        if (reviewDate && !topic) { alert("Tekrar tarihi eklemek için önce konu seçin."); return; }
+
+        const minutes = minutesInput.value;
+        const accuracyTracked = correctInput.entered || wrongInput.entered || blankInput.entered;
+        const correct = correctInput.value, wrong = wrongInput.value, blank = blankInput.value;
+        const classifiedQuestions = correct + wrong + blank;
+        if (accuracyTracked && questionsInput.entered && questionsInput.value !== 0 && questionsInput.value !== classifiedQuestions) {
+            alert("Soru sayısı, doğru + yanlış + boş toplamıyla aynı olmalıdır."); return;
+        }
+        const questions = accuracyTracked ? classifiedQuestions : questionsInput.value;
         if (minutes === 0 && questions === 0) { alert("Süre veya soru sayısından en az birini girin!"); return; }
 
-        const record = { id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()), date, subject, minutes, questions };
-        const updated = [...studyLogs, record].sort((a,b) => b.date.localeCompare(a.date));
+        const net = accuracyTracked ? Math.round((correct - wrong / 3) * 100) / 100 : null;
+        const record = {
+            id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+            date: date, subject: subject, topic: topic, minutes: minutes, questions: questions,
+            correct: correct, wrong: wrong, blank: blank, accuracyTracked: accuracyTracked,
+            net: net, examName: examName
+        };
+        const updated = [...studyLogs, record].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+        const nextTopicData = { ...(topicStudyData || {}) };
+        if (topic) {
+            const key = topicTrackingKey(subject, topic);
+            const previous = nextTopicData[key] || {};
+            nextTopicData[key] = {
+                subject: subject, topic: topic,
+                lastStudyDate: previous.lastStudyDate && previous.lastStudyDate > date ? previous.lastStudyDate : date,
+                reviewDate: reviewDate || previous.reviewDate || ""
+            };
+        }
         try {
-            await saveDBSetting(`lgs_study_logs_${currentUsername}`, updated);
+            await saveDBSetting("lgs_study_logs_" + currentUsername, updated);
+            await saveDBSetting("lgs_topic_study_" + currentUsername, nextTopicData);
             studyLogs = updated;
-            document.getElementById('log-minutes').value = '';
-            document.getElementById('log-questions').value = '';
+            topicStudyData = nextTopicData;
+            ["log-minutes", "log-questions", "log-correct", "log-wrong", "log-blank", "log-exam-name", "log-review-date"].forEach(id => { document.getElementById(id).value = ""; });
+            document.getElementById("log-topic").value = "";
             renderStudyTracking();
-            const alertBox = document.getElementById('save-alert');
-            if (alertBox) { alertBox.textContent = "✔ Çalışma kaydı IndexedDB'ye kaydedildi!"; alertBox.style.display = 'block'; setTimeout(() => alertBox.style.display = 'none', 2200); }
+            renderTopicReviewTracking();
+            const alertBox = document.getElementById("save-alert");
+            if (alertBox) { alertBox.textContent = "✔ Çalışma kaydı IndexedDB'ye kaydedildi!"; alertBox.style.display = "block"; setTimeout(() => alertBox.style.display = "none", 2200); }
         } catch (err) {
             console.error(err);
             alert("Kayıt yapılamadı. Tarayıcı depolama alanını kontrol edip tekrar deneyin.");
@@ -1704,81 +1853,302 @@
 
     async function deleteStudyLog(index) {
         if (await askDeleteConfirmation("Kaydı silmek istiyor musunuz?")) {
+            const removed = studyLogs[index];
             studyLogs.splice(index, 1);
-            await saveDBSetting(`lgs_study_logs_${currentUsername}`, studyLogs);
+            if (removed && removed.topic) {
+                const key = topicTrackingKey(removed.subject, removed.topic);
+                const remaining = studyLogs.filter(log => log.subject === removed.subject && log.topic === removed.topic);
+                const lastDate = remaining.reduce((latest, log) => String(log.date || "") > latest ? String(log.date) : latest, "");
+                if (topicStudyData[key]) topicStudyData[key].lastStudyDate = lastDate;
+            }
+            await saveDBSetting("lgs_study_logs_" + currentUsername, studyLogs);
+            await saveDBSetting("lgs_topic_study_" + currentUsername, topicStudyData);
             renderStudyTracking();
+            renderTopicReviewTracking();
         }
     }
 
     function formatMinutes(totalMinutes) {
-        if (!totalMinutes || totalMinutes <= 0) return "0 dk";
-        let hours = Math.floor(totalMinutes / 60);
-        let mins = totalMinutes % 60;
-        if (hours > 0 && mins > 0) return `${hours} sa ${mins} dk (${totalMinutes} dk)`;
-        else if (hours > 0) return `${hours} sa (${totalMinutes} dk)`;
-        else return `${totalMinutes} dk`;
+        const minutes = Number(totalMinutes) || 0;
+        if (minutes <= 0) return "0 dk";
+        const hours = Math.floor(minutes / 60);
+        const remainder = minutes % 60;
+        if (hours > 0 && remainder > 0) return hours + " sa " + remainder + " dk (" + minutes + " dk)";
+        if (hours > 0) return hours + " sa (" + minutes + " dk)";
+        return minutes + " dk";
     }
 
     function renderStudyTracking() {
-        let logsBody = document.getElementById('study-logs-body');
-        if(!logsBody) return; logsBody.innerHTML = '';
-        
-        if(studyLogs.length === 0) {
-            logsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">Henüz çalışma kaydı yok.</td></tr>`;
-        } else {
-            studyLogs.forEach((log, idx) => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${log.date}</td><td>${log.subject}</td><td>${log.minutes} dk</td><td>${log.questions} soru</td>
-                <td class="no-print" style="text-align:center;"><button type="button" class="icon-btn" onclick="deleteStudyLog(${idx})" style="color:var(--danger); font-size:1rem;">✕</button></td>`;
-                logsBody.appendChild(tr);
-            });
-        }
+        const logsBody = document.getElementById("study-logs-body");
+        const summaryBody = document.getElementById("study-summary-body");
+        if (!logsBody || !summaryBody) return;
+        logsBody.replaceChildren();
+        summaryBody.replaceChildren();
+        if (!Array.isArray(studyLogs)) studyLogs = [];
 
-        let now = new Date(), oneDay = 24*60*60*1000, summary = {};
+        const now = new Date();
+        const monthInput = document.getElementById("report-month");
+        if (monthInput && !monthInput.value) monthInput.value = getCurrentMonthKey();
+        const selectedMonth = monthInput && monthInput.value ? monthInput.value : getCurrentMonthKey();
+        const title = document.getElementById("study-summary-title");
+        if (title) title.textContent = "Aylık Çözülen Soru Raporu — " + formatMonthLabel(selectedMonth);
+
+        const newSummary = function() {
+            return { weeklyMins: 0, weeklyQ: 0, monthlyMins: 0, monthlyQ: 0, monthlyCorrect: 0, monthlyWrong: 0, monthlyBlank: 0, monthlyNet: 0, accuracyRows: 0, totalMins: 0, totalQ: 0 };
+        };
+        const summary = Object.create(null);
         const orderedSubjects = getOrderedSubjectKeys();
-        orderedSubjects.forEach(sub => { summary[sub] = { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 }; });
+        orderedSubjects.forEach(subject => { summary[subject] = newSummary(); });
+        const ensureSummary = function(subject) {
+            if (!summary[subject]) summary[subject] = newSummary();
+            return summary[subject];
+        };
+        const addCell = function(row, value, className) {
+            const cell = document.createElement("td");
+            cell.textContent = String(value);
+            if (className) cell.className = className;
+            row.appendChild(cell);
+            return cell;
+        };
+        const emptyRow = function(body, colspan, message) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = colspan;
+            cell.textContent = message;
+            cell.style.textAlign = "center";
+            cell.style.color = "#64748b";
+            row.appendChild(cell);
+            body.appendChild(row);
+        };
 
-        let currentMonth = now.getMonth();
-        let currentYear = now.getFullYear();
+        if (!studyLogs.length) emptyRow(logsBody, 10, "Henüz çalışma kaydı yok.");
+        studyLogs.forEach((log, index) => {
+            const row = document.createElement("tr");
+            const topicLabel = log.topic ? String(log.subject || "") + " / " + String(log.topic) : String(log.subject || "");
+            addCell(row, formatDateLabel(log.date));
+            addCell(row, topicLabel);
+            addCell(row, (Number(log.minutes) || 0) + " dk");
+            addCell(row, (Number(log.questions) || 0) + " soru");
+            addCell(row, log.accuracyTracked ? Number(log.correct) || 0 : "—");
+            addCell(row, log.accuracyTracked ? Number(log.wrong) || 0 : "—");
+            addCell(row, log.accuracyTracked ? Number(log.blank) || 0 : "—");
+            addCell(row, log.accuracyTracked ? (Number(log.net) || 0).toFixed(2) : "—");
+            addCell(row, log.examName || "—");
+            const actionCell = addCell(row, "");
+            actionCell.className = "no-print";
+            actionCell.style.textAlign = "center";
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "icon-btn";
+            deleteButton.textContent = "✕";
+            deleteButton.style.color = "var(--danger)";
+            deleteButton.setAttribute("aria-label", "Kaydı sil");
+            deleteButton.addEventListener("click", () => deleteStudyLog(index));
+            actionCell.appendChild(deleteButton);
+            logsBody.appendChild(row);
 
-        studyLogs.forEach(log => {
-            let parts = String(log.date).split('-').map(Number);
-            let logDate = parts.length === 3 ? new Date(parts[0], parts[1]-1, parts[2]) : new Date(log.date);
-            let diffDays = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - logDate) / oneDay);
-            if(!summary[log.subject]) {
-                summary[log.subject] = { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 };
+            const subject = String(log.subject || "Diğer");
+            const data = ensureSummary(subject);
+            const minutes = Number(log.minutes) || 0;
+            const questions = Number(log.questions) || 0;
+            data.totalMins += minutes;
+            data.totalQ += questions;
+            if (String(log.date || "").slice(0, 7) === selectedMonth) {
+                data.monthlyMins += minutes;
+                data.monthlyQ += questions;
+                if (log.accuracyTracked) {
+                    const correct = Number(log.correct) || 0;
+                    const wrong = Number(log.wrong) || 0;
+                    const blank = Number(log.blank) || 0;
+                    data.monthlyCorrect += correct;
+                    data.monthlyWrong += wrong;
+                    data.monthlyBlank += blank;
+                    data.monthlyNet += Number.isFinite(Number(log.net)) ? Number(log.net) : correct - wrong / 3;
+                    data.accuracyRows += 1;
+                }
             }
-            summary[log.subject].totalMins += log.minutes; 
-            summary[log.subject].totalQ += log.questions;
-
-            if(logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                summary[log.subject].monthlyMins += log.minutes; 
-                summary[log.subject].monthlyQ += log.questions;
-            }
-            if(diffDays >= 0 && diffDays <= 7) { 
-                summary[log.subject].weeklyMins += log.minutes; 
-                summary[log.subject].weeklyQ += log.questions; 
+            const parts = String(log.date || "").split("-").map(Number);
+            if (parts.length === 3 && parts.every(Number.isFinite)) {
+                const logDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const diffDays = Math.floor((today - logDate) / 86400000);
+                if (diffDays >= 0 && diffDays <= 7) {
+                    data.weeklyMins += minutes;
+                    data.weeklyQ += questions;
+                }
             }
         });
 
-        let summaryBody = document.getElementById('study-summary-body');
-        if(!summaryBody) return; summaryBody.innerHTML = '';
-        let gWM=0, gWQ=0, gMM=0, gMQ=0, gTM=0, gTQ=0;
-
-        orderedSubjects.forEach(sub => {
-            let data = summary[sub] || { weeklyMins:0, weeklyQ:0, monthlyMins:0, monthlyQ:0, totalMins:0, totalQ:0 };
-            gWM += data.weeklyMins; gWQ += data.weeklyQ; gMM += data.monthlyMins; gMQ += data.monthlyQ; gTM += data.totalMins; gTQ += data.totalQ;
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td style="font-weight:600; color:var(--primary);">${sub}</td><td>${formatMinutes(data.weeklyMins)}</td><td>${data.weeklyQ} soru</td><td>${formatMinutes(data.monthlyMins)}</td><td>${data.monthlyQ} soru</td><td>${formatMinutes(data.totalMins)}</td><td>${data.totalQ} soru</td>`;
-            summaryBody.appendChild(tr);
+        let totals = newSummary();
+        Object.keys(summary).forEach(subject => {
+            const data = summary[subject];
+            totals.weeklyMins += data.weeklyMins;
+            totals.weeklyQ += data.weeklyQ;
+            totals.monthlyMins += data.monthlyMins;
+            totals.monthlyQ += data.monthlyQ;
+            totals.monthlyCorrect += data.monthlyCorrect;
+            totals.monthlyWrong += data.monthlyWrong;
+            totals.monthlyBlank += data.monthlyBlank;
+            totals.monthlyNet += data.monthlyNet;
+            totals.accuracyRows += data.accuracyRows;
+            totals.totalMins += data.totalMins;
+            totals.totalQ += data.totalQ;
         });
-
-        let totalTr = document.createElement('tr');
-        totalTr.style.background = "#eef2ff"; totalTr.style.fontWeight = "bold";
-        totalTr.innerHTML = `<td style="color:var(--primary);">GENEL TOPLAM</td><td>${formatMinutes(gWM)}</td><td>${gWQ} soru</td><td>${formatMinutes(gMM)}</td><td>${gMQ} soru</td><td>${formatMinutes(gTM)}</td><td>${gTQ} soru</td>`;
-        summaryBody.appendChild(totalTr);
+        Object.keys(summary).forEach(subject => {
+            const data = summary[subject];
+            const row = document.createElement("tr");
+            addCell(row, subject);
+            addCell(row, formatMinutes(data.weeklyMins));
+            addCell(row, data.weeklyQ + " soru");
+            addCell(row, formatMinutes(data.monthlyMins));
+            addCell(row, data.monthlyQ + " soru");
+            addCell(row, data.accuracyRows ? data.monthlyCorrect : "—");
+            addCell(row, data.accuracyRows ? data.monthlyWrong : "—");
+            addCell(row, data.accuracyRows ? data.monthlyBlank : "—");
+            addCell(row, data.accuracyRows ? data.monthlyNet.toFixed(2) : "—");
+            addCell(row, formatMinutes(data.totalMins));
+            addCell(row, data.totalQ + " soru");
+            summaryBody.appendChild(row);
+        });
+        const totalRow = document.createElement("tr");
+        totalRow.style.background = "#eef2ff";
+        totalRow.style.fontWeight = "bold";
+        addCell(totalRow, "GENEL TOPLAM");
+        addCell(totalRow, formatMinutes(totals.weeklyMins));
+        addCell(totalRow, totals.weeklyQ + " soru");
+        addCell(totalRow, formatMinutes(totals.monthlyMins));
+        addCell(totalRow, totals.monthlyQ + " soru");
+        addCell(totalRow, totals.accuracyRows ? totals.monthlyCorrect : "—");
+        addCell(totalRow, totals.accuracyRows ? totals.monthlyWrong : "—");
+        addCell(totalRow, totals.accuracyRows ? totals.monthlyBlank : "—");
+        addCell(totalRow, totals.accuracyRows ? totals.monthlyNet.toFixed(2) : "—");
+        addCell(totalRow, formatMinutes(totals.totalMins));
+        addCell(totalRow, totals.totalQ + " soru");
+        summaryBody.appendChild(totalRow);
     }
 
+    function renderTopicReviewTracking() {
+        const body = document.getElementById("topic-review-body");
+        if (!body) return;
+        body.replaceChildren();
+        const entries = Object.values(topicStudyData || {}).filter(item => item && (item.lastStudyDate || item.reviewDate));
+        entries.sort((a, b) => String(a.subject).localeCompare(String(b.subject), "tr") || String(a.topic).localeCompare(String(b.topic), "tr"));
+        if (!entries.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 5;
+            cell.textContent = "Konu takibi için çalışma kaydına konu ve isteğe bağlı tekrar tarihi ekleyin.";
+            row.appendChild(cell);
+            body.appendChild(row);
+            return;
+        }
+        const today = getCurrentMonthKey() + "-" + String(new Date().getDate()).padStart(2, "0");
+        entries.forEach(item => {
+            const row = document.createElement("tr");
+            const values = [item.subject || "—", item.topic || "—", formatDateLabel(item.lastStudyDate), formatDateLabel(item.reviewDate)];
+            values.forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = String(value);
+                row.appendChild(cell);
+            });
+            const statusCell = document.createElement("td");
+            if (!item.reviewDate) statusCell.textContent = "Tekrar tarihi yok";
+            else if (item.reviewDate < today) statusCell.textContent = "Tekrar zamanı geçti";
+            else if (item.reviewDate === today) statusCell.textContent = "Bugün";
+            else statusCell.textContent = "Planlandı";
+            row.appendChild(statusCell);
+            body.appendChild(row);
+        });
+    }
+
+    function renderTeacherDashboard() {
+        const container = document.getElementById("teacher-students-container");
+        if (!container) return;
+        container.replaceChildren();
+        const monthInput = document.getElementById("teacher-report-month");
+        if (monthInput && !monthInput.value) monthInput.value = getCurrentMonthKey();
+        const selectedMonth = monthInput && monthInput.value ? monthInput.value : getCurrentMonthKey();
+        if (!Array.isArray(teacherRecords) || !teacherRecords.length) {
+            const empty = document.createElement("div");
+            empty.className = "section-box";
+            empty.textContent = "Henüz öğrenci yedeği eklenmedi. Öğrenci kodlu JSON yedeğini yukarıdan yükleyin.";
+            container.appendChild(empty);
+            return;
+        }
+
+        const wrap = document.createElement("div");
+        wrap.className = "table-responsive";
+        const table = document.createElement("table");
+        table.style.minWidth = "1050px";
+        const head = document.createElement("thead");
+        const header = document.createElement("tr");
+        ["Öğrenci Kodu", "Ay", "Soru", "Doğru", "Yanlış", "Boş", "Net", "Deneme", "Tekrarı Gelen Konu"].forEach(label => {
+            const cell = document.createElement("th");
+            cell.textContent = label;
+            header.appendChild(cell);
+        });
+        head.appendChild(header);
+        table.appendChild(head);
+        const body = document.createElement("tbody");
+        const monthStart = selectedMonth + "-01";
+        const monthParts = selectedMonth.split("-").map(Number);
+        const monthEndDate = new Date(monthParts[0], monthParts[1], 0);
+        const monthEnd = monthEndDate.getFullYear() + "-" + String(monthEndDate.getMonth() + 1).padStart(2, "0") + "-" + String(monthEndDate.getDate()).padStart(2, "0");
+
+        teacherRecords.slice().sort((a, b) => String(a.studentCode).localeCompare(String(b.studentCode))).forEach(record => {
+            const data = record && record.data ? record.data : {};
+            const logs = Array.isArray(data.studyLogs) ? data.studyLogs : [];
+            const monthLogs = logs.filter(log => String(log.date || "").slice(0, 7) === selectedMonth);
+            const row = document.createElement("tr");
+            const addCell = function(value) {
+                const cell = document.createElement("td");
+                cell.textContent = String(value);
+                row.appendChild(cell);
+                return cell;
+            };
+            addCell(record.studentCode || "—");
+            addCell(formatMonthLabel(selectedMonth));
+            addCell(monthLogs.reduce((sum, log) => sum + (Number(log.questions) || 0), 0));
+            const trackedLogs = monthLogs.filter(log => log.accuracyTracked);
+            const correct = trackedLogs.reduce((sum, log) => sum + (Number(log.correct) || 0), 0);
+            const wrong = trackedLogs.reduce((sum, log) => sum + (Number(log.wrong) || 0), 0);
+            const blank = trackedLogs.reduce((sum, log) => sum + (Number(log.blank) || 0), 0);
+            const net = trackedLogs.reduce((sum, log) => {
+                const calculated = (Number(log.correct) || 0) - (Number(log.wrong) || 0) / 3;
+                return sum + (Number.isFinite(Number(log.net)) ? Number(log.net) : calculated);
+            }, 0);
+            addCell(trackedLogs.length ? correct : "—");
+            addCell(trackedLogs.length ? wrong : "—");
+            addCell(trackedLogs.length ? blank : "—");
+            addCell(trackedLogs.length ? net.toFixed(2) : "—");
+
+            const examCell = addCell("");
+            const examLogs = monthLogs.filter(log => log.examName || String(log.subject || "").toLocaleLowerCase("tr-TR").includes("deneme"));
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.textContent = examLogs.length + " deneme";
+            details.appendChild(summary);
+            if (examLogs.length) {
+                const list = document.createElement("ul");
+                examLogs.forEach(log => {
+                    const item = document.createElement("li");
+                    const logNet = log.accuracyTracked ? Number(log.net) || 0 : null;
+                    item.textContent = formatDateLabel(log.date) + " — " + (log.examName || log.subject || "Deneme") + (logNet === null ? "" : " · Net " + logNet.toFixed(2));
+                    list.appendChild(item);
+                });
+                details.appendChild(list);
+            }
+            examCell.appendChild(details);
+
+            const reviewCell = addCell("");
+            const reviewItems = Object.values(data.topicStudyData || {}).filter(item => item && item.reviewDate && item.reviewDate <= monthEnd);
+            reviewCell.textContent = String(reviewItems.length);
+            body.appendChild(row);
+        });
+        table.appendChild(body);
+        wrap.appendChild(table);
+        container.appendChild(wrap);
+    }
     function readFileAsDataURL(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -1927,100 +2297,227 @@
         if(!hasData) container.innerHTML = `<div style="text-align:center; padding:20px; background:#f0fdf4; color:#166534; border-radius:8px;">🎉 İşaretlenmiş hata bulunmuyor!</div>`;
     }
 
-    // Kullanıcıya ait tüm verileri (soru fotoğrafları dahil) tek JSON dosyasında yedekler.
+    // Kullanıcıya ait tüm verileri (soru fotoğrafları dahil) tek JSON dosyasında hazırlar.
+    async function createUserBackupFile() {
+        if (!currentUsername) throw new Error("Önce kullanıcı hesabıyla giriş yapın.");
+        await saveData();
+        const profile = await getDBUser(currentUsername);
+        if (!profile) throw new Error("Kullanıcı hesabı bulunamadı.");
+        if (!profile.studentCode) {
+            profile.studentCode = generateStudentCode();
+            await saveDBUser(profile);
+        }
+        currentStudentCode = profile.studentCode;
+        const codeEl = document.getElementById("current-student-code");
+        if (codeEl) codeEl.textContent = currentStudentCode;
+        const questions = await getDBQuestions(currentUsername);
+        const backup = {
+            format: "LGS_STUDENT_SHARE", version: 2,
+            createdAt: new Date().toISOString(), studentCode: currentStudentCode,
+            data: {
+                customTopics: lgsData, examNames: examNames, customExamOptions: customExamOptions,
+                examCount: examCount, booksData: booksData, studyLogs: studyLogs,
+                examSelections: examSelections, topicChecks: topicChecks, scheduleData: scheduleData,
+                dayHoursData: dayHoursData, topicStudyData: topicStudyData
+            },
+            questions: questions.map(question => ({
+                id: question.id, subject: question.subject, note: question.note || "",
+                image: question.image, date: question.date || ""
+            }))
+        };
+        const blob = new Blob([JSON.stringify(backup)], { type: "application/json;charset=utf-8" });
+        const filename = "LGS_Ogrenci_" + currentStudentCode + "_" + new Date().toISOString().slice(0, 10) + ".json";
+        return { blob: blob, filename: filename, studentCode: currentStudentCode };
+    }
+
     async function exportUserBackup() {
-        if (!currentUsername) { alert("Önce kullanıcı hesabıyla giriş yapın."); return; }
         try {
-            await saveData();
-            const username = currentUsername;
-            const allSettings = await new Promise((resolve, reject) => {
-                const tx = db.transaction("app_settings", "readonly");
-                const req = tx.objectStore("app_settings").getAll();
-                req.onsuccess = () => resolve(req.result || []);
-                req.onerror = () => reject(req.error || new Error("Yedek verileri okunamadı."));
-            });
-            const suffix = "_" + username.toLowerCase();
-            const settings = allSettings.filter(item => String(item.key || "").toLowerCase().startsWith("lgs_") && String(item.key || "").toLowerCase().endsWith(suffix));
-            const user = await getDBUser(username);
-            const questions = await getDBQuestions(username);
-            if (!user) throw new Error("Kullanıcı hesabı bulunamadı.");
-            const backup = {
-                format: "LGS_TAKIP_BACKUP",
-                version: 1,
-                createdAt: new Date().toISOString(),
-                username,
-                user,
-                settings,
-                questions
-            };
-            const blob = new Blob([JSON.stringify(backup)], { type: "application/json;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `LGS_Yedek_${username}_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a); a.click(); a.remove();
+            const backupFile = await createUserBackupFile();
+            const url = URL.createObjectURL(backupFile.blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = backupFile.filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1500);
-            alert("Yedek dosyası indirildi. Öğretmene HTML uygulamasıyla birlikte bu JSON dosyasını da gönderin.");
+            alert("Öğrenci kodlu paylaşım yedeği indirildi. Dosyada hesap adı veya parola bilgisi bulunmaz.");
         } catch (err) {
             console.error(err);
             alert("Yedek oluşturulamadı: " + (err.message || err));
         }
     }
 
-    // Yedek yalnızca içindeki kullanıcı hesabını günceller; diğer kullanıcıların verilerine dokunmaz.
+    function validateStudentShare(backup) {
+        const isRecord = value => value && typeof value === "object" && !Array.isArray(value);
+        const safeText = (value, max) => typeof value === "string" && value.length <= max && !/[<>]/.test(value);
+        const validCount = value => Number.isSafeInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 10000000;
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (!isRecord(backup) || backup.format !== "LGS_STUDENT_SHARE" || backup.version !== 2) throw new Error("Bu dosya güncel öğrenci yedeği biçiminde değil.");
+        if (typeof backup.studentCode !== "string" || !/^LGS-[A-HJ-NP-Z2-9]{10}$/.test(backup.studentCode)) throw new Error("Öğrenci kodu geçersiz.");
+        if (!isRecord(backup.data) || !Array.isArray(backup.questions) || backup.questions.length > 2000) throw new Error("Yedekte eksik veya geçersiz veri var.");
+        const data = backup.data;
+        const objects = ["customTopics", "examNames", "booksData", "examSelections", "topicChecks", "scheduleData", "dayHoursData", "topicStudyData"];
+        for (const key of objects) if (!isRecord(data[key])) throw new Error("Yedekte geçersiz " + key + " alanı var.");
+        if (!Array.isArray(data.studyLogs) || data.studyLogs.length > 10000 || !Array.isArray(data.customExamOptions) || !validCount(data.examCount) || Number(data.examCount) < 1 || Number(data.examCount) > 50) throw new Error("Yedekteki kayıt sayısı veya deneme ayarı geçersiz.");
+
+        for (const subject of Object.keys(data.customTopics)) {
+            if (!safeText(subject, 120) || /['"]/ .test(subject) || !Array.isArray(data.customTopics[subject]) || data.customTopics[subject].length > 500) throw new Error("Yedekte geçersiz ders veya konu adı var.");
+            if (data.customTopics[subject].some(topic => !safeText(topic, 240))) throw new Error("Yedekte geçersiz konu adı var.");
+        }
+        for (const name of Object.values(data.examNames)) if (!safeText(name, 120)) throw new Error("Yedekte geçersiz deneme adı var.");
+        for (const value of Object.values(data.examSelections)) if (!safeText(value, 160)) throw new Error("Yedekte geçersiz deneme analizi var.");
+        for (const value of Object.values(data.topicChecks)) if (typeof value !== "boolean") throw new Error("Yedekte geçersiz konu durumu var.");
+        if (data.customExamOptions.some(item => !safeText(item, 120))) throw new Error("Yedekte geçersiz hata türü var.");
+        for (const subject of Object.keys(data.booksData)) {
+            if (!safeText(subject, 120) || /['"]/ .test(subject) || !Array.isArray(data.booksData[subject]) || data.booksData[subject].length > 500) throw new Error("Yedekte geçersiz kitap listesi var.");
+            for (const book of data.booksData[subject]) if (!isRecord(book) || !safeText(book.name, 240) || typeof book.completed !== "boolean") throw new Error("Yedekte geçersiz kitap kaydı var.");
+        }
+        for (const log of data.studyLogs) {
+            if (!isRecord(log) || !datePattern.test(String(log.date || "")) || !safeText(log.subject, 120) || !validCount(log.minutes) || !validCount(log.questions)) throw new Error("Yedekte geçersiz çalışma kaydı var.");
+            if (log.topic !== undefined && !safeText(log.topic, 240)) throw new Error("Yedekte geçersiz konu kaydı var.");
+            if (log.examName !== undefined && !safeText(log.examName, 160)) throw new Error("Yedekte geçersiz deneme adı var.");
+            for (const key of ["correct", "wrong", "blank"]) if (log[key] !== undefined && !validCount(log[key])) throw new Error("Yedekte geçersiz doğru/yanlış/boş sayısı var.");
+        }
+        for (const item of Object.values(data.topicStudyData)) {
+            if (!isRecord(item) || !safeText(item.subject, 120) || !safeText(item.topic, 240)) throw new Error("Yedekte geçersiz konu tekrar kaydı var.");
+            for (const key of ["lastStudyDate", "reviewDate"]) if (item[key] && !datePattern.test(String(item[key]))) throw new Error("Yedekte geçersiz tekrar tarihi var.");
+        }
+        for (const item of Object.values(data.scheduleData)) {
+            if (!isRecord(item) || !safeText(item.subject, 120) || !safeText(item.topic, 240) || !safeText(item.type, 120) || !validCount(item.span) || Number(item.span) < 1 || Number(item.span) > 30 || !validCount(item.target)) throw new Error("Yedekte geçersiz program kaydı var.");
+        }
+        for (const hours of Object.values(data.dayHoursData)) {
+            if (!Array.isArray(hours) || hours.length > 30 || hours.some(hour => !safeText(hour, 40))) throw new Error("Yedekte geçersiz program saati var.");
+        }
+        for (const question of backup.questions) {
+            if (!isRecord(question) || !safeText(question.subject, 120) || !safeText(question.note || "", 2000) || !safeText(question.date || "", 30) || typeof question.image !== "string" || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(question.image) || question.image.length > 20000000) throw new Error("Yedekte geçersiz soru fotoğrafı var.");
+        }
+        return backup;
+    }
+
+    function convertLegacyBackup(legacy) {
+        if (!legacy || legacy.format !== "LGS_TAKIP_BACKUP" || legacy.version !== 1 || !Array.isArray(legacy.settings) || !Array.isArray(legacy.questions) || String(legacy.username || "").trim().toLowerCase() !== currentUsername.toLowerCase()) {
+            throw new Error("Eski yedek yalnızca aynı kullanıcı hesabına yüklenebilir.");
+        }
+        const suffix = "_" + currentUsername.toLowerCase();
+        const data = {
+            customTopics: JSON.parse(JSON.stringify(defaultLgsData)), examNames: {}, customExamOptions: [],
+            examCount: 5, booksData: {}, studyLogs: [], examSelections: {}, topicChecks: {},
+            scheduleData: {}, dayHoursData: {}, topicStudyData: {}
+        };
+        const prefixMap = {
+            lgs_custom_topics: "customTopics", lgs_exam_names: "examNames",
+            lgs_custom_exam_options: "customExamOptions", lgs_exam_count: "examCount",
+            lgs_books_data: "booksData", lgs_study_logs: "studyLogs",
+            lgs_exam_selections: "examSelections", lgs_topic_checks: "topicChecks",
+            lgs_schedule: "scheduleData", lgs_day_hours: "dayHoursData"
+        };
+        for (const item of legacy.settings) {
+            if (!item || typeof item.key !== "string" || !item.key.toLowerCase().startsWith("lgs_") || !item.key.toLowerCase().endsWith(suffix)) throw new Error("Eski yedekte geçersiz kullanıcı verisi var.");
+            const prefix = item.key.slice(0, -suffix.length).toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(prefixMap, prefix)) data[prefixMap[prefix]] = item.val;
+        }
+        if (legacy.questions.some(question => !question || String(question.user || "").toLowerCase() !== currentUsername.toLowerCase())) throw new Error("Eski yedekte başka hesaba ait soru kaydı var.");
+        const questions = legacy.questions.map(question => ({
+            id: question.id, subject: question.subject, note: question.note || "",
+            image: question.image, date: question.date || ""
+        }));
+        return {
+            format: "LGS_STUDENT_SHARE", version: 2, studentCode: currentStudentCode,
+            createdAt: legacy.createdAt || "", data: data, questions: questions
+        };
+    }
+
+    async function restoreStudentShare(backup, username) {
+        const fields = [
+            ["customTopics", "lgs_custom_topics"], ["examNames", "lgs_exam_names"],
+            ["customExamOptions", "lgs_custom_exam_options"], ["examCount", "lgs_exam_count"],
+            ["booksData", "lgs_books_data"], ["studyLogs", "lgs_study_logs"],
+            ["examSelections", "lgs_exam_selections"], ["topicChecks", "lgs_topic_checks"],
+            ["scheduleData", "lgs_schedule"], ["dayHoursData", "lgs_day_hours"],
+            ["topicStudyData", "lgs_topic_study"]
+        ];
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(["app_settings", "questions"], "readwrite");
+            const settingsStore = tx.objectStore("app_settings");
+            const settingsRequest = settingsStore.getAll();
+            settingsRequest.onsuccess = () => {
+                const suffix = "_" + username.toLowerCase();
+                for (const item of settingsRequest.result || []) {
+                    const key = String(item.key || "").toLowerCase();
+                    if (key.startsWith("lgs_") && key.endsWith(suffix)) settingsStore.delete(item.key);
+                }
+                for (const field of fields) settingsStore.put({ key: field[1] + "_" + username, val: backup.data[field[0]] });
+                const questionStore = tx.objectStore("questions");
+                const questionRequest = questionStore.getAll();
+                questionRequest.onsuccess = () => {
+                    const usedIds = new Set();
+                    for (const question of questionRequest.result || []) {
+                        if (String(question.user || "").toLowerCase() === username.toLowerCase()) questionStore.delete(question.id);
+                        else usedIds.add(question.id);
+                    }
+                    backup.questions.forEach((question, index) => {
+                        let id = Date.now() + index + Math.floor(Math.random() * 1000000);
+                        while (usedIds.has(id)) id += 1;
+                        usedIds.add(id);
+                        questionStore.put({ ...question, id: id, user: username });
+                    });
+                };
+                questionRequest.onerror = () => { try { tx.abort(); } catch (_) {} };
+            };
+            settingsRequest.onerror = () => { try { tx.abort(); } catch (_) {} };
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error || new Error("Yedek veritabanına yazılamadı."));
+            tx.onabort = () => reject(tx.error || new Error("Yedek yükleme iptal edildi."));
+        });
+    }
+
     async function importUserBackup(input) {
         const file = input.files && input.files[0];
         if (!file) return;
         input.value = "";
-        if (!currentUsername) { alert("Yedek yüklemek için önce bir kullanıcı hesabıyla giriş yapın."); return; }
+        if (!currentUsername) { alert("Yedek yüklemek için önce kendi hesabınızla giriş yapın."); return; }
         try {
-            const backup = JSON.parse(await file.text());
-            if (!backup || backup.format !== "LGS_TAKIP_BACKUP" || backup.version !== 1 || !backup.user || !backup.username || !Array.isArray(backup.settings) || !Array.isArray(backup.questions)) {
-                throw new Error("Bu dosya geçerli bir LGS Takip yedeği değil.");
-            }
-            const username = String(backup.username).trim().toLowerCase();
-            if (!username || String(backup.user.username || "").toLowerCase() !== username) throw new Error("Yedek kullanıcı bilgileri tutarsız.");
-            const suffix = "_" + username;
-            if (backup.settings.some(item => !item || typeof item.key !== "string" || !item.key.toLowerCase().startsWith("lgs_") || !item.key.toLowerCase().endsWith(suffix))) throw new Error("Yedekte geçersiz kullanıcı verisi var.");
-            if (backup.questions.some(q => !q || String(q.user || "").toLowerCase() !== username || q.id === undefined || typeof q.image !== "string")) throw new Error("Yedekte geçersiz soru kaydı var.");
-            const confirmText = `“${username}” hesabının yedeği yüklenecek. Bu hesaptaki mevcut kayıtlar yedekteki kayıtlarla değiştirilecek. Diğer kullanıcı hesapları etkilenmez. Devam edilsin mi?`;
-            if (!confirm(confirmText)) return;
-
-            // Önce mevcut hesap anahtarlarını ve sorularını temizle, ardından yedekteki verileri yaz.
-            await new Promise((resolve, reject) => {
-                const tx = db.transaction(["app_settings", "users", "questions"], "readwrite");
-                const settingsStore = tx.objectStore("app_settings");
-                const allReq = settingsStore.getAll();
-                allReq.onsuccess = () => {
-                    const suffix = "_" + username;
-                    (allReq.result || []).forEach(item => {
-                        const key = String(item.key || "").toLowerCase();
-                        if (key.startsWith("lgs_") && key.endsWith(suffix)) settingsStore.delete(item.key);
-                    });
-                    backup.settings.forEach(item => settingsStore.put(item));
-                    tx.objectStore("users").put({ ...backup.user, username });
-                    const qStore = tx.objectStore("questions");
-                    const qReq = qStore.getAll();
-                    qReq.onsuccess = () => {
-                        (qReq.result || []).forEach(q => { if (String(q.user || "").toLowerCase() === username) qStore.delete(q.id); });
-                        backup.questions.forEach(q => qStore.put(q));
-                    };
-                    qReq.onerror = () => { try { tx.abort(); } catch (_) {} };
-                };
-                allReq.onerror = () => { try { tx.abort(); } catch (_) {} };
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error || new Error("Yedek veritabanına yazılamadı."));
-                tx.onabort = () => reject(tx.error || new Error("Yedek yükleme iptal edildi."));
-            });
-            await saveDBSetting("active_user", username);
-            await launchApp(username);
-            alert(`“${username}” hesabının yedeği başarıyla yüklendi. Bu kullanıcı adı ve yedekteki parola ile giriş yapılabilir.`);
+            if (file.size > 75000000) throw new Error("Yedek dosyası 75 MB sınırını aşıyor.");
+            const raw = JSON.parse(await file.text());
+            const profile = await getDBUser(currentUsername);
+            if (!profile) throw new Error("Kullanıcı hesabı bulunamadı.");
+            if (!profile.studentCode) profile.studentCode = currentStudentCode || generateStudentCode();
+            const backup = raw && raw.format === "LGS_TAKIP_BACKUP" ? convertLegacyBackup(raw) : validateStudentShare(raw);
+            if (backup.studentCode !== profile.studentCode && !confirm("Yedekteki öğrenci kodu " + backup.studentCode + ", bu hesabın kodu " + profile.studentCode + ". Yükleme sonrası hesap kodu değişecek. Devam edilsin mi?")) return;
+            if (!confirm(backup.studentCode + " kodlu yedek bu hesaptaki ders, çalışma ve soru kayıtlarını değiştirecek. Devam edilsin mi?")) return;
+            validateStudentShare(backup);
+            await restoreStudentShare(backup, currentUsername);
+            profile.studentCode = backup.studentCode;
+            await saveDBUser(profile);
+            await launchApp(currentUsername);
+            alert("Öğrenci yedeği yüklendi. Hesap parolanız değiştirilmedi.");
         } catch (err) {
             console.error(err);
             alert("Yedek yüklenemedi: " + (err.message || err));
         }
     }
 
+    async function importTeacherBackup(input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        input.value = "";
+        try {
+            if (file.size > 75000000) throw new Error("Yedek dosyası 75 MB sınırını aşıyor.");
+            const backup = validateStudentShare(JSON.parse(await file.text()));
+            if (!Array.isArray(teacherRecords)) teacherRecords = [];
+            const existing = teacherRecords.some(record => record.studentCode === backup.studentCode);
+            if (existing && !confirm(backup.studentCode + " kodlu öğrencinin eski kaydı yeni yedekle değiştirilecek. Devam edilsin mi?")) return;
+            teacherRecords = teacherRecords.filter(record => record.studentCode !== backup.studentCode);
+            teacherRecords.push({ ...backup, importedAt: new Date().toISOString() });
+            await saveDBSetting("lgs_teacher_students_" + currentUsername, teacherRecords);
+            renderTeacherDashboard();
+            alert(backup.studentCode + " kodlu öğrenci öğretmen listesine eklendi.");
+        } catch (err) {
+            console.error(err);
+            alert("Öğrenci yedeği eklenemedi: " + (err.message || err));
+        }
+    }
     async function saveData() {
         document.querySelectorAll('#subjects-container input[type="checkbox"]').forEach(cb => {
             let key = cb.getAttribute('data-key');
@@ -2038,6 +2535,7 @@
         await saveDBSetting(`lgs_exam_count_${activeUser}`, examCount);
         await saveDBSetting(`lgs_books_data_${activeUser}`, booksData);
         await saveDBSetting(`lgs_study_logs_${activeUser}`, studyLogs);
+        await saveDBSetting(`lgs_topic_study_${activeUser}`, topicStudyData);
         await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
         await saveDBSetting(`lgs_exam_names_${activeUser}`, examNames);
         await saveDBSetting(`lgs_custom_exam_options_${activeUser}`, customExamOptions);
