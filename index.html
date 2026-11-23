@@ -183,6 +183,16 @@
 </head>
 <body>
 
+<div id="site-password-overlay" style="position:fixed;inset:0;z-index:100001;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <form onsubmit="return unlockSite(event)" style="width:100%;max-width:380px;background:white;padding:26px;border-radius:14px;box-shadow:0 16px 45px rgba(0,0,0,.3);text-align:center;">
+        <h2 style="margin:0 0 8px;color:#1e293b;">LGS Takip Sistemi</h2>
+        <p style="margin:0 0 18px;color:#64748b;">Devam etmek için giriş şifresini yazın.</p>
+        <input id="site-password-input" type="password" inputmode="numeric" autocomplete="off" placeholder="Şifre" aria-label="Giriş şifresi" required style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:1rem;">
+        <button type="submit" style="width:100%;margin-top:12px;padding:12px;border:0;border-radius:8px;background:#2563eb;color:white;font-weight:700;font-size:1rem;cursor:pointer;">Giriş Yap</button>
+        <p id="site-password-error" role="alert" style="display:none;margin:12px 0 0;color:#dc2626;font-size:.9rem;">Şifre yanlış. Tekrar deneyin.</p>
+    </form>
+</div>
+
 <div id="role-entry-overlay" style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:16px;">
     <div class="section-box" role="dialog" aria-modal="true" aria-labelledby="role-entry-title" style="width:100%;max-width:440px;padding:26px;text-align:center;">
         <h2 id="role-entry-title" style="margin-bottom:8px;color:var(--primary);">LGS Takip Sistemine Giriş</h2>
@@ -563,6 +573,19 @@
 </div>
 
 <script>
+    function unlockSite(event) {
+        event.preventDefault();
+        const input = document.getElementById("site-password-input");
+        if (input.value === "759103") {
+            document.getElementById("site-password-overlay").remove();
+            return false;
+        }
+        document.getElementById("site-password-error").style.display = "block";
+        input.value = "";
+        input.focus();
+        return false;
+    }
+
     let db;
     let currentUsername = null, currentStudentName = "", currentRole = null, studentOwnerUsername = null;
     let appLoading = false;
