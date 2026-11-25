@@ -42,6 +42,23 @@
         .subject-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
         .subject-header h3 { color: var(--primary); font-size: 0.95rem; margin: 0; }
         .subject-progress { font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 12px; }
+
+        .unit-list { display: grid; gap: 8px; }
+        .topic-unit { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+        .topic-unit > summary { list-style: none; cursor: pointer; padding: 10px 12px; display: grid; grid-template-columns: minmax(130px,1fr) auto 20px; gap: 10px; align-items: center; }
+        .topic-unit > summary::-webkit-details-marker { display: none; }
+        .topic-unit > summary::after { content: '▾'; color: var(--primary); font-size: 1.1rem; text-align: center; }
+        .topic-unit[open] > summary::after { content: '▴'; }
+        .unit-title { font-weight: 700; font-size: .88rem; }
+        .unit-progress-info { min-width: 112px; text-align: right; color: var(--text-muted); font-size: .75rem; font-weight: 700; }
+        .unit-progress-track { display: block; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+        .unit-progress-fill { display: block; height: 100%; width: 0; background: var(--success); transition: width .2s ease; }
+        .unit-contents { border-top: 1px solid var(--border-color); padding: 8px 12px 12px; }
+        .unit-tools { display: flex; gap: 4px; justify-content: flex-end; margin-bottom: 6px; }
+        .subtopic-row { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-bottom: 1px solid #f1f5f9; }
+        .subtopic-row:last-child { border-bottom: 0; }
+        .subtopic-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: .84rem; flex: 1; }
+        .subtopic-tools { display: inline-flex; align-items: center; gap: 3px; }
         
         .topic-row { display: flex; align-items: center; justify-content: space-between; background: white; padding: 6px 10px; border-radius: 8px; border: 1px solid #f1f5f9; gap: 8px; margin-bottom: 6px; }
         .topic-row-left { display: flex; align-items: center; gap: 8px; flex: 1; }
@@ -173,7 +190,7 @@
             .lesson-topic { font-size: 6.5pt !important; color: #1e293b !important; }
             .lesson-meta { font-size: 6pt !important; color: #334155 !important; }
             .question-card { break-inside: avoid; border: 1px solid #ccc !important; margin-bottom: 10px; }
-            #tab-sorular #questions-list-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 5mm !important; }
+            #tab-sorular #questions-list-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 4mm !important; }
             #tab-sorular .question-card { padding: 3mm !important; margin: 0 !important; }
             #tab-sorular .Onizle_imageContent { padding: 1mm !important; border: 0 !important; background: #fff !important; }
             #tab-sorular .question-img { width: 100% !important; max-width: 100% !important; height: auto !important; max-height: 105mm !important; object-fit: contain !important; }
@@ -183,25 +200,35 @@
 </head>
 <body>
 
-<div id="site-password-overlay" style="position:fixed;inset:0;z-index:100001;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <form onsubmit="return unlockSite(event)" style="width:100%;max-width:380px;background:white;padding:26px;border-radius:14px;box-shadow:0 16px 45px rgba(0,0,0,.3);text-align:center;">
-        <h2 style="margin:0 0 8px;color:#1e293b;">LGS Takip Sistemi</h2>
-        <p style="margin:0 0 18px;color:#64748b;">Devam etmek için giriş şifresini yazın.</p>
-        <input id="site-password-input" type="password" inputmode="numeric" autocomplete="off" placeholder="Şifre" aria-label="Giriş şifresi" required style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:1rem;">
-        <button type="submit" style="width:100%;margin-top:12px;padding:12px;border:0;border-radius:8px;background:#2563eb;color:white;font-weight:700;font-size:1rem;cursor:pointer;">Giriş Yap</button>
-        <p id="site-password-error" role="alert" style="display:none;margin:12px 0 0;color:#dc2626;font-size:.9rem;">Şifre yanlış. Tekrar deneyin.</p>
-    </form>
-</div>
-
 <div id="role-entry-overlay" style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:16px;">
     <div class="section-box" role="dialog" aria-modal="true" aria-labelledby="role-entry-title" style="width:100%;max-width:440px;padding:26px;text-align:center;">
         <h2 id="role-entry-title" style="margin-bottom:8px;color:var(--primary);">LGS Takip Sistemine Giriş</h2>
         <p style="margin-bottom:18px;color:var(--text-muted);">Devam etmek için kullanım türünü seçin.</p>
         <div style="display:grid;gap:10px;">
-            <button type="button" class="btn btn-primary" onclick="enterStudentMode()" style="padding:13px;">🎓 Öğrenci Girişi</button>
+            <button type="button" class="btn btn-primary" onclick="enterStudentMode()" style="padding:13px;">🎓 Öğrenci Girişi / Kayıt</button>
             <button type="button" class="btn btn-success" onclick="enterTeacherMode()" style="padding:13px;">👩‍🏫 Öğretmen Girişi</button>
         </div>
     </div>
+</div>
+
+<div id="student-access-overlay" style="position:fixed;inset:0;z-index:100001;background:rgba(15,23,42,.92);display:none;align-items:center;justify-content:center;padding:16px;">
+    <form class="section-box" onsubmit="return loginOrRegisterStudent(event)" style="width:100%;max-width:440px;padding:26px;text-align:center;">
+        <h2 style="margin:0 0 8px;color:var(--primary);">Öğrenci Girişi / Kayıt</h2>
+        <p style="margin:0 0 18px;color:var(--text-muted);">Adınızı ve hatırlatma yanıtınızı girin. İlk girişte öğrenci profili oluşturulur.</p>
+        <div style="text-align:left;margin-bottom:12px;">
+            <label for="student-login-name" style="display:block;margin-bottom:5px;font-weight:700;">Öğrenci adı soyadı</label>
+            <input id="student-login-name" type="text" maxlength="100" autocomplete="name" placeholder="Ad Soyad" required style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;">
+        </div>
+        <div style="text-align:left;margin-bottom:12px;">
+            <label for="student-recovery-animal" style="display:block;margin-bottom:5px;font-weight:700;">Hatırlatma sorusu: En sevdiğin hayvan?</label>
+            <input id="student-recovery-animal" type="text" maxlength="60" autocomplete="off" placeholder="Yanıtınız" required style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;">
+        </div>
+        <p id="student-access-error" role="alert" style="display:none;margin:0 0 12px;color:#dc2626;font-size:.9rem;"></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button type="submit" class="btn btn-primary" style="padding:12px;">Devam Et</button>
+            <button type="button" class="btn" onclick="cancelStudentAccess()" style="padding:12px;">Geri</button>
+        </div>
+    </form>
 </div>
 
 <div class="container" id="main-container">
@@ -573,19 +600,6 @@
 </div>
 
 <script>
-    function unlockSite(event) {
-        event.preventDefault();
-        const input = document.getElementById("site-password-input");
-        if (input.value === "759103") {
-            document.getElementById("site-password-overlay").remove();
-            return false;
-        }
-        document.getElementById("site-password-error").style.display = "block";
-        input.value = "";
-        input.focus();
-        return false;
-    }
-
     let db;
     let currentUsername = null, currentStudentName = "", currentRole = null, studentOwnerUsername = null;
     let appLoading = false;
@@ -741,19 +755,88 @@
     }
 
     const defaultLgsData = {
-        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri", "Anlatım Bozuklukları"],
-        "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler"],
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Parçada Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Fiilde Çatı", "Yazım Kuralları", "Noktalama İşaretleri", "Metin Türleri", "Anlatım Bozuklukları", "Söz Sanatları", "Görsel Okuma ve Grafik Yorumlama"],
+        "Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
         "Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"],
-        "T.C. İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Millî Uyanış", "Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları"],
+        "T.C. İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Millî Uyanış", "Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları", "Atatürk Dönemi Türk Dış Politikası", "Atatürk'ün Ölümü ve Sonrası"],
         "Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliği", "Kur'an-ı Kerim"],
-        "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism"],
+        "İngilizce": ["Friendship", "Teen Life", "In The Kitchen", "On The Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"],
         "LGS Denemesi": ["Genel Deneme (Sözel + Sayısal)", "Sözel Bölüm Denemesi", "Sayısal Bölüm Denemesi", "Branş Denemesi", "Deneme Analizi"]
+    };
+
+    // 2026 LGS hazırlığı için 8. sınıf ünitelerinin takip alt başlıkları.
+    const defaultLgsSubtopics = {
+        "Türkçe": {
+            "Sözcükte Anlam": ["Gerçek, mecaz ve terim anlam", "Eş, zıt ve eş sesli sözcükler", "Deyimler ve atasözleri", "Sözcükler arası anlam ilişkileri"],
+            "Cümlede Anlam": ["Öznel ve nesnel yargılar", "Neden-sonuç, amaç-sonuç ve koşul", "Karşılaştırma ve örneklendirme", "Çıkarım ve cümle yorumlama"],
+            "Parçada Anlam": ["Konu, ana düşünce ve başlık", "Yardımcı düşünce ve çıkarım", "Paragrafın yapısı ve akışı", "Anlatım biçimleri ve düşünceyi geliştirme yolları"],
+            "Fiilimsiler": ["İsim-fiil", "Sıfat-fiil", "Zarf-fiil", "Fiilimsi ekleri ve cümlede görevleri"],
+            "Cümlenin Ögeleri": ["Yüklem ve özne", "Nesne", "Dolaylı tümleç", "Zarf tümleci ve öge bulma"],
+            "Fiilde Çatı": ["Etken ve edilgen fiiller", "Dönüşlü ve işteş fiiller", "Geçişli ve geçişsiz fiiller", "Oldurgan ve ettirgen fiiller"],
+            "Yazım Kuralları": ["Büyük harflerin kullanımı", "de / da ve ki'nin yazımı", "mi soru ekinin yazımı", "Birleşik kelimeler, kısaltmalar ve sayıların yazımı"],
+            "Noktalama İşaretleri": ["Nokta, virgül ve noktalı virgül", "İki nokta, üç nokta ve soru işareti", "Ünlem, tırnak ve kısa çizgi", "Kesme işareti ve yay ayraç"],
+            "Metin Türleri": ["Hikâye edici metinler", "Bilgilendirici metinler", "Şiir ve anı", "Deneme, makale, söyleşi ve fıkra"],
+            "Anlatım Bozuklukları": ["Anlam yönünden anlatım bozukluğu", "Gereksiz sözcük kullanımı", "Sözcüğün yanlış anlamda kullanımı", "Dil bilgisi yönünden anlatım bozukluğu"],
+            "Söz Sanatları": ["Benzetme", "Kişileştirme ve konuşturma", "Abartma", "Karşıtlık"],
+            "Görsel Okuma ve Grafik Yorumlama": ["Tablo ve grafik yorumlama", "Görsel ve karikatür yorumlama", "Harita ve yönerge okuma", "Çoklu metin ve veri karşılaştırma"]
+        },
+        "Matematik": {
+            "Çarpanlar ve Katlar": ["Pozitif tam sayıların çarpanları", "Asal sayılar ve asal çarpanlara ayırma", "EBOB ve EKOK", "Aralarında asal sayılar ve problemler"],
+            "Üslü İfadeler": ["Tam sayı kuvvetleri", "Üslü ifadelerin çarpımı ve bölümü", "Ondalık gösterimlerin çözümlenmesi", "Bilimsel gösterim"],
+            "Kareköklü İfadeler": ["Tam kare sayılar ve karekökleri", "Kareköklü ifadeleri sadeleştirme", "Kareköklü ifadelerde işlemler", "Gerçek sayılar ve sayı doğrusunda gösterim"],
+            "Veri Analizi": ["Çizgi ve sütun grafikleri", "Daire grafikleri", "Grafik türleri arasında dönüşüm", "Verileri yorumlama ve karşılaştırma"],
+            "Basit Olayların Olma Olasılığı": ["Olası durumları belirleme", "Daha fazla, eşit ve daha az olasılıklı olaylar", "Bir olayın olasılık değeri", "Olasılık problemleri"],
+            "Cebirsel İfadeler": ["Terim, katsayı ve sabit terim", "Cebirsel ifadelerde toplama ve çıkarma", "Dağılma özelliği ve özdeşlikler", "Çarpanlara ayırma ve cebirsel problemler"],
+            "Doğrusal Denklemler": ["Koordinat sistemi", "Doğrusal ilişki ve denklem", "Doğrunun grafiği ve eğim", "Doğrusal denklem problemleri"],
+            "Eşitsizlikler": ["Birinci dereceden bir bilinmeyenli eşitsizlikler", "Eşitsizliğin çözüm kümesi", "Sayı doğrusunda gösterim", "Eşitsizlik problemleri"],
+            "Üçgenler": ["Üçgende kenar ve açı ilişkileri", "Üçgen eşitsizliği", "Üçgen çizimleri", "Pisagor bağıntısı ve uygulamaları"],
+            "Eşlik ve Benzerlik": ["Eş şekiller ve eşlik", "Benzer şekiller", "Benzerlik oranı", "Benzerlik problemleri"],
+            "Dönüşüm Geometrisi": ["Öteleme hareketi", "Yansıma", "Dönme", "Dönüşüm geometrisi uygulamaları"],
+            "Geometrik Cisimler": ["Prizmalar ve temel elemanları", "Dik dairesel silindir", "Silindirin yüzey alanı", "Silindirin hacmi"]
+        },
+        "Fen Bilimleri": {
+            "Mevsimler ve İklim": ["Mevsimlerin oluşumu", "İklim ve hava olayları", "İklim bilimi ve meteoroloji"],
+            "DNA ve Genetik Kod": ["DNA'nın yapısı ve genetik kod", "Kalıtım ve çaprazlama", "Mutasyon ve modifikasyon", "Adaptasyon ve doğal seçilim", "Biyoteknoloji"],
+            "Basınç": ["Katı basıncı", "Sıvı basıncı", "Gaz basıncı", "Basınç uygulamaları"],
+            "Madde ve Endüstri": ["Periyodik sistem", "Fiziksel ve kimyasal değişimler", "Kimyasal tepkimeler", "Asitler ve bazlar", "Maddenin ısı ile etkileşimi", "Türkiye'de kimya endüstrisi"],
+            "Basit Makineler": ["Kaldıraçlar", "Makaralar", "Eğik düzlem, çıkrık ve vida", "Dişli çarklar ve basit makine düzenekleri"],
+            "Enerji Dönüşümleri": ["Besin zinciri ve enerji akışı", "Fotosentez ve solunum", "Madde döngüleri", "Enerji kaynakları ve çevre sorunları", "Sürdürülebilir yaşam"],
+            "Elektrik Yükleri": ["Elektrik yükleri ve elektriklenme", "Elektrik yüklü cisimler", "Elektrik enerjisinin dönüşümü", "Elektrik enerjisinin bilinçli kullanımı"]
+        },
+        "T.C. İnkılap Tarihi": {
+            "Bir Kahraman Doğuyor": ["Avrupa'daki gelişmeler ve Osmanlı Devleti", "Mustafa Kemal'in çocukluğu ve öğrenim hayatı", "Fikir hayatını etkileyen kişiler ve olaylar", "Mustafa Kemal'in askerlik hayatı"],
+            "Millî Uyanış": ["I. Dünya Savaşı ve Osmanlı Devleti", "Mondros Ateşkes Antlaşması", "İşgaller ve cemiyetler", "Kuvâ-yı Millîye ve millî bilinç"],
+            "Ya İstiklal Ya Ölüm": ["TBMM'nin açılması", "Sevr Antlaşması", "Doğu ve Güney cepheleri", "Batı Cephesi ve Millî Mücadele'nin kazanılması", "Lozan Barış Antlaşması"],
+            "Atatürkçülük ve Çağdaşlaşan Türkiye": ["Atatürk ilkeleri", "Siyasi alanda yapılan inkılaplar", "Hukuk ve eğitim alanındaki inkılaplar", "Toplumsal ve ekonomik alandaki yenilikler"],
+            "Demokratikleşme Çabaları": ["Cumhuriyetin ilk yıllarında siyasi gelişmeler", "Çok partili hayata geçiş denemeleri", "Demokratikleşme ve millî egemenlik"],
+            "Atatürk Dönemi Türk Dış Politikası": ["Dış politikada temel ilkeler", "Lozan'dan kalan sorunlar", "Balkan Antantı ve Sadabat Paktı", "Hatay'ın ana vatana katılması"],
+            "Atatürk'ün Ölümü ve Sonrası": ["Atatürk'ün son günleri ve vefatı", "II. Dünya Savaşı'nın Türkiye'ye etkileri", "Demokratik hayata geçiş", "Atatürk'ün eserleri ve mirası"]
+        },
+        "Din Kültürü": {
+            "Kader İnancı": ["Kader ve kaza kavramları", "İrade ve sorumluluk", "Tevekkül ve emek", "Kaderle ilgili yanlış anlayışlar"],
+            "Zekat ve Sadaka": ["Paylaşma ve yardımlaşma", "Zekât ibadeti", "Sadaka ve infak", "Zekât ve sadakanın bireysel/toplumsal faydaları"],
+            "Din ve Hayat": ["Dinin birey ve toplum hayatındaki yeri", "Dinin temel gayesi", "İslam dininin korunmasını amaçladığı değerler"],
+            "Hz. Muhammed'in Örnekliği": ["Hz. Muhammed'in doğruluğu ve güvenilirliği", "Merhameti ve affediciliği", "İstişareye verdiği önem", "Hz. Muhammed'in örnek davranışları"],
+            "Kur'an-ı Kerim": ["Kur'an-ı Kerim'in temel özellikleri", "Kur'an'ın ana konuları", "Kur'an'da akıl ve bilgi", "Sure ve ayetlerden mesajlar"]
+        },
+        "İngilizce": {
+            "Friendship": ["Accepting and refusing", "Making and responding to invitations", "Apologizing and giving excuses"],
+            "Teen Life": ["Daily routines and activities", "Preferences and interests", "Frequency expressions"],
+            "In The Kitchen": ["Food and cooking vocabulary", "Following a recipe", "Sequencing cooking steps"],
+            "On The Phone": ["Making phone calls", "Leaving and taking messages", "Asking for and giving information"],
+            "The Internet": ["Internet habits", "Making requests", "Accepting and refusing requests"],
+            "Adventures": ["Extreme sports and activities", "Experiences and achievements", "Expressing preferences"],
+            "Tourism": ["Places and tourist attractions", "Describing destinations", "Comparing holiday options"],
+            "Chores": ["Household chores", "Responsibilities and duties", "Making simple requests"],
+            "Science": ["Scientific studies and inventions", "Describing processes", "Talking about achievements"],
+            "Natural Forces": ["Natural disasters", "Weather and effects", "Giving advice and expressing results"]
+        }
     };
 
     const DAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
     const DEFAULT_FULL_HOURS = ["09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 13:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00"];
 
-    let lgsData = {}, examNames = {};
+    let lgsData = {}, examNames = {}, subtopicsData = {};
     const defaultExamOptions = ["-", "İşlem Hatası", "Soru Kökünü Yanlış Okuma", "Yorum / Mantık Yürütme Hatası", "Bilgi Eksikliği"];
     let customExamOptions = [], examCount = 5, booksData = {}, studyLogs = [], questionsData = [], examSelections = {}, topicChecks = {};
     let scheduleData = {}, dayHoursData = {};
@@ -838,22 +921,9 @@
                 tx.onerror = () => reject(tx.error || new Error("Eski klasör yedeği ayarı silinemedi."));
             });
 
-            let activeUser = await getDBSetting('active_user', null);
             let users = await getDBUsers();
-            let profile = activeUser ? users.find(user => user.username === String(activeUser).toLowerCase()) : null;
             for (const user of users) await migrateLegacyTeacherRecords(user.username);
-            users = await getDBUsers();
-            const rememberedStudent = await getDBSetting("lgs_student_user", null);
-            profile = rememberedStudent ? users.find(user => user.username === String(rememberedStudent).toLowerCase() && !user.importedStudent) : null;
-            if (!profile && activeUser) profile = users.find(user => user.username === String(activeUser).toLowerCase() && !user.importedStudent) || null;
-            if (!profile) profile = users.find(user => !user.importedStudent) || null;
-            if (!profile) {
-                const username = "yerel_ogrenci_" + Date.now();
-                profile = { username: username, studentCode: generateStudentCode(), studentName: "Öğrenci", localOnly: true };
-                await saveDBUser(profile);
-            }
-            studentOwnerUsername = profile.username;
-            await saveDBSetting("lgs_student_user", studentOwnerUsername);
+            studentOwnerUsername = null;
             document.getElementById("role-entry-overlay").style.display = "flex";
             document.getElementById("main-container").style.display = "none";
         } catch (err) {
@@ -878,20 +948,97 @@
         if (content) content.style.display = teacherMode && !hasStudent ? "none" : "block";
     }
 
-    async function enterStudentMode() {
+    function normalizeStudentLoginName(value) {
+        return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
+    }
+
+    function normalizeRecoveryAnimal(value) {
+        return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
+    }
+
+    function enterStudentMode() {
+        const error = document.getElementById("student-access-error");
+        if (error) { error.style.display = "none"; error.textContent = ""; }
+        document.getElementById("student-login-name").value = "";
+        document.getElementById("student-recovery-animal").value = "";
+        document.getElementById("role-entry-overlay").style.display = "none";
+        document.getElementById("student-access-overlay").style.display = "flex";
+        document.getElementById("student-login-name").focus();
+    }
+
+    function cancelStudentAccess() {
+        document.getElementById("student-access-overlay").style.display = "none";
+        document.getElementById("role-entry-overlay").style.display = "flex";
+    }
+
+    async function loginOrRegisterStudent(event) {
+        event.preventDefault();
+        const nameInput = document.getElementById("student-login-name");
+        const animalInput = document.getElementById("student-recovery-animal");
+        const error = document.getElementById("student-access-error");
+        const studentName = String(nameInput.value || "").trim().replace(/\s+/g, " ");
+        const normalizedName = normalizeStudentLoginName(studentName);
+        const recoveryAnimal = normalizeRecoveryAnimal(animalInput.value);
+        error.style.display = "none";
+        error.textContent = "";
+
         try {
-            if (!studentOwnerUsername) throw new Error("Öğrenci profili bulunamadı.");
-            if (currentUsername && currentRole) { await saveData(); }
+            if (!studentName || studentName.length > 100 || /[<>]/.test(studentName)) throw new Error("Geçerli bir öğrenci adı girin.");
+            if (!recoveryAnimal || recoveryAnimal.length > 60) throw new Error("En sevdiğiniz hayvanı girin.");
+
+            const users = (await getDBUsers()).filter(user => user && !user.importedStudent);
+            const matches = users.filter(user => normalizeStudentLoginName(user.studentName || "") === normalizedName);
+            let profile = null;
+
+            if (matches.length) {
+                profile = matches.find(user => user.recoveryAnimal && normalizeRecoveryAnimal(user.recoveryAnimal) === recoveryAnimal) || null;
+                if (!profile && matches.some(user => user.recoveryAnimal)) throw new Error("Bu öğrenci adı için hayvan yanıtı eşleşmedi.");
+                if (!profile) profile = matches[0];
+            } else {
+                // Eski sürümün isimsiz varsayılan profili varsa, var olan kayıtları koruyarak yeniden adlandır.
+                const legacyProfiles = users.filter(user => String(user.studentName || "").trim() === "Öğrenci" && !user.recoveryAnimal);
+                if (legacyProfiles.length === 1) {
+                    profile = legacyProfiles[0];
+                } else if (legacyProfiles.length > 1) {
+                    const remembered = await getDBSetting("lgs_student_user", null);
+                    profile = legacyProfiles.find(user => user.username === String(remembered || "").toLowerCase()) || null;
+                    if (!profile) throw new Error("Eski sürümden birden fazla isimsiz öğrenci profili bulundu. Kayıtların karışmaması için önce bu profillerin yedeklerini ayırın.");
+                }
+            }
+
+            if (!profile) {
+                const studentCode = generateStudentCode();
+                profile = {
+                    username: "ogrenci_" + studentCode.toLowerCase().replace(/[^a-z0-9]/g, ""),
+                    studentCode: studentCode,
+                    studentName: studentName,
+                    recoveryAnimal: recoveryAnimal,
+                    localOnly: true
+                };
+            } else {
+                if (profile.recoveryAnimal && normalizeRecoveryAnimal(profile.recoveryAnimal) !== recoveryAnimal) {
+                    throw new Error("Bu öğrenci adı için hayvan yanıtı eşleşmedi.");
+                }
+                profile.studentName = studentName;
+                profile.recoveryAnimal = recoveryAnimal;
+                if (!profile.studentCode) profile.studentCode = generateStudentCode();
+            }
+
+            await saveDBUser(profile);
+            studentOwnerUsername = profile.username;
             currentRole = "student";
-            document.getElementById("role-entry-overlay").style.display = "none";
+            document.getElementById("student-access-overlay").style.display = "none";
             document.getElementById("main-container").style.display = "block";
             document.getElementById("current-role-label").textContent = "Öğrenci";
             applyRoleVisibility(true);
+            await saveDBSetting("lgs_student_user", studentOwnerUsername);
             await saveDBSetting("active_user", studentOwnerUsername);
             await launchApp(studentOwnerUsername);
         } catch (err) {
-            alert("Öğrenci ekranı açılamadı: " + (err.message || err));
+            error.textContent = err.message || "Öğrenci profili açılamadı.";
+            error.style.display = "block";
         }
+        return false;
     }
 
     async function enterTeacherMode() {
@@ -1096,6 +1243,7 @@
         applyRoleVisibility(true);
 
         lgsData = await getDBSetting(`lgs_custom_topics_${username}`, JSON.parse(JSON.stringify(defaultLgsData)));
+        subtopicsData = await getDBSetting(`lgs_subtopics_${username}`, {});
         examNames = await getDBSetting(`lgs_exam_names_${username}`, {});
         customExamOptions = await getDBSetting(`lgs_custom_exam_options_${username}`, []);
         examCount = await getDBSetting(`lgs_exam_count_${username}`, 5);
@@ -1116,8 +1264,14 @@
 
         for (const key of Object.keys(defaultLgsData)) {
             if (!booksData[key]) booksData[key] = [];
-            if (!lgsData[key]) lgsData[key] = [...defaultLgsData[key]];
+            if (!Array.isArray(lgsData[key])) lgsData[key] = [...defaultLgsData[key]];
+            else {
+                for (const unit of defaultLgsData[key]) {
+                    if (!lgsData[key].includes(unit)) lgsData[key].push(unit);
+                }
+            }
         }
+        migrateLegacyTopicChecks();
 
         renderTopics();
         renderExamTable();
@@ -1301,9 +1455,10 @@
         if (!Object.prototype.hasOwnProperty.call(lgsData, subject)) return;
         if (await askDeleteConfirmation(`"${subject}" kategorisini ve içindeki tüm konuları silmek istiyor musunuz? Bu işlem konu listesinden kaldırır; geçmiş çalışma kayıtları ve bu kategoriyle kaydedilmiş soru fotoğrafları korunur.`)) {
             delete lgsData[subject];
+            delete subtopicsData[subject];
             // Silinen kategoriye ait konu işaretlerini de temizle.
             Object.keys(topicChecks || {}).forEach(key => {
-                if (key.startsWith(`topic_${subject}_`)) delete topicChecks[key];
+                if (key.startsWith(`topic_${subject}_`) || key.startsWith(`topic_v2_${encodeURIComponent(subject)}_`)) delete topicChecks[key];
             });
             await saveTopicsState();
             alert(`"${subject}" kategorisi silindi. İsterseniz aynı adı yeniden ekleyebilirsiniz.`);
@@ -1425,20 +1580,27 @@
         const safeTitle = escapeHtml(title);
         let htmlContent = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${safeTitle}</title>
         <style>
-          @page { size: A4 portrait; margin: 8mm; }
+          @page { size: A4 portrait; margin: 7mm; }
           * { box-sizing: border-box; }
-          body { font-family: Arial, sans-serif; color:#111; margin:0; font-size:10pt; }
-          .exam-header { text-align:center; border-bottom:2px solid #222; padding-bottom:4mm; margin-bottom:5mm; }
-          .exam-header h1 { font-size:16pt; margin:0 0 2mm; }
-          .student-info { display:flex; justify-content:space-between; gap:5mm; border:1px solid #555; padding:3mm; margin-bottom:5mm; font-weight:600; font-size:9pt; }
-          .question-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4mm; align-items:start; }
-          .exam-question { border:1px solid #bbb; border-radius:2mm; padding:3mm; break-inside:avoid; page-break-inside:avoid; min-width:0; }
-          .q-meta { display:flex; justify-content:space-between; gap:2mm; font-weight:bold; font-size:8.5pt; margin-bottom:2mm; }
-          .q-note { font-size:8pt; margin-bottom:2mm; }
-          .q-text { white-space:pre-wrap; font-size:10pt; line-height:1.35; overflow-wrap:anywhere; }
-          .q-img-container { text-align:center; width:100%; }
-          .q-img { display:block; max-width:100%; width:auto; height:auto; max-height:105mm; object-fit:contain; margin:0 auto; }
-          @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+          html, body { margin:0; padding:0; width:100%; min-height:0; }
+          body { font-family: Arial, sans-serif; color:#111; font-size:10.5pt; }
+          .exam-header { text-align:center; border-bottom:2px solid #222; padding-bottom:2mm; margin-bottom:3mm; }
+          .exam-header h1 { font-size:15pt; margin:0 0 1mm; }
+          .student-info { display:flex; justify-content:space-between; gap:4mm; border:1px solid #555; padding:2mm; margin-bottom:3mm; font-weight:600; font-size:8.5pt; }
+          .question-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3mm; align-items:start; }
+          .exam-question { border:1px solid #bbb; border-radius:2mm; padding:2.5mm; break-inside:avoid; page-break-inside:avoid; min-width:0; }
+          .q-meta { display:flex; justify-content:space-between; gap:2mm; font-weight:bold; font-size:8.5pt; margin-bottom:1.5mm; }
+          .q-note { font-size:8.5pt; margin-bottom:1.5mm; }
+          .q-text { white-space:pre-wrap; font-size:10.5pt; line-height:1.3; overflow-wrap:anywhere; }
+          .q-img-container { text-align:center; width:100%; break-inside:avoid; page-break-inside:avoid; }
+          .q-img { display:block; max-width:100%; width:100%; height:auto; max-height:110mm; object-fit:contain; margin:0 auto; }
+          @media print {
+            html, body { margin:0 !important; padding:0 !important; width:auto !important; min-height:0 !important; }
+            body { -webkit-print-color-adjust:exact; print-color-adjust:exact; break-before:auto !important; page-break-before:auto !important; }
+            .exam-header, .student-info { break-inside:avoid; page-break-inside:avoid; }
+            .question-grid { display:block !important; columns:2; column-gap:3mm; column-fill:auto; }
+            .exam-question { display:inline-block; vertical-align:top; width:100%; margin:0 0 3mm; break-inside:avoid; page-break-inside:avoid; }
+          }
           @media screen { body { padding:10mm; max-width:210mm; margin:auto; } }
         </style></head><body>
         <div class="exam-header"><h1>${safeTitle}</h1><div>8. Sınıf LGS Deneme Sınavı</div></div>
@@ -1455,7 +1617,16 @@
         closeExamGeneratorModal();
         const doPrint = () => { printWindow.focus(); printWindow.print(); };
         const imgs = Array.from(printWindow.document.images);
-        Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }))).then(() => setTimeout(doPrint, 250));
+        const imagesReady = Promise.all(imgs.map(img => typeof img.decode === "function" ? img.decode().catch(() => {}) : (img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }))));
+        const fontsReady = printWindow.document.fonts && printWindow.document.fonts.ready ? printWindow.document.fonts.ready.catch(() => {}) : Promise.resolve();
+        const waitForLayout = () => new Promise(resolve => {
+            let finished = false;
+            const finish = () => { if (finished) return; finished = true; clearTimeout(fallback); resolve(); };
+            const fallback = setTimeout(finish, 300);
+            if (printWindow.requestAnimationFrame) printWindow.requestAnimationFrame(() => printWindow.requestAnimationFrame(finish));
+            else setTimeout(finish, 50);
+        });
+        Promise.all([imagesReady, fontsReady]).then(waitForLayout).then(() => setTimeout(doPrint, 350));
     }
 
     function renderScheduleTable() {
@@ -1684,61 +1855,103 @@
         if(l2) l2.innerText = `${totalQuestions} Soru`;
     }
 
+    function getSubtopicsForUnit(subject, unit) {
+        const custom = subtopicsData && subtopicsData[subject] && subtopicsData[subject][unit];
+        if (Array.isArray(custom)) return custom;
+        const configured = defaultLgsSubtopics[subject] && defaultLgsSubtopics[subject][unit];
+        return Array.isArray(configured) && configured.length ? configured : [unit];
+    }
+
+    function getSubtopicTrackingKey(subject, unit, subtopic) {
+        return `topic_v2_${encodeURIComponent(subject)}_${encodeURIComponent(unit)}_${encodeURIComponent(subtopic)}`;
+    }
+
+    function subtopicJsArg(value) { return escapeHtml(JSON.stringify(String(value))); }
+
+    function migrateLegacyTopicChecks() {
+        if (!topicChecks || typeof topicChecks !== "object" || Array.isArray(topicChecks)) topicChecks = {};
+        for (const subject of Object.keys(lgsData || {})) {
+            (lgsData[subject] || []).forEach((unit, unitIdx) => {
+                const legacyKey = `topic_${subject}_${unitIdx}`;
+                if (!Object.prototype.hasOwnProperty.call(topicChecks, legacyKey)) return;
+                const wasChecked = topicChecks[legacyKey] === true;
+                getSubtopicsForUnit(subject, unit).forEach(subtopic => {
+                    const key = getSubtopicTrackingKey(subject, unit, subtopic);
+                    if (!Object.prototype.hasOwnProperty.call(topicChecks, key)) topicChecks[key] = wasChecked;
+                });
+                delete topicChecks[legacyKey];
+            });
+        }
+    }
+
     function renderTopics() {
         const container = document.getElementById('subjects-container');
         if(!container) return;
         container.innerHTML = '';
         let grandTotal = 0, grandChecked = 0;
         const orderedSubjects = getOrderedSubjectKeys();
-        orderedSubjects.forEach(subject => {
-            let topics = lgsData[subject] || [];
-            let div = document.createElement('div');
+        orderedSubjects.forEach((subject, subjectIdx) => {
+            const units = lgsData[subject] || [];
+            const div = document.createElement('div');
             div.className = "section-box";
-            let subjectChecked = 0, subjectTotal = topics.length;
-
-            let deleteCategoryBtn = `<button type="button" class="btn btn-danger no-print" onclick="deleteSubjectCategory('${subject}')" style="font-size:0.7rem; padding:3px 8px;">🗑️ Kategoriyi Sil</button>`;
-
-            let htmlHeader = `
+            let subjectChecked = 0, subjectTotal = 0;
+            const deleteCategoryBtn = `<button type="button" class="btn btn-danger no-print" onclick="deleteSubjectCategory('${subject}')" style="font-size:0.7rem;padding:3px 8px;">🗑️ Kategoriyi Sil</button>`;
+            let html = `
                 <div class="subject-header">
-                    <h3>${subject}</h3>
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <h3>${escapeHtml(subject)}</h3>
+                    <div style="display:flex;align-items:center;gap:8px;">
                         <span class="subject-progress" id="badge_${subject}">0/0 (%0)</span>
                         ${deleteCategoryBtn}
-                        <button type="button" class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem; padding:3px 8px;">➕ Konu Ekle</button>
+                        <button type="button" class="btn btn-primary no-print" onclick="addNewTopic('${subject}')" style="font-size:0.7rem;padding:3px 8px;">➕ Ünite Ekle</button>
                     </div>
                 </div>
-            `;
+                <div class="unit-list">`;
 
-            let htmlTopics = `<div class="grid-2">`;
-            topics.forEach((topic, idx) => {
-                grandTotal++;
-                let key = `topic_${subject}_${idx}`;
-                let isChecked = topicChecks[key] === true;
-                if(isChecked) { grandChecked++; subjectChecked++; }
-
-                htmlTopics += `
-                <div class="topic-row">
-                    <div class="topic-row-left">
-                        <label class="checkbox-label">
-                            <input type="checkbox" data-key="${key}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
-                            <span>${topic}</span>
-                        </label>
-                    </div>
-                    <div class="topic-actions no-print">
-                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, -1)">⬆️</button>
-                        <button type="button" class="icon-btn" onclick="moveTopic('${subject}', ${idx}, 1)">⬇️</button>
-                        <button type="button" class="icon-btn" onclick="editTopic('${subject}', ${idx})">✏️</button>
-                        <button type="button" class="icon-btn" onclick="deleteTopic('${subject}', ${idx})" style="color:var(--danger);">🗑️</button>
-                    </div>
+            units.forEach((unit, unitIdx) => {
+                const subtopics = getSubtopicsForUnit(subject, unit);
+                const unitId = `unit_${subjectIdx}_${unitIdx}`;
+                let unitChecked = 0;
+                let subtopicHtml = "";
+                subtopics.forEach((subtopic, subtopicIdx) => {
+                    const key = getSubtopicTrackingKey(subject, unit, subtopic);
+                    const isChecked = topicChecks[key] === true;
+                    subjectTotal++; grandTotal++;
+                    if (isChecked) { unitChecked++; subjectChecked++; grandChecked++; }
+                    subtopicHtml += `
+                        <div class="subtopic-row">
+                            <label>
+                                <input class="topic-subtopic-checkbox" type="checkbox" data-key="${escapeHtml(key)}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
+                                <span>${escapeHtml(subtopic)}</span>
+                            </label>
+                            <span class="subtopic-tools no-print">
+                                <button type="button" class="icon-btn" title="Alt konu adını düzenle" onclick="editSubtopic(${subtopicJsArg(subject)}, ${subtopicJsArg(unit)}, ${subtopicIdx})">✏️</button>
+                                <button type="button" class="icon-btn" title="Alt konuyu sil" onclick="deleteSubtopic(${subtopicJsArg(subject)}, ${subtopicJsArg(unit)}, ${subtopicIdx})" style="color:var(--danger);">🗑️</button>
+                            </span>
+                        </div>`;
+                });
+                const unitPercent = subtopics.length ? Math.round((unitChecked / subtopics.length) * 100) : 0;
+                const toolsHtml = `<div class="unit-tools no-print">
+                    <button type="button" class="icon-btn" title="Üniteyi yukarı taşı" onclick="moveTopic('${subject}', ${unitIdx}, -1)">⬆️</button>
+                    <button type="button" class="icon-btn" title="Üniteyi aşağı taşı" onclick="moveTopic('${subject}', ${unitIdx}, 1)">⬇️</button>
+                    <button type="button" class="icon-btn" title="Ünite adını düzenle" onclick="editTopic('${subject}', ${unitIdx})">✏️</button>
+                    <button type="button" class="icon-btn" title="Üniteyi sil" onclick="deleteTopic('${subject}', ${unitIdx})" style="color:var(--danger);">🗑️</button>
                 </div>`;
+                html += `
+                    <details class="topic-unit">
+                        <summary>
+                            <span class="unit-title">${escapeHtml(unit)}</span>
+                            <span class="unit-progress-info"><span id="${unitId}_label">${unitChecked}/${subtopics.length} (%${unitPercent})</span><span class="unit-progress-track"><span class="unit-progress-fill" id="${unitId}_fill" style="width:${unitPercent}%"></span></span></span>
+                        </summary>
+                        <div class="unit-contents">${toolsHtml}<div class="subtopic-list">${subtopicHtml}</div><button type="button" class="btn btn-primary no-print" onclick="addSubtopic(${subtopicJsArg(subject)}, ${subtopicJsArg(unit)})" style="font-size:.72rem;padding:4px 9px;margin-top:8px;">➕ Alt Konu Ekle</button></div>
+                    </details>`;
             });
-            htmlTopics += `</div>`;
-            div.innerHTML = htmlHeader + htmlTopics;
-            container.appendChild(div);
 
-            let subjectPercent = subjectTotal > 0 ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
-            let badge = div.querySelector('.subject-progress');
-            if(badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${subjectPercent})`;
+            html += `</div>`;
+            div.innerHTML = html;
+            container.appendChild(div);
+            const subjectPercent = subjectTotal > 0 ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
+            const badge = div.querySelector('.subject-progress');
+            if (badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${subjectPercent})`;
         });
         updateGrandProgressPercent(grandChecked, grandTotal);
     }
@@ -1748,16 +1961,100 @@
         if(name && name.trim()) { lgsData[subject].push(name.trim()); saveTopicsState(); }
     }
 
+    function cleanSubtopicName(value) {
+        const name = String(value || "").trim();
+        if (!name || name.length > 240 || /[<>]/.test(name)) {
+            alert("Alt konu adı boş olamaz, 240 karakteri aşamaz ve < > karakterlerini içeremez.");
+            return "";
+        }
+        return name;
+    }
+
+    function ensureCustomSubtopics(subject, unit) {
+        if (!subtopicsData || typeof subtopicsData !== "object" || Array.isArray(subtopicsData)) subtopicsData = {};
+        if (!subtopicsData[subject] || typeof subtopicsData[subject] !== "object" || Array.isArray(subtopicsData[subject])) subtopicsData[subject] = {};
+        if (!Array.isArray(subtopicsData[subject][unit])) subtopicsData[subject][unit] = [...getSubtopicsForUnit(subject, unit)];
+        return subtopicsData[subject][unit];
+    }
+
+    async function saveSubtopicsState() {
+        const activeUser = currentUsername || await getDBSetting('active_user', 'default');
+        await saveDBSetting(`lgs_subtopics_${activeUser}`, subtopicsData);
+        await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
+        renderTopics();
+        updateSubjectDropdowns();
+    }
+
+    async function addSubtopic(subject, unit) {
+        const entered = prompt(`"${unit}" ünitesine eklenecek alt konu adı:`);
+        if (entered === null) return;
+        const name = cleanSubtopicName(entered);
+        if (!name) return;
+        const items = ensureCustomSubtopics(subject, unit);
+        if (items.length >= 500) { alert("Bir üniteye en fazla 500 alt konu eklenebilir."); return; }
+        if (items.some(item => item.toLocaleLowerCase('tr') === name.toLocaleLowerCase('tr'))) { alert("Bu alt konu zaten listede."); return; }
+        items.push(name);
+        await saveSubtopicsState();
+    }
+
+    async function editSubtopic(subject, unit, idx) {
+        const items = ensureCustomSubtopics(subject, unit);
+        const oldName = items[idx];
+        if (oldName === undefined) return;
+        const entered = prompt("Alt konu adını düzenleyin:", oldName);
+        if (entered === null) return;
+        const name = cleanSubtopicName(entered);
+        if (!name || name === oldName) return;
+        if (items.some((item, i) => i !== idx && item.toLocaleLowerCase('tr') === name.toLocaleLowerCase('tr'))) { alert("Bu alt konu zaten listede."); return; }
+        const oldKey = getSubtopicTrackingKey(subject, unit, oldName);
+        const newKey = getSubtopicTrackingKey(subject, unit, name);
+        if (Object.prototype.hasOwnProperty.call(topicChecks, oldKey)) topicChecks[newKey] = topicChecks[oldKey];
+        delete topicChecks[oldKey];
+        items[idx] = name;
+        await saveSubtopicsState();
+    }
+
+    async function deleteSubtopic(subject, unit, idx) {
+        const items = ensureCustomSubtopics(subject, unit);
+        if (items.length <= 1) { alert("İlerleme takibinin çalışması için ünitede en az bir alt konu kalmalı."); return; }
+        const name = items[idx];
+        if (name === undefined || !await askDeleteConfirmation(`"${name}" alt konusunu silmek istiyor musunuz?`)) return;
+        items.splice(idx, 1);
+        delete topicChecks[getSubtopicTrackingKey(subject, unit, name)];
+        await saveSubtopicsState();
+    }
+
     function editTopic(subject, idx) {
         let oldName = lgsData[subject][idx];
         let newName = prompt(`Konu adını düzenleyin:`, oldName);
-        if(newName && newName.trim() && newName !== oldName) { lgsData[subject][idx] = newName.trim(); saveTopicsState(); }
+        if(newName && newName.trim() && newName !== oldName) {
+            newName = newName.trim();
+            const oldSubtopics = [...getSubtopicsForUnit(subject, oldName)];
+            const oldPrefix = `topic_v2_${encodeURIComponent(subject)}_${encodeURIComponent(oldName)}_`;
+            oldSubtopics.forEach(subtopic => {
+                const oldKey = getSubtopicTrackingKey(subject, oldName, subtopic);
+                const newKey = getSubtopicTrackingKey(subject, newName, subtopic);
+                if (Object.prototype.hasOwnProperty.call(topicChecks, oldKey)) topicChecks[newKey] = topicChecks[oldKey];
+                delete topicChecks[oldKey];
+            });
+            Object.keys(topicChecks || {}).forEach(key => { if (key.startsWith(oldPrefix)) delete topicChecks[key]; });
+            if (!subtopicsData[subject]) subtopicsData[subject] = {};
+            subtopicsData[subject][newName] = oldSubtopics;
+            delete subtopicsData[subject][oldName];
+            lgsData[subject][idx] = newName;
+            saveTopicsState();
+        }
     }
 
     async function deleteTopic(subject, idx) {
         if (await askDeleteConfirmation(`"${lgsData[subject][idx]}" konusunu silmek istiyor musunuz?`)) {
+            const unit = lgsData[subject][idx];
             lgsData[subject].splice(idx, 1);
-            saveTopicsState();
+            if (subtopicsData[subject]) delete subtopicsData[subject][unit];
+            const prefix = `topic_v2_${encodeURIComponent(subject)}_${encodeURIComponent(unit)}_`;
+            Object.keys(topicChecks || {}).forEach(key => { if (key.startsWith(prefix)) delete topicChecks[key]; });
+            delete topicChecks[`topic_${subject}_${idx}`];
+            await saveTopicsState();
         }
     }
 
@@ -1773,28 +2070,38 @@
     async function saveTopicsState() {
         let activeUser = currentUsername || await getDBSetting('active_user', 'default');
         await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
+        await saveDBSetting(`lgs_subtopics_${activeUser}`, subtopicsData);
         await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
         renderTopics(); renderExamTable(); renderBooks(); updateSubjectDropdowns();
     }
 
     async function updateProgress() {
         let grandChecked = 0, grandTotal = 0;
+        const checkboxByKey = new Map(Array.from(document.querySelectorAll('#subjects-container .topic-subtopic-checkbox')).map(box => [box.dataset.key, box]));
+        checkboxByKey.forEach((box, key) => { topicChecks[key] = box.checked; });
         const orderedSubjects = getOrderedSubjectKeys();
-        orderedSubjects.forEach(subject => {
-            let topics = lgsData[subject] || [];
-            let subChecked = 0;
-            topics.forEach((topic, idx) => {
-                grandTotal++;
-                let key = `topic_${subject}_${idx}`;
-                let cb = document.querySelector(`input[data-key="${key}"]`);
-                if(cb) {
-                    topicChecks[key] = cb.checked;
-                    if(cb.checked) { grandChecked++; subChecked++; }
-                }
+        orderedSubjects.forEach((subject, subjectIdx) => {
+            let subjectChecked = 0, subjectTotal = 0;
+            (lgsData[subject] || []).forEach((unit, unitIdx) => {
+                const subtopics = getSubtopicsForUnit(subject, unit);
+                let unitChecked = 0;
+                subtopics.forEach(subtopic => {
+                    const key = getSubtopicTrackingKey(subject, unit, subtopic);
+                    const box = checkboxByKey.get(key);
+                    const isChecked = box ? box.checked : topicChecks[key] === true;
+                    subjectTotal++; grandTotal++;
+                    if (isChecked) { unitChecked++; subjectChecked++; grandChecked++; }
+                });
+                const unitId = `unit_${subjectIdx}_${unitIdx}`;
+                const percent = subtopics.length ? Math.round((unitChecked / subtopics.length) * 100) : 0;
+                const label = document.getElementById(`${unitId}_label`);
+                const fill = document.getElementById(`${unitId}_fill`);
+                if (label) label.textContent = `${unitChecked}/${subtopics.length} (%${percent})`;
+                if (fill) fill.style.width = `${percent}%`;
             });
-            let subPercent = topics.length > 0 ? Math.round((subChecked / topics.length) * 100) : 0;
-            let badge = document.getElementById(`badge_${subject}`);
-            if(badge) badge.innerText = `${subChecked}/${topics.length} (%${subPercent})`;
+            const percent = subjectTotal ? Math.round((subjectChecked / subjectTotal) * 100) : 0;
+            const badge = document.getElementById(`badge_${subject}`);
+            if (badge) badge.innerText = `${subjectChecked}/${subjectTotal} (%${percent})`;
         });
         let activeUser = currentUsername || await getDBSetting('active_user', 'default');
         await saveDBSetting(`lgs_topic_checks_${activeUser}`, topicChecks);
@@ -2532,7 +2839,7 @@
             data: {
                 customTopics: lgsData, examNames: examNames, customExamOptions: customExamOptions,
                 examCount: examCount, booksData: booksData, studyLogs: studyLogs,
-                examSelections: examSelections, topicChecks: topicChecks, scheduleData: scheduleData,
+                examSelections: examSelections, topicChecks: topicChecks, subtopicsData: subtopicsData, scheduleData: scheduleData,
                 dayHoursData: dayHoursData, topicStudyData: topicStudyData
             },
             questions: questions.map(question => ({
@@ -2606,11 +2913,21 @@
         const data = backup.data;
         const objects = ["customTopics", "examNames", "booksData", "examSelections", "topicChecks", "scheduleData", "dayHoursData", "topicStudyData"];
         for (const key of objects) if (!isRecord(data[key])) throw new Error("Yedekte geçersiz " + key + " alanı var.");
+        if (data.subtopicsData === undefined) data.subtopicsData = {};
+        if (!isRecord(data.subtopicsData)) throw new Error("Yedekte geçersiz alt konu listesi var.");
         if (!Array.isArray(data.studyLogs) || data.studyLogs.length > 10000 || !Array.isArray(data.customExamOptions) || !validCount(data.examCount) || Number(data.examCount) < 1 || Number(data.examCount) > 50) throw new Error("Yedekteki kayıt sayısı veya deneme ayarı geçersiz.");
 
         for (const subject of Object.keys(data.customTopics)) {
             if (!safeText(subject, 120) || /['"]/ .test(subject) || !Array.isArray(data.customTopics[subject]) || data.customTopics[subject].length > 500) throw new Error("Yedekte geçersiz ders veya konu adı var.");
             if (data.customTopics[subject].some(topic => !safeText(topic, 240))) throw new Error("Yedekte geçersiz konu adı var.");
+        }
+        const subtopicUnitCount = Object.values(data.subtopicsData).reduce((sum, units) => sum + (isRecord(units) ? Object.keys(units).length : 0), 0);
+        if (Object.keys(data.subtopicsData).length > 100 || subtopicUnitCount > 2000) throw new Error("Yedekte çok fazla alt konu listesi var.");
+        for (const [subject, units] of Object.entries(data.subtopicsData)) {
+            if (!safeText(subject, 120) || !isRecord(units)) throw new Error("Yedekte geçersiz alt konu dersi var.");
+            for (const [unit, items] of Object.entries(units)) {
+                if (!safeText(unit, 240) || !Array.isArray(items) || items.length < 1 || items.length > 500 || items.some(item => !safeText(item, 240))) throw new Error("Yedekte geçersiz alt konu listesi var.");
+            }
         }
         for (const name of Object.values(data.examNames)) if (!safeText(name, 120)) throw new Error("Yedekte geçersiz deneme adı var.");
         for (const value of Object.values(data.examSelections)) if (!safeText(value, 160)) throw new Error("Yedekte geçersiz deneme analizi var.");
@@ -2650,14 +2967,14 @@
         const suffix = "_" + legacyUsername;
         const data = {
             customTopics: JSON.parse(JSON.stringify(defaultLgsData)), examNames: {}, customExamOptions: [],
-            examCount: 5, booksData: {}, studyLogs: [], examSelections: {}, topicChecks: {},
+            examCount: 5, booksData: {}, studyLogs: [], examSelections: {}, topicChecks: {}, subtopicsData: {},
             scheduleData: {}, dayHoursData: {}, topicStudyData: {}
         };
         const prefixMap = {
             lgs_custom_topics: "customTopics", lgs_exam_names: "examNames",
             lgs_custom_exam_options: "customExamOptions", lgs_exam_count: "examCount",
             lgs_books_data: "booksData", lgs_study_logs: "studyLogs",
-            lgs_exam_selections: "examSelections", lgs_topic_checks: "topicChecks",
+            lgs_exam_selections: "examSelections", lgs_topic_checks: "topicChecks", lgs_subtopics: "subtopicsData",
             lgs_schedule: "scheduleData", lgs_day_hours: "dayHoursData"
         };
         for (const item of legacy.settings) {
@@ -2683,7 +3000,7 @@
             ["customTopics", "lgs_custom_topics"], ["examNames", "lgs_exam_names"],
             ["customExamOptions", "lgs_custom_exam_options"], ["examCount", "lgs_exam_count"],
             ["booksData", "lgs_books_data"], ["studyLogs", "lgs_study_logs"],
-            ["examSelections", "lgs_exam_selections"], ["topicChecks", "lgs_topic_checks"],
+            ["examSelections", "lgs_exam_selections"], ["topicChecks", "lgs_topic_checks"], ["subtopicsData", "lgs_subtopics"],
             ["scheduleData", "lgs_schedule"], ["dayHoursData", "lgs_day_hours"],
             ["topicStudyData", "lgs_topic_study"]
         ];
@@ -2837,6 +3154,7 @@
         await saveDBSetting(`lgs_study_logs_${activeUser}`, studyLogs);
         await saveDBSetting(`lgs_topic_study_${activeUser}`, topicStudyData);
         await saveDBSetting(`lgs_custom_topics_${activeUser}`, lgsData);
+        await saveDBSetting(`lgs_subtopics_${activeUser}`, subtopicsData);
         await saveDBSetting(`lgs_exam_names_${activeUser}`, examNames);
         await saveDBSetting(`lgs_custom_exam_options_${activeUser}`, customExamOptions);
         await saveDBSetting(`lgs_schedule_${activeUser}`, scheduleData);
