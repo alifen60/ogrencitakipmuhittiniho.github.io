@@ -1937,7 +1937,7 @@
             ? examItems.map((item, index) => ({ number: index + 1, answer: String(item.question.answer || '').trim() })).filter(item => item.answer)
             : [];
         if (answerKey.length) {
-            htmlContent += `<section class="answer-key"><h2>Cevap Anahtarı</h2><ol>${answerKey.map(item => `<li><b>${item.number}.</b> ${escapeHtml(item.answer)}</li>`).join('')}</ol></section>`;
+            htmlContent += `<section class="answer-key"><h2>Cevap Anahtarı</h2><ol>${answerKey.map(item => `<li>${escapeHtml(item.answer)}</li>`).join('')}</ol></section>`;
         }
         htmlContent += `</body></html>`;
         printWindow.document.open(); printWindow.document.write(htmlContent); printWindow.document.close();
