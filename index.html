@@ -139,6 +139,22 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200000; padding: 15px; }
         .modal { background: var(--card-bg); border-radius: var(--radius); width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        #examGenModal.modal-overlay { align-items: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+        #examGenModal > .modal { max-height: calc(100vh - 30px); max-height: calc(100dvh - 30px); overflow-y: auto; margin: auto 0; }
+        #examLayoutModal.modal-overlay { align-items: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+        #examLayoutModal > .modal { max-width: 1000px; max-height: calc(100vh - 30px); max-height: calc(100dvh - 30px); overflow-y: auto; margin: auto 0; }
+        .exam-layout-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+        .exam-layout-question { position: relative; min-width: 0; border: 1px solid #94a3b8; border-radius: 9px; padding: 12px; background: #fff; cursor: grab; }
+        .exam-layout-question:active { cursor: grabbing; }
+        .exam-layout-question.wide { grid-column: 1 / -1; }
+        .exam-layout-question.dragging { opacity: .45; }
+        .exam-layout-question img { display: block; max-width: 100%; max-height: 220px; object-fit: contain; margin: 8px auto 0; }
+        #examCropModal.modal-overlay { align-items: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+        #examCropModal > .modal { max-width: 900px; max-height: calc(100vh - 30px); max-height: calc(100dvh - 30px); overflow-y: auto; margin: auto 0; }
+        #examCropStage { position: relative; display: inline-block; max-width: 100%; line-height: 0; touch-action: none; user-select: none; }
+        #examCropImage { display: block; max-width: 100%; max-height: 62vh; width: auto; height: auto; pointer-events: none; user-select: none; }
+        #examCropSelection { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 2px dashed #16a34a; background: rgba(34,197,94,.08); pointer-events: none; }
+        @media(max-width:700px) { .exam-layout-list { grid-template-columns:1fr; } .exam-layout-question.wide { grid-column:auto; } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
@@ -458,6 +474,11 @@
                     <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Not / Açıklama (İsteğe bağlı)</label>
                     <input type="text" id="question-note" placeholder="Örn: Çarpanlar ve katlar yeni nesil soru...">
                 </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Doğru Cevap (İsteğe bağlı)</label>
+                    <input type="text" id="question-answer" placeholder="Örn: B veya 24">
+                    <small style="display:block;color:var(--text-muted);margin-top:4px;">Birden fazla fotoğraf yüklüyorsanız, cevapları kayıttan sonra her sorunun kartından ayrı ekleyin.</small>
+                </div>
                 <button class="btn btn-primary" onclick="addQuestions()" style="width:100%;">Seçilen Soruları Kaydet</button>
                 <div id="question-storage-status" role="status" aria-live="polite" style="margin-top:10px;padding:9px 11px;border-radius:8px;background:#f1f5f9;color:#475569;font-size:.78rem;line-height:1.5;">
                     Fotoğraflar bu cihazdaki tarayıcı veritabanına kaydedilir. Depolama durumu yükleniyor...
@@ -588,13 +609,60 @@
       <input type="number" id="genExamLimit" value="0" min="0">
       <small style="display:block;color:var(--text-muted);margin-top:5px;">Soru havuzunda kutucuğunu işaretlediğiniz sorular varsa önce onlar kullanılır.</small>
     </div>
+    <label class="no-print" style="display:flex;align-items:center;gap:7px;margin-bottom:10px;font-size:.85rem;"><input type="checkbox" id="genExamAnswerKey"> Yazdırılan dosyaya cevap anahtarı ekle</label>
     <div class="form-group">
-      <label>Elle Soru Yaz (İsteğe bağlı)</label>
-      <textarea id="genExamManualQuestions" rows="4" placeholder="Her satıra bir soru yazın. Yazdığınız sorular seçilen soruların sonuna eklenir." style="width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:6px;font:inherit;"></textarea>
+      <label>Elle Soru Hazırla (İsteğe bağlı)</label>
+      <div style="border:1px solid #94a3b8;border-radius:8px;padding:12px;background:#f8fafc;">
+        <label for="manualExamStem" style="display:block;font-weight:700;margin-bottom:5px;">Soru Kökü</label>
+        <textarea id="manualExamStem" rows="3" placeholder="Sorunun metnini buraya yazın" style="width:100%;padding:9px;border:1px solid #94a3b8;border-radius:6px;font:inherit;resize:vertical;"></textarea>
+        <fieldset style="margin:12px 0 0;padding:10px;border:1px solid #cbd5e1;border-radius:6px;background:white;">
+          <legend style="padding:0 5px;font-weight:700;">Seçenekler</legend>
+          <div id="manualExamOptions" style="display:grid;grid-template-columns:1fr;gap:7px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;">
+            <button type="button" class="btn" onclick="changeManualExamOptionCount(-1)">− Seçenek Azalt</button>
+            <button type="button" class="btn" onclick="changeManualExamOptionCount(1)">＋ Seçenek Ekle</button>
+          </div>
+        </fieldset>
+        <button type="button" class="btn btn-primary" onclick="addManualExamQuestion()" style="margin-top:10px;">➕ Soruyu Denemeye Ekle</button>
+      </div>
+      <div id="manualExamQuestionList" style="margin-top:8px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeExamGeneratorModal()">İptal</button>
-      <button class="btn btn-success" onclick="generateAndPrintExam()">🖨️ Sınav Kitapçığını Oluştur ve Yazdır</button>
+      <button class="btn btn-success" onclick="generateAndPrintExam()">↔ Soruları Düzenle</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="examLayoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🧩 Sınav Dizgisi</h3>
+      <button class="btn" style="padding:2px 8px;" onclick="closeExamLayoutModal()">✕</button>
+    </div>
+    <p style="font-size:.85rem;color:var(--text-muted);margin:8px 0;">Soruları tutup sürükleyerek sıralayın. “Genişlet” seçilen soruyu yazdırmada iki sütun boyunca tam genişlikte gösterir.</p>
+    <div id="examLayoutList" class="exam-layout-list"></div>
+    <div class="modal-footer" style="margin-top:14px;">
+      <button class="btn" onclick="backToExamGenerator()">Ayarları Değiştir</button>
+      <button class="btn btn-success" onclick="printPreparedExam()">🖨️ Yazdır / PDF Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="examCropModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✂️ Soru Resmini Kırp</h3>
+      <button class="btn" style="padding:2px 8px;" onclick="closeQuestionCropper()">✕</button>
+    </div>
+    <p style="font-size:.85rem;color:var(--text-muted);margin:8px 0;">Resmin üzerinde sürükleyerek kullanmak istediğiniz alanı seçin. Kırpma yalnızca bu deneme çıktısına uygulanır.</p>
+    <div style="text-align:center;background:#e2e8f0;border-radius:8px;padding:10px;overflow:auto;">
+      <div id="examCropStage"><img id="examCropImage" alt="Kırpılacak soru resmi"><div id="examCropSelection"></div></div>
+    </div>
+    <div class="modal-footer" style="margin-top:12px;">
+      <button class="btn" onclick="resetQuestionCrop()">Tüm Resmi Seç</button>
+      <button class="btn" onclick="closeQuestionCropper()">Vazgeç</button>
+      <button class="btn btn-primary" onclick="saveQuestionCrop()">Kırpmayı Uygula</button>
     </div>
   </div>
 </div>
@@ -604,6 +672,13 @@
     let currentUsername = null, currentStudentName = "", currentRole = null, studentOwnerUsername = null;
     let appLoading = false;
     let selectedQuestionIds = new Set();
+    let manualExamQuestions = [];
+    let manualExamOptionCount = 5;
+    let pendingExamItems = [];
+    let draggedExamQuestionIndex = -1;
+    let activeCropQuestionIndex = -1;
+    let cropStartPoint = null;
+    let cropSelectionRect = null;
     const DB_NAME = "LGS_Takip_And_Program_DB_V5";
     const DB_VERSION = 1;
 
@@ -1555,6 +1630,7 @@
 
     function openExamGeneratorModal() {
         document.getElementById('examGenModal').style.display = 'flex';
+        renderManualExamOptions();
         const info = document.getElementById('exam-selection-info');
         if (info) info.textContent = selectedQuestionIds.size ? `${selectedQuestionIds.size} soru seçildi. Deneme bu sorulardan hazırlanacak.` : 'Soru seçmediyseniz ders filtresine göre sorular alınır.';
     }
@@ -1563,18 +1639,239 @@
         document.getElementById('examGenModal').style.display = 'none';
     }
 
+    function manualOptionLetter(index) {
+        return String.fromCharCode(65 + index);
+    }
+
+    function renderManualExamOptions() {
+        const container = document.getElementById('manualExamOptions');
+        if (!container) return;
+        const currentValues = Array.from(container.querySelectorAll('input')).map(input => input.value);
+        container.innerHTML = Array.from({ length: manualExamOptionCount }, (_, index) => {
+            const letter = manualOptionLetter(index);
+            return `<label style="display:flex;align-items:center;gap:7px;"><b style="width:22px;">${letter})</b><input type="text" id="manualExamOption${index}" placeholder="${letter} seçeneği" value="${escapeHtml(currentValues[index] || '')}" style="flex:1;"></label>`;
+        }).join('');
+    }
+
+    function changeManualExamOptionCount(change) {
+        const nextCount = manualExamOptionCount + change;
+        if (nextCount < 2 || nextCount > 10) {
+            alert("Seçenek sayısı en az 2, en fazla 10 olabilir.");
+            return;
+        }
+        manualExamOptionCount = nextCount;
+        renderManualExamOptions();
+    }
+
+    function addManualExamQuestion() {
+        const stemEl = document.getElementById('manualExamStem');
+        const stem = stemEl.value.trim();
+        const options = Array.from({ length: manualExamOptionCount }, (_, index) => ({
+            letter: manualOptionLetter(index),
+            text: document.getElementById(`manualExamOption${index}`).value.trim()
+        })).filter(option => option.text);
+        if (!stem) { alert("Önce soru kökünü yazın."); stemEl.focus(); return; }
+        if (options.length > 0 && options.length < 2) { alert("Seçenek eklediyseniz en az iki seçenek yazın."); return; }
+        manualExamQuestions.push({ id: `manual-${Date.now()}-${manualExamQuestions.length}`, subject: 'Elle Yazılan Soru', text: stem, options, image: '', note: '' });
+        stemEl.value = '';
+        Array.from({ length: manualExamOptionCount }, (_, index) => { document.getElementById(`manualExamOption${index}`).value = ''; });
+        renderManualExamQuestions();
+        stemEl.focus();
+    }
+
+    function removeManualExamQuestion(index) {
+        manualExamQuestions.splice(index, 1);
+        renderManualExamQuestions();
+    }
+
+    function renderManualExamQuestions() {
+        const list = document.getElementById('manualExamQuestionList');
+        if (!list) return;
+        list.innerHTML = manualExamQuestions.map((question, index) => `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:8px;border:1px solid #cbd5e1;border-radius:6px;margin-top:6px;background:white;">
+            <div style="font-size:.82rem;"><b>Elle eklenen soru ${index + 1}:</b> ${escapeHtml(question.text.slice(0, 120))}${question.text.length > 120 ? '…' : ''}<div style="color:#64748b;">${question.options.length ? `${question.options.length} seçenek` : 'Seçeneksiz soru'}</div></div>
+            <button type="button" class="btn btn-danger" onclick="removeManualExamQuestion(${index})" style="padding:3px 8px;">Sil</button>
+          </div>`).join('');
+    }
+
     function generateAndPrintExam() {
         const title = document.getElementById('genExamTitle').value.trim() || "Özel Soru Havuzu Denemesi";
         const subFilter = document.getElementById('genExamSubject').value;
         const limit = Math.max(0, parseInt(document.getElementById('genExamLimit').value, 10) || 0);
-        const manualLines = document.getElementById('genExamManualQuestions').value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
         let chosen = selectedQuestionIds.size
             ? questionsData.filter(q => selectedQuestionIds.has(Number(q.id)))
             : questionsData.filter(q => subFilter === "ALL" || q.subject === subFilter);
         if (!selectedQuestionIds.size && limit > 0) chosen = chosen.slice(0, limit);
-        const examItems = [...chosen, ...manualLines.map((text, i) => ({ id: `manual-${i}`, subject: 'Elle Yazılan Soru', text, image: '', note: '' }))];
+        const examItems = [...chosen, ...manualExamQuestions];
         if (!examItems.length) { alert("Deneme oluşturmak için soru seçin veya elle soru yazın."); return; }
+        pendingExamItems = examItems.map(question => ({ question: { ...question, options: Array.isArray(question.options) ? question.options.map(option => ({ ...option })) : undefined }, sourceImage: question.image || '', wide: false }));
+        renderExamLayout();
+        document.getElementById('examGenModal').style.display = 'none';
+        document.getElementById('examLayoutModal').style.display = 'flex';
+    }
 
+    function renderExamLayout() {
+        const list = document.getElementById('examLayoutList');
+        if (!list) return;
+        list.innerHTML = pendingExamItems.map((item, index) => {
+            const q = item.question;
+            const options = Array.isArray(q.options) ? q.options : [];
+            return `<article class="exam-layout-question ${item.wide ? 'wide' : ''}" draggable="true" ondragstart="startExamQuestionDrag(event, ${index})" ondragend="endExamQuestionDrag(event)" ondragover="event.preventDefault()" ondrop="dropExamQuestion(event, ${index})">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;"><strong>⠿ Soru ${index + 1} · ${escapeHtml(q.subject || '')}</strong><button type="button" class="btn ${item.wide ? 'btn-dark' : 'btn-primary'}" onclick="toggleExamQuestionWidth(${index})">${item.wide ? 'Daralt' : '↔ Genişlet'}</button></div>
+                ${q.note ? `<div style="font-size:.85rem;margin-bottom:6px;"><b>Not:</b> ${escapeHtml(q.note)}</div>` : ''}
+                ${q.answer ? `<div style="font-size:.82rem;color:#64748b;margin-bottom:6px;"><b>Cevap:</b> ${escapeHtml(q.answer)}</div>` : ''}
+                ${q.text ? `<div style="white-space:pre-wrap;line-height:1.45;">${escapeHtml(q.text)}</div>` : ''}
+                ${options.length ? `<div style="display:grid;gap:3px;margin-top:6px;">${options.map(option => `<div><b>${escapeHtml(option.letter)})</b> ${escapeHtml(option.text)}</div>`).join('')}</div>` : ''}
+                ${q.image ? `<div style="display:flex;gap:6px;margin-top:8px;"><button type="button" class="btn no-print" onclick="openQuestionCropper(${index})">✂️ Resmi Kırp</button>${item.question.image !== item.sourceImage ? `<button type="button" class="btn no-print" onclick="resetExamQuestionCrop(${index})">Kırpmayı Sıfırla</button>` : ''}</div><img src="${q.image}" alt="Soru ${index + 1}">` : ''}
+            </article>`;
+        }).join('');
+    }
+
+    function startExamQuestionDrag(event, index) {
+        draggedExamQuestionIndex = index;
+        if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(index)); }
+        event.currentTarget.classList.add('dragging');
+    }
+
+    function endExamQuestionDrag(event) {
+        event.currentTarget.classList.remove('dragging');
+        draggedExamQuestionIndex = -1;
+    }
+
+    function dropExamQuestion(event, targetIndex) {
+        event.preventDefault();
+        const sourceIndex = event.dataTransfer ? Number(event.dataTransfer.getData('text/plain')) : draggedExamQuestionIndex;
+        if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || sourceIndex >= pendingExamItems.length || sourceIndex === targetIndex) return;
+        const [moved] = pendingExamItems.splice(sourceIndex, 1);
+        pendingExamItems.splice(targetIndex, 0, moved);
+        draggedExamQuestionIndex = -1;
+        renderExamLayout();
+    }
+
+    function toggleExamQuestionWidth(index) {
+        if (!pendingExamItems[index]) return;
+        pendingExamItems[index].wide = !pendingExamItems[index].wide;
+        renderExamLayout();
+    }
+
+    function resetExamQuestionCrop(index) {
+        const item = pendingExamItems[index];
+        if (!item) return;
+        item.question.image = item.sourceImage;
+        renderExamLayout();
+    }
+
+    function bindQuestionCropEvents() {
+        const stage = document.getElementById('examCropStage');
+        if (!stage || stage.dataset.cropEventsBound === 'true') return;
+        stage.dataset.cropEventsBound = 'true';
+        stage.addEventListener('pointerdown', event => {
+            const image = document.getElementById('examCropImage');
+            const rect = image.getBoundingClientRect();
+            cropStartPoint = {
+                x: Math.max(0, Math.min(rect.width, event.clientX - rect.left)),
+                y: Math.max(0, Math.min(rect.height, event.clientY - rect.top))
+            };
+            setCropSelection({ x: cropStartPoint.x, y: cropStartPoint.y, width: 0, height: 0 });
+            try { stage.setPointerCapture(event.pointerId); } catch (_) {}
+            event.preventDefault();
+        });
+        stage.addEventListener('pointermove', event => {
+            if (!cropStartPoint) return;
+            const image = document.getElementById('examCropImage');
+            const rect = image.getBoundingClientRect();
+            const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+            const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+            setCropSelection({
+                x: Math.min(cropStartPoint.x, x),
+                y: Math.min(cropStartPoint.y, y),
+                width: Math.abs(x - cropStartPoint.x),
+                height: Math.abs(y - cropStartPoint.y)
+            });
+            event.preventDefault();
+        });
+        const stopSelection = () => { cropStartPoint = null; };
+        stage.addEventListener('pointerup', stopSelection);
+        stage.addEventListener('pointercancel', stopSelection);
+    }
+
+    function setCropSelection(rect) {
+        cropSelectionRect = rect;
+        const selection = document.getElementById('examCropSelection');
+        if (!selection) return;
+        selection.style.left = `${rect.x}px`;
+        selection.style.top = `${rect.y}px`;
+        selection.style.width = `${Math.max(0, rect.width)}px`;
+        selection.style.height = `${Math.max(0, rect.height)}px`;
+    }
+
+    function resetQuestionCrop() {
+        const image = document.getElementById('examCropImage');
+        if (!image || !image.naturalWidth) return;
+        setCropSelection({ x: 0, y: 0, width: image.getBoundingClientRect().width, height: image.getBoundingClientRect().height });
+    }
+
+    function openQuestionCropper(index) {
+        const item = pendingExamItems[index];
+        if (!item || !item.question.image) return;
+        activeCropQuestionIndex = index;
+        const image = document.getElementById('examCropImage');
+        bindQuestionCropEvents();
+        image.onload = resetQuestionCrop;
+        image.src = item.question.image;
+        document.getElementById('examCropModal').style.display = 'flex';
+        if (image.complete && image.naturalWidth) requestAnimationFrame(resetQuestionCrop);
+    }
+
+    function closeQuestionCropper() {
+        document.getElementById('examCropModal').style.display = 'none';
+        activeCropQuestionIndex = -1;
+        cropStartPoint = null;
+    }
+
+    function saveQuestionCrop() {
+        const item = pendingExamItems[activeCropQuestionIndex];
+        const image = document.getElementById('examCropImage');
+        const displayRect = image.getBoundingClientRect();
+        const selection = cropSelectionRect;
+        if (!item || !image.naturalWidth || !selection || selection.width < 8 || selection.height < 8 || !displayRect.width || !displayRect.height) {
+            alert("Kırpmak için resim üzerinde daha geniş bir alan seçin.");
+            return;
+        }
+        const scaleX = image.naturalWidth / displayRect.width;
+        const scaleY = image.naturalHeight / displayRect.height;
+        const sourceX = Math.round(selection.x * scaleX);
+        const sourceY = Math.round(selection.y * scaleY);
+        const sourceWidth = Math.min(image.naturalWidth - sourceX, Math.round(selection.width * scaleX));
+        const sourceHeight = Math.min(image.naturalHeight - sourceY, Math.round(selection.height * scaleY));
+        const canvas = document.createElement('canvas');
+        canvas.width = sourceWidth;
+        canvas.height = sourceHeight;
+        try {
+            const context = canvas.getContext('2d');
+            context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+            item.question.image = canvas.toDataURL('image/jpeg', 0.94);
+            closeQuestionCropper();
+            renderExamLayout();
+        } catch (err) {
+            console.error("Soru resmi kırpılamadı:", err);
+            alert("Resim kırpılamadı. Lütfen yeniden deneyin.");
+        }
+    }
+
+    function backToExamGenerator() {
+        document.getElementById('examLayoutModal').style.display = 'none';
+        document.getElementById('examGenModal').style.display = 'flex';
+    }
+
+    function closeExamLayoutModal() {
+        document.getElementById('examLayoutModal').style.display = 'none';
+    }
+
+    function printPreparedExam() {
+        if (!pendingExamItems.length) return;
+        const examItems = pendingExamItems;
+        const title = document.getElementById('genExamTitle').value.trim() || "Özel Soru Havuzu Denemesi";
         const printWindow = window.open('', '_blank');
         if (!printWindow) { alert("Yeni pencere açılamadı. Tarayıcıda açılır pencere izni verin."); return; }
         const safeTitle = escapeHtml(title);
@@ -1587,34 +1884,64 @@
           .exam-header { text-align:center; border-bottom:2px solid #222; padding-bottom:2mm; margin-bottom:3mm; }
           .exam-header h1 { font-size:15pt; margin:0 0 1mm; }
           .student-info { display:flex; justify-content:space-between; gap:4mm; border:1px solid #555; padding:2mm; margin-bottom:3mm; font-weight:600; font-size:8.5pt; }
-          .question-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3mm; align-items:start; }
-          .exam-question { border:1px solid #bbb; border-radius:2mm; padding:2.5mm; break-inside:avoid; page-break-inside:avoid; min-width:0; }
+          .question-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4mm; align-items:start; }
+          .exam-question { border:1px solid #bbb; border-radius:2mm; padding:2.5mm; break-inside:avoid; page-break-inside:avoid; min-width:0; background:#fff; }
           .q-meta { display:flex; justify-content:space-between; gap:2mm; font-weight:bold; font-size:8.5pt; margin-bottom:1.5mm; }
           .q-note { font-size:8.5pt; margin-bottom:1.5mm; }
-          .q-text { white-space:pre-wrap; font-size:10.5pt; line-height:1.3; overflow-wrap:anywhere; }
+          .q-text { white-space:pre-wrap; font-size:10.5pt; line-height:1.3; overflow-wrap:anywhere; margin:1mm 0; }
+          .q-options { display:grid; grid-template-columns:1fr; gap:1mm; margin-top:1.5mm; font-size:9.5pt; line-height:1.25; }
+          .q-option { display:flex; gap:1.5mm; overflow-wrap:anywhere; }
+          .q-option-letter { flex:0 0 5mm; font-weight:bold; }
+          .answer-key { break-before:page; page-break-before:always; font-size:12pt; }
+          .answer-key li { margin:0 0 3mm; }
           .q-img-container { text-align:center; width:100%; break-inside:avoid; page-break-inside:avoid; }
           .q-img { display:block; max-width:100%; width:100%; height:auto; max-height:110mm; object-fit:contain; margin:0 auto; }
           @media print {
             html, body { margin:0 !important; padding:0 !important; width:auto !important; min-height:0 !important; }
             body { -webkit-print-color-adjust:exact; print-color-adjust:exact; break-before:auto !important; page-break-before:auto !important; }
             .exam-header, .student-info { break-inside:avoid; page-break-inside:avoid; }
-            .question-grid { display:block !important; columns:2; column-gap:3mm; column-fill:auto; }
-            .exam-question { display:inline-block; vertical-align:top; width:100%; margin:0 0 3mm; break-inside:avoid; page-break-inside:avoid; }
+            .question-grid { display:block !important; columns:auto; column-count:1; }
+            .exam-layout-row { display:flex; align-items:flex-start; gap:4mm; width:100%; margin-bottom:4mm; break-inside:avoid; page-break-inside:avoid; }
+            .exam-question { display:block; flex:1 1 0; width:50%; margin:0; break-inside:avoid; page-break-inside:avoid; }
+            .exam-question.wide { display:block !important; flex:0 0 100%; width:100%; }
           }
           @media screen { body { padding:10mm; max-width:210mm; margin:auto; } }
         </style></head><body>
         <div class="exam-header"><h1>${safeTitle}</h1><div>8. Sınıf LGS Deneme Sınavı</div></div>
         <div class="student-info"><span>Adı Soyadı: __________________</span><span>Sınıf / No: __________</span><span>Tarih: ${new Date().toLocaleDateString('tr-TR')}</span></div><div class="question-grid">`;
-        examItems.forEach((q, idx) => {
-            htmlContent += `<article class="exam-question"><div class="q-meta"><span>Soru ${idx+1}</span><span>${escapeHtml(q.subject || '')}</span></div>`;
-            if (q.note) htmlContent += `<div class="q-note">${escapeHtml(q.note)}</div>`;
-            if (q.text) htmlContent += `<div class="q-text">${escapeHtml(q.text)}</div>`;
-            if (q.image) htmlContent += `<div class="q-img-container"><img src="${q.image}" class="q-img" alt="Soru ${idx+1}"></div>`;
-            htmlContent += `</article>`;
-        });
-        htmlContent += `</div></body></html>`;
+        const questionCardHtml = (item, idx) => {
+            const q = item.question;
+            let card = `<article class="exam-question${item.wide ? ' wide' : ''}"><div class="q-meta"><span>Soru ${idx+1}</span><span>${escapeHtml(q.subject || '')}</span></div>`;
+            if (q.note) card += `<div class="q-note">${escapeHtml(q.note)}</div>`;
+            if (q.text) card += `<div class="q-text">${escapeHtml(q.text)}</div>`;
+            if (Array.isArray(q.options) && q.options.length) {
+                card += `<div class="q-options">${q.options.map(option => `<div class="q-option"><span class="q-option-letter">${escapeHtml(option.letter)})</span><span>${escapeHtml(option.text)}</span></div>`).join('')}</div>`;
+            }
+            if (q.image) card += `<div class="q-img-container"><img src="${q.image}" class="q-img" alt="Soru ${idx+1}"></div>`;
+            return card + `</article>`;
+        };
+        let itemIndex = 0;
+        while (itemIndex < examItems.length) {
+            const first = examItems[itemIndex];
+            if (first.wide) {
+                htmlContent += `<div class="exam-layout-row">${questionCardHtml(first, itemIndex)}</div>`;
+                itemIndex++;
+                continue;
+            }
+            const pairWithNext = itemIndex + 1 < examItems.length && !examItems[itemIndex + 1].wide;
+            htmlContent += `<div class="exam-layout-row">${questionCardHtml(first, itemIndex)}${pairWithNext ? questionCardHtml(examItems[itemIndex + 1], itemIndex + 1) : ''}</div>`;
+            itemIndex += pairWithNext ? 2 : 1;
+        }
+        htmlContent += `</div>`;
+        const answerKey = document.getElementById('genExamAnswerKey').checked
+            ? examItems.map((item, index) => ({ number: index + 1, answer: String(item.question.answer || '').trim() })).filter(item => item.answer)
+            : [];
+        if (answerKey.length) {
+            htmlContent += `<section class="answer-key"><h2>Cevap Anahtarı</h2><ol>${answerKey.map(item => `<li><b>${item.number}.</b> ${escapeHtml(item.answer)}</li>`).join('')}</ol></section>`;
+        }
+        htmlContent += `</body></html>`;
         printWindow.document.open(); printWindow.document.write(htmlContent); printWindow.document.close();
-        closeExamGeneratorModal();
+        closeExamLayoutModal();
         const doPrint = () => { printWindow.focus(); printWindow.print(); };
         const imgs = Array.from(printWindow.document.images);
         const imagesReady = Promise.all(imgs.map(img => typeof img.decode === "function" ? img.decode().catch(() => {}) : (img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }))));
@@ -2659,14 +2986,17 @@
     async function addQuestions() {
         const subjectEl = document.getElementById('question-subject');
         const noteEl = document.getElementById('question-note');
+        const answerEl = document.getElementById('question-answer');
         const fileInput = document.getElementById('question-image');
         const statusEl = document.getElementById('question-storage-status');
         const subject = subjectEl ? subjectEl.value : "";
         const note = noteEl ? noteEl.value.trim() : "";
+        const answer = answerEl ? answerEl.value.trim() : "";
         const files = Array.from((fileInput && fileInput.files) || []);
 
         if (!currentUsername) { alert("Önce öğrenci hesabıyla giriş yapın."); return; }
         if (!files.length) { alert("Lütfen önce bir veya daha fazla soru fotoğrafı seçin."); return; }
+        if (files.length > 1 && answer) { alert("Birden fazla fotoğraf seçili. Her sorunun cevabını kayıttan sonra kendi kartından ayrı ekleyin."); return; }
         if (!db) { alert("Tarayıcı veritabanı henüz hazır değil. Sayfayı yenileyip tekrar deneyin."); return; }
 
         const button = document.querySelector('#tab-sorular button[onclick="addQuestions()"]');
@@ -2692,6 +3022,7 @@
                     user: currentUsername,
                     subject,
                     note,
+                    answer,
                     image,
                     date: new Date().toLocaleDateString('tr-TR')
                 };
@@ -2703,6 +3034,7 @@
             questionsData = [...created.reverse(), ...(questionsData || [])];
             fileInput.value = '';
             if (noteEl) noteEl.value = '';
+            if (answerEl) answerEl.value = '';
             renderQuestions();
             await updateQuestionStorageStatus();
             if (statusEl) statusEl.textContent = `${created.length} soru başarıyla kaydedildi. Fotoğraflar bu cihazdaki tarayıcı veritabanında.`;
@@ -2734,6 +3066,16 @@
         }
     }
 
+    async function editQuestionAnswer(id) {
+        const q = questionsData.find(item => item.id === id);
+        if (!q) return;
+        const answer = prompt("Sorunun doğru cevabını düzenleyin (boş bırakabilirsiniz):", q.answer || "");
+        if (answer === null) return;
+        q.answer = answer.trim();
+        await saveDBQuestion(q);
+        renderQuestions();
+    }
+
     function renderQuestions() {
         let container = document.getElementById('questions-list-container');
         if(!container) return;
@@ -2754,8 +3096,10 @@
         filtered.forEach((q, idx) => {
             let card = document.createElement('div'); card.className = "question-card";
             let hasNote = q.note && q.note.trim() !== "";
+            let hasAnswer = q.answer && q.answer.trim() !== "";
             const safeSubject = escapeHtml(q.subject);
             const safeNote = escapeHtml(q.note || '');
+            const safeAnswer = escapeHtml(q.answer || '');
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:0.8rem; color:#64748b; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
                     <label class="no-print" style="display:flex;align-items:center;gap:5px;"><input type="checkbox" ${selectedQuestionIds.has(Number(q.id)) ? 'checked' : ''} onchange="toggleQuestionSelection(${Number(q.id)}, this.checked)"> Denemeye ekle</label>
@@ -2765,6 +3109,10 @@
                 <div style="font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
                     <span>${hasNote ? `<b>Not:</b> ${safeNote}` : ''}</span>
                     <button type="button" class="btn btn-primary no-print" onclick="editQuestionNote(${Number(q.id)})" style="padding:2px 6px; font-size:0.7rem;">✏️ ${hasNote ? 'Düzenle' : 'Not Ekle'}</button>
+                </div>
+                <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:#475569;margin:2px 0 6px;">
+                    <span>${hasAnswer ? `<b>Doğru cevap:</b> ${safeAnswer}` : '<span style="color:#94a3b8;">Cevap eklenmemiş</span>'}</span>
+                    <button type="button" class="btn btn-primary" onclick="editQuestionAnswer(${Number(q.id)})" style="padding:2px 6px;font-size:.7rem;">✏️ ${hasAnswer ? 'Cevabı Düzenle' : 'Cevap Ekle'}</button>
                 </div>
                 <div class="Onizle_imageContent"><img src="${q.image}" class="question-img" alt="Soru"></div>
             `;
@@ -2843,7 +3191,7 @@
                 dayHoursData: dayHoursData, topicStudyData: topicStudyData
             },
             questions: questions.map(question => ({
-                id: question.id, subject: question.subject, note: question.note || "",
+                id: question.id, subject: question.subject, note: question.note || "", answer: question.answer || "",
                 image: question.image, date: question.date || ""
             }))
         };
@@ -2954,7 +3302,7 @@
             if (!Array.isArray(hours) || hours.length > 30 || hours.some(hour => !safeText(hour, 40))) throw new Error("Yedekte geçersiz program saati var.");
         }
         for (const question of backup.questions) {
-            if (!isRecord(question) || !safeText(question.subject, 120) || !safeText(question.note || "", 2000) || !safeText(question.date || "", 30) || typeof question.image !== "string" || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(question.image) || question.image.length > 20000000) throw new Error("Yedekte geçersiz soru fotoğrafı var.");
+            if (!isRecord(question) || !safeText(question.subject, 120) || !safeText(question.note || "", 2000) || (question.answer !== undefined && !safeText(question.answer, 1000)) || !safeText(question.date || "", 30) || typeof question.image !== "string" || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(question.image) || question.image.length > 20000000) throw new Error("Yedekte geçersiz soru fotoğrafı var.");
         }
         return backup;
     }
@@ -2984,7 +3332,7 @@
         }
         if (legacy.questions.some(question => !question || String(question.user || "").toLowerCase() !== legacyUsername)) throw new Error("Eski yedekte başka hesaba ait soru kaydı var.");
         const questions = legacy.questions.map(question => ({
-            id: question.id, subject: question.subject, note: question.note || "",
+            id: question.id, subject: question.subject, note: question.note || "", answer: question.answer || "",
             image: question.image, date: question.date || ""
         }));
         return {
