@@ -3244,17 +3244,60 @@
         };
         const blob = new Blob([JSON.stringify(backup)], { type: "application/json;charset=utf-8" });
         const stamp = backupNow.getFullYear()
-            + String(backupNow.getMonth() + 1).padStart(2, "0")
-            + String(backupNow.getDate()).padStart(2, "0") + "_"
+            + "-" + String(backupNow.getMonth() + 1).padStart(2, "0")
+            + "-" + String(backupNow.getDate()).padStart(2, "0") + "_"
             + String(backupNow.getHours()).padStart(2, "0")
-            + String(backupNow.getMinutes()).padStart(2, "0")
-            + String(backupNow.getSeconds()).padStart(2, "0");
+            + "-" + String(backupNow.getMinutes()).padStart(2, "0")
+            + "-" + String(backupNow.getSeconds()).padStart(2, "0");
         const safeName = backup.studentName.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ_-]+/g, "_").slice(0, 40);
         const filename = "LGS_Yedek_" + safeName + "_" + currentStudentCode + "_" + stamp + ".json";
         return { blob: blob, filename: filename, studentCode: currentStudentCode, createdAt: backupCreatedAt };
     }
 
+    function getStudentBackupFolderName(profile) {
+        let name = String(profile.studentName || profile.username || "Ogrenci").trim();
+        name = name.replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_").replace(/\s+/g, " ").replace(/[. ]+$/g, "").slice(0, 70);
+        if (!name || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(name)) name = "Ogrenci";
+        const code = String(profile.studentCode || "").replace(/[^A-Za-z0-9-]/g, "");
+        return code ? `${name} - ${code}` : name;
+    }
+
+    async function writeBackupToStudentFolder(parentDirectory, folderName, backupFile) {
+        const studentDirectory = await parentDirectory.getDirectoryHandle(folderName, { create: true });
+        const fileHandle = await studentDirectory.getFileHandle(backupFile.filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        try {
+            await writable.write(backupFile.blob);
+            await writable.close();
+        } catch (err) {
+            try { await writable.abort(); } catch (_) {}
+            throw err;
+        }
+    }
+
+    function triggerBackupBrowserDownload(backupFile) {
+        const url = URL.createObjectURL(backupFile.blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = backupFile.filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
     async function exportUserBackup() {
+        // showDirectoryPicker must be called directly from the user's click gesture.
+        let folderPickerPromise = null;
+        if (typeof window.showDirectoryPicker === "function" && window.isSecureContext) {
+            try {
+                folderPickerPromise = window.showDirectoryPicker({ id: "lgs-student-backup", mode: "readwrite", startIn: "downloads" })
+                    .then(handle => ({ handle }))
+                    .catch(error => ({ error }));
+            } catch (error) {
+                folderPickerPromise = Promise.resolve({ error });
+            }
+        }
         try {
             let profile = await getDBUser(currentUsername);
             if (!profile) throw new Error("Öğrenci hesabı bulunamadı.");
@@ -3273,21 +3316,35 @@
                 }
             }
             const backupFile = await createUserBackupFile();
-            const url = URL.createObjectURL(backupFile.blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = backupFile.filename;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            const pickerResult = folderPickerPromise ? await folderPickerPromise : null;
+            if (pickerResult && pickerResult.error && pickerResult.error.name === "AbortError") return;
+            let savedFolderName = "";
+            let folderSaveFailed = false;
+            if (pickerResult && pickerResult.handle) {
+                const proposedFolderName = getStudentBackupFolderName(profile);
+                try {
+                    await writeBackupToStudentFolder(pickerResult.handle, proposedFolderName, backupFile);
+                    savedFolderName = proposedFolderName;
+                } catch (err) {
+                    console.warn("Öğrenci klasörüne yazılamadı; normal indirme deneniyor:", err);
+                    folderSaveFailed = true;
+                    triggerBackupBrowserDownload(backupFile);
+                }
+            } else {
+                triggerBackupBrowserDownload(backupFile);
+            }
 
             profile = await getDBUser(currentUsername);
             profile.lastBackupDownloadedAt = new Date().toISOString();
             profile.backupCreatedAt = backupFile.createdAt;
             await saveDBUser(profile);
             updateBackupReminder(profile);
-            alert("Yedek indirildi. Dosya adında öğrenci adı, öğrenci kodu ve tarih-saat; dosyanın içinde de öğrenci adı ve yedek oluşturulma zamanı bulunur. Öğretmen bu JSON dosyasını Öğretmen Girişi > Öğrenci Yedeği Ekle bölümünden açabilir.");
+            const saveLocationMessage = savedFolderName
+                ? `Seçtiğiniz konumda "${savedFolderName}" klasörüne kaydedildi.`
+                : folderSaveFailed
+                    ? "Seçilen klasöre yazılamadığı için dosya normal indirme konumuna gönderildi."
+                    : "Bu tarayıcı klasör seçmeyi desteklemiyor veya klasör izni alınamadı; dosya normal indirme konumuna gönderildi.";
+            alert(`Yedek hazır. ${saveLocationMessage} Dosya adında öğrenci adı, öğrenci kodu ve tarih-saat bulunur. Öğretmen bu JSON dosyasını Öğretmen Girişi > Öğrenci Yedeği Ekle bölümünden açabilir.`);
         } catch (err) {
             console.error(err);
             alert("Yedek oluşturulamadı: " + (err.message || err));
