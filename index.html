@@ -148,7 +148,8 @@
         .exam-layout-question:active { cursor: grabbing; }
         .exam-layout-question.wide { grid-column: 1 / -1; }
         .exam-layout-question.dragging { opacity: .45; }
-        .exam-layout-question img { display: block; max-width: 100%; max-height: 220px; object-fit: contain; margin: 8px auto 0; }
+        .exam-layout-question img { display: block; max-width: 100%; object-fit: contain; margin: 0 auto; }
+        .exam-layout-image-frame { text-align: center; margin-top: 8px; }
         #examCropModal.modal-overlay { align-items: flex-start; overflow-y: auto; overscroll-behavior: contain; }
         #examCropModal > .modal { max-width: 900px; max-height: calc(100vh - 30px); max-height: calc(100dvh - 30px); overflow-y: auto; margin: auto 0; }
         #examCropStage { position: relative; display: inline-block; max-width: 100%; line-height: 0; touch-action: none; user-select: none; }
@@ -189,11 +190,11 @@
             #tab-calisma .study-summary-box th:nth-child(2),#tab-calisma .study-summary-box td:nth-child(2),
             #tab-calisma .study-summary-box th:nth-child(3),#tab-calisma .study-summary-box td:nth-child(3),
             #tab-calisma .study-summary-box th:nth-child(4),#tab-calisma .study-summary-box td:nth-child(4),
-            #tab-calisma .study-summary-box th:nth-child(10),#tab-calisma .study-summary-box td:nth-child(10),
-            #tab-calisma .study-summary-box th:nth-child(11),#tab-calisma .study-summary-box td:nth-child(11) { display:none !important; }
+            #tab-calisma .study-summary-box th:nth-child(9),#tab-calisma .study-summary-box td:nth-child(9),
+            #tab-calisma .study-summary-box th:nth-child(10),#tab-calisma .study-summary-box td:nth-child(10) { display:none !important; }
             #tab-calisma .study-summary-box th:first-child,#tab-calisma .study-summary-box td:first-child { width:40% !important;text-align:left !important; }
-            #tab-calisma .study-summary-box th:nth-child(n+5):nth-child(-n+9),
-            #tab-calisma .study-summary-box td:nth-child(n+5):nth-child(-n+9) { width:12% !important;text-align:center !important; }
+            #tab-calisma .study-summary-box th:nth-child(n+5):nth-child(-n+8),
+            #tab-calisma .study-summary-box td:nth-child(n+5):nth-child(-n+8) { width:15% !important;text-align:center !important; }
             #tab-calisma .study-summary-box tr { break-inside:avoid !important;page-break-inside:avoid !important; }
             #tab-calisma .study-summary-box thead { display:table-header-group !important; }
             #tab-calisma .study-summary-box th { font-weight:700 !important; }
@@ -219,8 +220,15 @@
 <div id="role-entry-overlay" style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:16px;">
     <div class="section-box" role="dialog" aria-modal="true" aria-labelledby="role-entry-title" style="width:100%;max-width:440px;padding:26px;text-align:center;">
         <h2 id="role-entry-title" style="margin-bottom:8px;color:var(--primary);">LGS Takip Sistemine Giriş</h2>
-        <p style="margin-bottom:18px;color:var(--text-muted);">Devam etmek için kullanım türünü seçin.</p>
-        <div style="display:grid;gap:10px;">
+        <form id="shared-access-form" onsubmit="return verifySharedAccess(event)" style="text-align:left;">
+            <p style="margin-bottom:14px;color:var(--text-muted);text-align:center;">Devam etmek için ortak giriş şifresini yazın.</p>
+            <label for="shared-access-password" style="display:block;margin-bottom:5px;font-weight:700;">Giriş şifresi</label>
+            <input id="shared-access-password" type="password" inputmode="numeric" autocomplete="off" required style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;">
+            <p id="shared-access-error" role="alert" style="display:none;margin:8px 0;color:#dc2626;font-size:.9rem;text-align:center;"></p>
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;">Giriş Yap</button>
+        </form>
+        <div id="role-choice-panel" style="display:none;gap:10px;">
+            <p style="margin-bottom:8px;color:var(--text-muted);">Kullanım türünü seçin.</p>
             <button type="button" class="btn btn-primary" onclick="enterStudentMode()" style="padding:13px;">🎓 Öğrenci Girişi / Kayıt</button>
             <button type="button" class="btn btn-success" onclick="enterTeacherMode()" style="padding:13px;">👩‍🏫 Öğretmen Girişi</button>
         </div>
@@ -399,17 +407,13 @@
                 <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Yeni Çalışma / Soru Girişi</h3>
                 <div class="grid-2" style="gap:10px;margin-bottom:10px;">
                     <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Tarih</label><input type="date" id="log-date"></div>
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Ders / Kategori</label><select id="log-subject" onchange="updateLogTopicOptions()"></select></div>
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Konu (isteğe bağlı)</label><select id="log-topic"></select></div>
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Tekrar Tarihi (isteğe bağlı)</label><input type="date" id="log-review-date"></div>
+                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Ders / Kategori</label><select id="log-subject"></select></div>
                     <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Çalışma Süresi (Dakika)</label><input type="number" id="log-minutes" min="0" placeholder="Örn: 45"></div>
                     <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Soru Sayısı</label><input type="number" id="log-questions" min="0" placeholder="Örn: 50"></div>
                     <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Doğru</label><input type="number" id="log-correct" min="0" placeholder="Boş bırakılabilir"></div>
                     <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Yanlış</label><input type="number" id="log-wrong" min="0" placeholder="Boş bırakılabilir"></div>
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Boş</label><input type="number" id="log-blank" min="0" placeholder="Boş bırakılabilir"></div>
-                    <div><label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:4px;">Deneme Adı (isteğe bağlı)</label><input type="text" id="log-exam-name" placeholder="Örn: Kasım genel denemesi"></div>
                 </div>
-                <small style="display:block;margin:0 0 10px;color:var(--text-muted);">Doğru/yanlış/boş girildiğinde soru toplamı bunlardan hesaplanır. Net = doğru − yanlış ÷ 3.</small>
+                <small style="display:block;margin:0 0 10px;color:var(--text-muted);">Doğru ve yanlış sayıları girildiğinde net = doğru − yanlış ÷ 3 olarak hesaplanır.</small>
                 <button class="btn btn-primary" onclick="addStudyLog()" style="width:100%;">Kayıt Ekle</button>
             </div>
 
@@ -421,25 +425,17 @@
                 <div class="table-responsive">
                     <table>
                         <thead><tr>
-                            <th>Ders / Kategori</th><th>Haftalık Süre</th><th>Haftalık Soru</th><th>Seçilen Ay Süre</th><th>Ay Sorusu</th><th>Doğru</th><th>Yanlış</th><th>Boş</th><th>Net</th><th>Toplam Süre</th><th>Toplam Soru</th>
+                            <th>Ders / Kategori</th><th>Haftalık Süre</th><th>Haftalık Soru</th><th>Seçilen Ay Süre</th><th>Ay Sorusu</th><th>Doğru</th><th>Yanlış</th><th>Net</th><th>Toplam Süre</th><th>Toplam Soru</th>
                         </tr></thead>
                         <tbody id="study-summary-body"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="section-box topic-review-box">
-                <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Konu Bazlı Son Çalışma ve Tekrar Planı</h3>
-                <div class="table-responsive"><table>
-                    <thead><tr><th>Ders</th><th>Konu</th><th>Son Çalışma</th><th>Tekrar Tarihi</th><th>Durum</th></tr></thead>
-                    <tbody id="topic-review-body"></tbody>
-                </table></div>
-            </div>
-
             <div class="section-box study-history-box">
                 <h3 style="margin-bottom:10px;font-size:0.95rem;color:var(--primary);">Geçmiş Çalışma Kayıtları</h3>
                 <div class="table-responsive"><table>
-                    <thead><tr><th>Tarih</th><th>Ders / Konu</th><th>Süre</th><th>Soru</th><th>Doğru</th><th>Yanlış</th><th>Boş</th><th>Net</th><th>Deneme</th><th class="no-print" style="width:50px;text-align:center;">Sil</th></tr></thead>
+                    <thead><tr><th>Tarih</th><th>Ders</th><th>Süre</th><th>Soru</th><th>Doğru</th><th>Yanlış</th><th>Net</th><th class="no-print" style="width:50px;text-align:center;">Sil</th></tr></thead>
                     <tbody id="study-logs-body"></tbody>
                 </table></div>
             </div>
@@ -644,7 +640,7 @@
     <div id="examLayoutList" class="exam-layout-list"></div>
     <div class="modal-footer" style="margin-top:14px;">
       <button class="btn" onclick="backToExamGenerator()">Ayarları Değiştir</button>
-      <button class="btn btn-success" onclick="printPreparedExam()">🖨️ Yazdır / PDF Kaydet</button>
+      <button id="print-prepared-exam-btn" class="btn btn-success" onclick="printPreparedExam()">🖨️ Yazdır / PDF Kaydet</button>
     </div>
   </div>
 </div>
@@ -671,6 +667,7 @@
     let db;
     let currentUsername = null, currentStudentName = "", currentRole = null, studentOwnerUsername = null;
     let appLoading = false;
+    let sharedAccessGranted = false;
     let selectedQuestionIds = new Set();
     let manualExamQuestions = [];
     let manualExamOptionCount = 5;
@@ -1031,7 +1028,25 @@
         return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
     }
 
+    function verifySharedAccess(event) {
+        event.preventDefault();
+        const input = document.getElementById("shared-access-password");
+        const error = document.getElementById("shared-access-error");
+        if (!input || input.value !== "759103") {
+            if (error) { error.textContent = "Giriş şifresi yanlış."; error.style.display = "block"; }
+            if (input) { input.value = ""; input.focus(); }
+            return false;
+        }
+        sharedAccessGranted = true;
+        input.value = "";
+        document.getElementById("shared-access-form").style.display = "none";
+        if (error) error.style.display = "none";
+        document.getElementById("role-choice-panel").style.display = "grid";
+        return false;
+    }
+
     function enterStudentMode() {
+        if (!sharedAccessGranted) return;
         const error = document.getElementById("student-access-error");
         if (error) { error.style.display = "none"; error.textContent = ""; }
         document.getElementById("student-login-name").value = "";
@@ -1117,6 +1132,7 @@
     }
 
     async function enterTeacherMode() {
+        if (!sharedAccessGranted) return;
         try {
             if (currentUsername && currentRole) { await saveData(); }
             currentRole = "teacher";
@@ -1704,7 +1720,7 @@
         if (!selectedQuestionIds.size && limit > 0) chosen = chosen.slice(0, limit);
         const examItems = [...chosen, ...manualExamQuestions];
         if (!examItems.length) { alert("Deneme oluşturmak için soru seçin veya elle soru yazın."); return; }
-        pendingExamItems = examItems.map(question => ({ question: { ...question, options: Array.isArray(question.options) ? question.options.map(option => ({ ...option })) : undefined }, sourceImage: question.image || '', wide: false }));
+        pendingExamItems = examItems.map(question => ({ question: { ...question, options: Array.isArray(question.options) ? question.options.map(option => ({ ...option })) : undefined }, sourceImage: question.image || '', wide: false, manualWide: false, autoWide: false, zoom: 1 }));
         renderExamLayout();
         document.getElementById('examGenModal').style.display = 'none';
         document.getElementById('examLayoutModal').style.display = 'flex';
@@ -1713,18 +1729,30 @@
     function renderExamLayout() {
         const list = document.getElementById('examLayoutList');
         if (!list) return;
+        const printButton = document.getElementById('print-prepared-exam-btn');
+        if (printButton) printButton.disabled = pendingExamItems.length === 0;
+        if (!pendingExamItems.length) {
+            list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#64748b;border:1px dashed #94a3b8;border-radius:8px;">Denemede soru kalmadı. Ayarlara dönüp soruları yeniden seçebilirsiniz.</div>';
+            return;
+        }
         list.innerHTML = pendingExamItems.map((item, index) => {
             const q = item.question;
             const options = Array.isArray(q.options) ? q.options : [];
             return `<article class="exam-layout-question ${item.wide ? 'wide' : ''}" draggable="true" ondragstart="startExamQuestionDrag(event, ${index})" ondragend="endExamQuestionDrag(event)" ondragover="event.preventDefault()" ondrop="dropExamQuestion(event, ${index})">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;"><strong>⠿ Soru ${index + 1} · ${escapeHtml(q.subject || '')}</strong><button type="button" class="btn ${item.wide ? 'btn-dark' : 'btn-primary'}" onclick="toggleExamQuestionWidth(${index})">${item.wide ? 'Daralt' : '↔ Genişlet'}</button></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;"><strong>⠿ Soru ${index + 1} · ${escapeHtml(q.subject || '')}</strong><div style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="btn btn-danger" onclick="removeExamQuestionFromLayout(${index})">Denemeden Çıkar</button><button type="button" class="btn ${item.wide ? 'btn-dark' : 'btn-primary'}" onclick="toggleExamQuestionWidth(${index})">${item.wide ? 'Daralt' : '↔ Genişlet'}</button></div></div>
                 ${q.note ? `<div style="font-size:.85rem;margin-bottom:6px;"><b>Not:</b> ${escapeHtml(q.note)}</div>` : ''}
                 ${q.answer ? `<div style="font-size:.82rem;color:#64748b;margin-bottom:6px;"><b>Cevap:</b> ${escapeHtml(q.answer)}</div>` : ''}
                 ${q.text ? `<div style="white-space:pre-wrap;line-height:1.45;">${escapeHtml(q.text)}</div>` : ''}
                 ${options.length ? `<div style="display:grid;gap:3px;margin-top:6px;">${options.map(option => `<div><b>${escapeHtml(option.letter)})</b> ${escapeHtml(option.text)}</div>`).join('')}</div>` : ''}
-                ${q.image ? `<div style="display:flex;gap:6px;margin-top:8px;"><button type="button" class="btn no-print" onclick="openQuestionCropper(${index})">✂️ Resmi Kırp</button>${item.question.image !== item.sourceImage ? `<button type="button" class="btn no-print" onclick="resetExamQuestionCrop(${index})">Kırpmayı Sıfırla</button>` : ''}</div><img src="${q.image}" alt="Soru ${index + 1}">` : ''}
+                ${q.image ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;"><button type="button" class="btn no-print" onclick="changeExamQuestionZoom(${index}, -0.25)" title="Görseli küçült">−</button><strong style="font-size:.8rem;">${Math.round((item.zoom || 1) * 100)}%</strong><button type="button" class="btn no-print" onclick="changeExamQuestionZoom(${index}, 0.25)" title="Görseli büyüt">＋</button><button type="button" class="btn no-print" onclick="rotateExamQuestion(${index})">↻ 90° Döndür</button><button type="button" class="btn no-print" onclick="openQuestionCropper(${index})">✂️ Resmi Kırp</button>${item.question.image !== item.sourceImage ? `<button type="button" class="btn no-print" onclick="resetExamQuestionCrop(${index})">Düzenlemeleri Sıfırla</button>` : ''}</div><div class="exam-layout-image-frame"><img src="${q.image}" alt="Soru ${index + 1}" style="width:${getExamQuestionImageWidth(item)}%;max-width:100%;max-height:${Math.round(220 * (item.zoom || 1))}px;"></div>` : ''}
             </article>`;
         }).join('');
+    }
+
+    function removeExamQuestionFromLayout(index) {
+        if (index < 0 || index >= pendingExamItems.length) return;
+        pendingExamItems.splice(index, 1);
+        renderExamLayout();
     }
 
     function startExamQuestionDrag(event, index) {
@@ -1750,8 +1778,33 @@
 
     function toggleExamQuestionWidth(index) {
         if (!pendingExamItems[index]) return;
-        pendingExamItems[index].wide = !pendingExamItems[index].wide;
+        const item = pendingExamItems[index];
+        if (item.wide) {
+            item.manualWide = false;
+            item.zoom = 1;
+            item.autoWide = false;
+        } else {
+            item.manualWide = true;
+            item.autoWide = false;
+        }
+        item.wide = item.manualWide || item.autoWide;
         renderExamLayout();
+    }
+
+    function changeExamQuestionZoom(index, change) {
+        const item = pendingExamItems[index];
+        if (!item) return;
+        item.zoom = Math.max(0.5, Math.min(2, Math.round(((item.zoom || 1) + change) * 100) / 100));
+        item.autoWide = item.zoom > 1 && !item.manualWide;
+        item.wide = item.manualWide || item.autoWide;
+        renderExamLayout();
+    }
+
+    function getExamQuestionImageWidth(item) {
+        const zoom = item.zoom || 1;
+        if (item.manualWide) return Math.min(100, zoom * 100);
+        if (item.autoWide) return Math.min(100, zoom * 50);
+        return Math.min(100, zoom * 100);
     }
 
     function resetExamQuestionCrop(index) {
@@ -1759,6 +1812,25 @@
         if (!item) return;
         item.question.image = item.sourceImage;
         renderExamLayout();
+    }
+
+    function rotateExamQuestion(index) {
+        const item = pendingExamItems[index];
+        if (!item || !item.question.image) return;
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalHeight;
+            canvas.height = image.naturalWidth;
+            const context = canvas.getContext('2d');
+            context.translate(canvas.width / 2, canvas.height / 2);
+            context.rotate(Math.PI / 2);
+            context.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
+            item.question.image = canvas.toDataURL('image/jpeg', 0.94);
+            renderExamLayout();
+        };
+        image.onerror = () => alert("Soru resmi döndürülemedi.");
+        image.src = item.question.image;
     }
 
     function bindQuestionCropEvents() {
@@ -1895,7 +1967,7 @@
           .answer-key { break-before:page; page-break-before:always; font-size:12pt; }
           .answer-key li { margin:0 0 3mm; }
           .q-img-container { text-align:center; width:100%; break-inside:avoid; page-break-inside:avoid; }
-          .q-img { display:block; max-width:100%; width:100%; height:auto; max-height:110mm; object-fit:contain; margin:0 auto; }
+          .q-img { display:block; max-width:100%; height:auto; object-fit:contain; margin:0 auto; }
           @media print {
             html, body { margin:0 !important; padding:0 !important; width:auto !important; min-height:0 !important; }
             body { -webkit-print-color-adjust:exact; print-color-adjust:exact; break-before:auto !important; page-break-before:auto !important; }
@@ -1917,7 +1989,7 @@
             if (Array.isArray(q.options) && q.options.length) {
                 card += `<div class="q-options">${q.options.map(option => `<div class="q-option"><span class="q-option-letter">${escapeHtml(option.letter)})</span><span>${escapeHtml(option.text)}</span></div>`).join('')}</div>`;
             }
-            if (q.image) card += `<div class="q-img-container"><img src="${q.image}" class="q-img" alt="Soru ${idx+1}"></div>`;
+            if (q.image) card += `<div class="q-img-container"><img src="${q.image}" class="q-img" alt="Soru ${idx+1}" style="width:${getExamQuestionImageWidth(item)}%;max-width:100%;max-height:${Math.round(110 * (item.zoom || 1))}mm;"></div>`;
             return card + `</article>`;
         };
         let itemIndex = 0;
@@ -2619,9 +2691,6 @@
     async function addStudyLog() {
         const date = document.getElementById("log-date").value;
         const subject = document.getElementById("log-subject").value;
-        const topic = document.getElementById("log-topic").value;
-        const reviewDate = document.getElementById("log-review-date").value;
-        const examName = document.getElementById("log-exam-name").value.trim();
         if (!currentUsername) { alert("Önce öğrenci hesabıyla giriş yapın."); return; }
         if (!date) { alert("Tarih seçin!"); return; }
 
@@ -2635,18 +2704,16 @@
         const questionsInput = readCount("log-questions");
         const correctInput = readCount("log-correct");
         const wrongInput = readCount("log-wrong");
-        const blankInput = readCount("log-blank");
-        if (![minutesInput, questionsInput, correctInput, wrongInput, blankInput].every(item => item.valid)) {
+        if (![minutesInput, questionsInput, correctInput, wrongInput].every(item => item.valid)) {
             alert("Süre ve soru adetleri sıfır veya daha büyük tam sayı olmalıdır."); return;
         }
-        if (reviewDate && !topic) { alert("Tekrar tarihi eklemek için önce konu seçin."); return; }
 
         const minutes = minutesInput.value;
-        const accuracyTracked = correctInput.entered || wrongInput.entered || blankInput.entered;
-        const correct = correctInput.value, wrong = wrongInput.value, blank = blankInput.value;
-        const classifiedQuestions = correct + wrong + blank;
+        const accuracyTracked = correctInput.entered || wrongInput.entered;
+        const correct = correctInput.value, wrong = wrongInput.value;
+        const classifiedQuestions = correct + wrong;
         if (accuracyTracked && questionsInput.entered && questionsInput.value !== 0 && questionsInput.value !== classifiedQuestions) {
-            alert("Soru sayısı, doğru + yanlış + boş toplamıyla aynı olmalıdır."); return;
+            alert("Soru sayısı, doğru + yanlış toplamıyla aynı olmalıdır."); return;
         }
         const questions = accuracyTracked ? classifiedQuestions : questionsInput.value;
         if (minutes === 0 && questions === 0) { alert("Süre veya soru sayısından en az birini girin!"); return; }
@@ -2654,30 +2721,15 @@
         const net = accuracyTracked ? Math.round((correct - wrong / 3) * 100) / 100 : null;
         const record = {
             id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-            date: date, subject: subject, topic: topic, minutes: minutes, questions: questions,
-            correct: correct, wrong: wrong, blank: blank, accuracyTracked: accuracyTracked,
-            net: net, examName: examName
+            date: date, subject: subject, minutes: minutes, questions: questions,
+            correct: correct, wrong: wrong, accuracyTracked: accuracyTracked, net: net
         };
         const updated = [...studyLogs, record].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-        const nextTopicData = { ...(topicStudyData || {}) };
-        if (topic) {
-            const key = topicTrackingKey(subject, topic);
-            const previous = nextTopicData[key] || {};
-            nextTopicData[key] = {
-                subject: subject, topic: topic,
-                lastStudyDate: previous.lastStudyDate && previous.lastStudyDate > date ? previous.lastStudyDate : date,
-                reviewDate: reviewDate || previous.reviewDate || ""
-            };
-        }
         try {
             await saveDBSetting("lgs_study_logs_" + currentUsername, updated);
-            await saveDBSetting("lgs_topic_study_" + currentUsername, nextTopicData);
             studyLogs = updated;
-            topicStudyData = nextTopicData;
-            ["log-minutes", "log-questions", "log-correct", "log-wrong", "log-blank", "log-exam-name", "log-review-date"].forEach(id => { document.getElementById(id).value = ""; });
-            document.getElementById("log-topic").value = "";
+            ["log-minutes", "log-questions", "log-correct", "log-wrong"].forEach(id => { document.getElementById(id).value = ""; });
             renderStudyTracking();
-            renderTopicReviewTracking();
             const alertBox = document.getElementById("save-alert");
             if (alertBox) { alertBox.textContent = "✔ Çalışma kaydı IndexedDB'ye kaydedildi!"; alertBox.style.display = "block"; setTimeout(() => alertBox.style.display = "none", 2200); }
         } catch (err) {
@@ -2756,19 +2808,16 @@
             body.appendChild(row);
         };
 
-        if (!studyLogs.length) emptyRow(logsBody, 10, "Henüz çalışma kaydı yok.");
+        if (!studyLogs.length) emptyRow(logsBody, 8, "Henüz çalışma kaydı yok.");
         studyLogs.forEach((log, index) => {
             const row = document.createElement("tr");
-            const topicLabel = log.topic ? String(log.subject || "") + " / " + String(log.topic) : String(log.subject || "");
             addCell(row, formatDateLabel(log.date));
-            addCell(row, topicLabel);
+            addCell(row, String(log.subject || ""));
             addCell(row, (Number(log.minutes) || 0) + " dk");
             addCell(row, (Number(log.questions) || 0) + " soru");
             addCell(row, log.accuracyTracked ? Number(log.correct) || 0 : "—");
             addCell(row, log.accuracyTracked ? Number(log.wrong) || 0 : "—");
-            addCell(row, log.accuracyTracked ? Number(log.blank) || 0 : "—");
             addCell(row, log.accuracyTracked ? (Number(log.net) || 0).toFixed(2) : "—");
-            addCell(row, log.examName || "—");
             const actionCell = addCell(row, "");
             actionCell.className = "no-print";
             actionCell.style.textAlign = "center";
@@ -2839,7 +2888,6 @@
             addCell(row, data.monthlyQ + " soru");
             addCell(row, data.accuracyRows ? data.monthlyCorrect : "—");
             addCell(row, data.accuracyRows ? data.monthlyWrong : "—");
-            addCell(row, data.accuracyRows ? data.monthlyBlank : "—");
             addCell(row, data.accuracyRows ? data.monthlyNet.toFixed(2) : "—");
             addCell(row, formatMinutes(data.totalMins));
             addCell(row, data.totalQ + " soru");
@@ -2855,7 +2903,6 @@
         addCell(totalRow, totals.monthlyQ + " soru");
         addCell(totalRow, totals.accuracyRows ? totals.monthlyCorrect : "—");
         addCell(totalRow, totals.accuracyRows ? totals.monthlyWrong : "—");
-        addCell(totalRow, totals.accuracyRows ? totals.monthlyBlank : "—");
         addCell(totalRow, totals.accuracyRows ? totals.monthlyNet.toFixed(2) : "—");
         addCell(totalRow, formatMinutes(totals.totalMins));
         addCell(totalRow, totals.totalQ + " soru");
