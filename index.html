@@ -2013,6 +2013,9 @@
         }
         htmlContent += `</body></html>`;
         printWindow.document.open(); printWindow.document.write(htmlContent); printWindow.document.close();
+        printWindow.addEventListener('afterprint', () => {
+            try { printWindow.close(); } catch (_) {}
+        }, { once: true });
         closeExamLayoutModal();
         const doPrint = () => { printWindow.focus(); printWindow.print(); };
         const imgs = Array.from(printWindow.document.images);
